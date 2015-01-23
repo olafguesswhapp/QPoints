@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var credentials = require('./credentials.js');
+// var emailService = require('./lib/email.js')(credentials);
 
 // set up handlebars view engine
 var handlebars = require('express3-handlebars')
@@ -50,10 +51,6 @@ app.use(function(req, res, next){
 app.get('/', function(req, res) {
 	res.render('home');
 });
-
-// app.get('/thank-you', function(req, res){
-// 	res.render('thank-you');
-// });
 
 app.get('/newsletter', function(req, res){
     // we will learn about CSRF later...for now, we just
@@ -104,6 +101,17 @@ app.post('/newsletter', function(req, res){
 
 app.get('/newsletter/archive', function(req, res){
     res.render('newsletter/archive');
+});
+
+//testen Email versand
+app.get('/eBrief', function(req, res){
+    // emailService.send('olaf@guesswhapp.de', 'Action - mailli test', 'hallo, ich bin gespannt ob jetzt der nodemailer immer noch funktioniert');
+    req.session.flash = {
+        type: 'Erfolg',
+            intro: 'Danke!',
+            message: 'Die email wurde versendet.',
+        };
+    res.render('eBrief');
 });
 
 // 404 catch-all handler (middleware)
