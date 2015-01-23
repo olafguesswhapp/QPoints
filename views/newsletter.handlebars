@@ -1,14 +1,7 @@
+<h2>Neuigkeiten zu QPoints gibt es in unserem Newsletter</h2>
 <div class="formContainer">
     <form class="form-horizontal newsletterForm" role="form" 
-            action="/process?form=newsletter" method="POST">
-        <input type="hidden" name="_csrf" value="{{csrf}}">
-        <div class="form-group">
-            <label for="fieldName" class="col-sm-2 control-label">Name</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" 
-                id="fieldName" name="name">
-            </div>
-        </div>
+            action="/newsletter" method="POST">
         <div class="form-group">
             <label for="fieldEmail" class="col-sm-2 control-label">Email</label>
             <div class="col-sm-4">
@@ -18,12 +11,12 @@
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
-                <button type="submit" class="btn btn-default">Register</button>
+                <button type="submit" class="btn btn-default">Anmelden</button>
             </div>
         </div>
     </form>
 </div>
-{{#section 'jquery'}}
+{{!-- {{#section 'jquery'}}
     <script>
         $(document).ready(function(){
             $('.newsletterForm').on('submit', function(evt){
@@ -48,4 +41,4 @@
             });
         });
     </script>
-{{/section}}
+{{/section}} --}}

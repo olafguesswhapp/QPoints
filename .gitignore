@@ -1,6 +1,9 @@
 # Dependency directory
 node_modules
 
+#Credentials
+credentials.js
+
 # Debug log from npm
 npm-debug.log
 

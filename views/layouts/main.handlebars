@@ -6,12 +6,22 @@
 	<meta name="generator" content="Sublime Text 2" />
 
 	<title>QPoints</title>
-	<link rel='stylesheet' id='responsive-style-css'  href='css/styles.css' type='text/css' media='all' />
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+	<link rel='stylesheet' id='responsive-style-css'  href="{{static '/css/styles.css'}}" type='text/css' media='all' />
 </head>
 <body>
 	<div>
+		{{#if flash}}
+			<div class="alert alert-dismissible alert-{{flash.type}}">
+				<button type="button" class="close" 
+					data-dismiss="alert" aria-hidden="true">&times;</button>
+				<strong>{{flash.intro}}</strong> {{{flash.message}}}
+			</div>
+		{{/if}}
+			
 		<header>
-			<img src="/images/QPointsLogo.png">
+			<img src="{{static '/images/QPointsLogo.png'}}">
 		</header>
 		{{{body}}}
 	</div>
