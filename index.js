@@ -4,6 +4,34 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var credentials = require('./credentials.js');
+
+var mongoose = require('mongoose');
+// Connect mongoose with mongoDB
+// do not forget to open a 2nd terminal window and start mongoDB with "mongod" upfront
+var opts = {
+    server: {
+        socketOptions: {keepAlive: 1}
+    }
+};
+switch(app.get('env')){
+    case 'development': mongoose.connect(credentials.mongo.development.connectionString, opts);
+    break;
+    case 'production': mongoose.connect(credentials.mongo.production.connectionString, opts);
+    break;
+    default:
+    throw new Error('Unknown execution environment: ' + app.get('env'));
+}
+//Mongoose Schema and Model
+var TestDB = require('./models/testDB.js');
+//Mongoose create new Data and Save
+// TestDB.create({
+//     a: 'korean 1st',
+//     b: 'koreanischer zweiter',
+// }, function (err, test) {
+//   if (err) return handleError(err);
+// })
+
+// Email versenden
 // var emailService = require('./lib/email.js')(credentials);
 
 // set up handlebars view engine
@@ -112,6 +140,21 @@ app.get('/eBrief', function(req, res){
             message: 'Die email wurde versendet.',
         };
     res.render('eBrief');
+});
+
+//testen MongoDB
+app.get('/testMongo', function(req, res){
+    TestDB.find({}, function(err, tests){
+        var context = {
+            tests: tests.map(function(test){
+                return {
+                    a: test.a,
+                    b: test.b,
+                }
+            })
+        };
+        res.render('testMongo', context);
+    });
 });
 
 // 404 catch-all handler (middleware)
