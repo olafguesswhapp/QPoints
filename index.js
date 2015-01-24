@@ -54,9 +54,13 @@ app.set('view engine', 'handlebars');
 
 app.set('port', process.env.PORT || 3000);
 
+var MongoSessionStore = require('session-mongoose')(require('connect'));
+var sessionStore = new MongoSessionStore({ url: credentials.mongo.development.connectionString });
+
 app.use(cookieParser(credentials.cookieSecret));
 app.use(expressSession({
     secret: credentials.sessionSecret,
+    store: sessionStore,
     saveUninitialized: true,
     resave: true
 }));
@@ -142,10 +146,19 @@ app.get('/eBrief', function(req, res){
     res.render('eBrief');
 });
 
+//testen Sessions Merken
+app.get('/waehlen/:wahl', function(req,res){
+    console.log(req.params.wahl);
+    req.session.wahl = req.params.wahl;
+    return res.redirect(303, '/testMongo');
+});
+
 //testen MongoDB
 app.get('/testMongo', function(req, res){
+    var wahl = req.session.wahl;
     TestDB.find({}, function(err, tests){
         var context = {
+            wahl: wahl,
             tests: tests.map(function(test){
                 return {
                     a: test.a,
@@ -153,6 +166,11 @@ app.get('/testMongo', function(req, res){
                 }
             })
         };
+        switch(wahl){
+            case '1': context.wahl1 = 'selected'; break;
+            case '2': context.wahl2 = 'selected'; break;
+            case '3': context.wahl3 = 'selected'; break;
+        }
         res.render('testMongo', context);
     });
 });

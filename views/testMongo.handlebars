@@ -1,6 +1,16 @@
-<h1>Hiermit teste ich erstmalig den Abruf von einer MongoDB</h1>
+<h3>Hiermit teste ich erstmalig den Abruf von einer MongoDB</h3>
+
+<hr>
+{{!-- Session Daten in MongoDB abspeichern und wieder abrufen --}}
+<p>Getroffene Wahl:
+	<a href="/waehlen/1" class="sessionTest {{wahl1}}">1</a>
+	<a href="/waehlen/2" class="sessionTest {{wahl2}}">2</a>
+	<a href="/waehlen/3" class="sessionTest {{wahl3}}">3</a>
+</p>
+
+{{!-- Daten aus MongoDB abrufen --}}
 {{#each tests}}
 	<div>
-		<h3>{{a}} = {{b}}</h3>
+		<p>{{a}} = {{b}}</p>
 	</div>
 {{/each}}
