@@ -1,0 +1,64 @@
+<h1>New Customer</h1>
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/customer/register" method="POST">
+        <div class="form-group">
+            <label for="fieldFirstName" class="col-sm-2 control-label">First name</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldFirstName" name="firstName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldLastName" class="col-sm-2 control-label">Last name</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldLastName" name="lastName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldEmail" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-4">
+                <input type="email" class="form-control" required id="fieldEmail" name="email">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldAddress1" class="col-sm-2 control-label">Address</label>
+            <div class="col-sm-4">
+				<input type="text" class="form-control" required id="fieldAddress1" name="address1"><br>
+                <input type="text" class="form-control" id="fieldAddress2" name="address2">
+            </div>
+			<br>
+        </div>
+        <div class="form-group">
+            <label for="fieldCity" class="col-sm-2 control-label">City</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldCity" name="city">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldState" class="col-sm-2 control-label">State</label>
+            <div class="col-sm-4">
+				<select id="fieldState" name="state">
+					<option value="NRW">Nordrhein-Westfalen</option> <option value="HE">Hessen</option>
+					<option value="BAY">Bayern</option> <option value="NIE">Niedersachsen</option>
+				</select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldZip" class="col-sm-2 control-label">Postal Code</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldZip" name="zip">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldPhone" class="col-sm-2 control-label">Phone</label>
+            <div class="col-sm-4">
+                <input type="phone" class="form-control" required id="fieldPhone" name="phone">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -79,61 +79,8 @@ app.use(function(req, res, next){
     next();
 });
 
-//Routes
-app.get('/', function(req, res) {
-	res.render('home');
-});
-
-app.get('/newsletter', function(req, res){
-    // we will learn about CSRF later...for now, we just
-    // provide a dummy value
-    res.render('newsletter');
-});
-
-// for now, we're mocking NewsletterSignup:
-function NewsletterSignup(){
-}
-NewsletterSignup.prototype.save = function(cb){
-    cb();
-}
-
-var VALID_EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
-app.post('/newsletter', function(req, res){
-    var name = req.body.name || '', email = req.body.email || '';
-    // input validation
-    if(!email.match(VALID_EMAIL_REGEX)) {
-        if(req.xhr) return res.json({ error: 'Invalid name email address.' });
-        req.session.flash = {
-            type: 'danger',
-            intro: 'Validation error!',
-            message: 'The email address you entered was  not valid.',
-        };
-        return res.redirect(303, '/newsletter/archive');
-    }
-    new NewsletterSignup({ name: name, email: email }).save(function(err){
-        if(err) {
-            if(req.xhr) return res.json({ error: 'Database error.' });
-            req.session.flash = {
-                type: 'danger',
-                intro: 'Database error!',
-                message: 'There was a database error; please try again later.',
-            }
-            return res.redirect(303, '/newsletter/archive');
-        }
-        if(req.xhr) return res.json({ success: true });
-        req.session.flash = {
-            type: 'success',
-            intro: 'Thank you!',
-            message: 'You have now been signed up for the newsletter.',
-        };
-        return res.redirect(303, '/newsletter/archive');
-    });
-});
-
-app.get('/newsletter/archive', function(req, res){
-    res.render('newsletter/archive');
-});
+// add routes
+require('./routes.js')(app);
 
 //testen Email versand
 app.get('/eBrief', function(req, res){
@@ -144,35 +91,6 @@ app.get('/eBrief', function(req, res){
             message: 'Die email wurde versendet.',
         };
     res.render('eBrief');
-});
-
-//testen Sessions Merken
-app.get('/waehlen/:wahl', function(req,res){
-    console.log(req.params.wahl);
-    req.session.wahl = req.params.wahl;
-    return res.redirect(303, '/testMongo');
-});
-
-//testen MongoDB
-app.get('/testMongo', function(req, res){
-    var wahl = req.session.wahl;
-    TestDB.find({}, function(err, tests){
-        var context = {
-            wahl: wahl,
-            tests: tests.map(function(test){
-                return {
-                    a: test.a,
-                    b: test.b,
-                }
-            })
-        };
-        switch(wahl){
-            case '1': context.wahl1 = 'selected'; break;
-            case '2': context.wahl2 = 'selected'; break;
-            case '3': context.wahl3 = 'selected'; break;
-        }
-        res.render('testMongo', context);
-    });
 });
 
 // 404 catch-all handler (middleware)
