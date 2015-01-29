@@ -79,6 +79,13 @@ app.use(function(req, res, next){
     next();
 });
 
+// middleware to provide cart data for header
+app.use(function(req, res, next) {
+    var cart = req.session.cart;
+    res.locals.cartItems = cart && cart.items ? cart.items.length : 0;
+    next();
+});
+
 // add routes
 require('./routes.js')(app);
 

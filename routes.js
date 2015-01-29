@@ -2,6 +2,9 @@
 var main = require('./handlers/main.js');
 var TestMongoDB = require('./handlers/TestMongoDB.js');
 var customerController = require('./controllers/customer.js');
+var productsController = require('./controllers/products.js');
+var cart = require('./handlers/cart.js');
+var cartValidation = require('./lib/cartValidation.js');
 
 
 module.exports = function(app) {
@@ -18,5 +21,15 @@ module.exports = function(app) {
 
 	// customer routes
 	customerController.registerRoutes(app);
+	
+	// products routes
+	productsController.registerRoutes(app);
+
+	// shopping cart routes
+	app.get('/cart', cart.middleware, cart.home);
+	app.get('/cart/add', cart.addProcessGet);
+	app.post('/cart/add', cart.addProcessPost);
+	app.get('/cart/checkout', cart.checkout);
+
 
 };
