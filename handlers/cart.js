@@ -1,6 +1,15 @@
 var Products = require('../models/products.js'),
 	Q = require('q');
-	// emailService = require('../lib/email.js')(require('../credentials.js'));
+function getIndexOfCartItem(arr, k){
+	for(var i=0; i<arr.length; i++){
+		var index = arr[i].nr.indexOf(k);
+		if (index > -1){
+			return i;
+		}
+	}
+	return i=-1;
+};
+// emailService = require('../lib/email.js')(require('../credentials.js'));
 
 // var VALID_EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
@@ -42,12 +51,16 @@ function addToCart(nr, quantity, req, res, next){
 	Products.find({ nr : nr }, function(err, product){
 		if(err) return next(err);
 		if(!product) return next(new Error('Unbekanntes QPoints Produkt: ' + nr));
-		console.log(product[0].productName);
+		var findId = getIndexOfCartItem(cart.items, nr);
+		if (findId>-1) {
+			cart.items[findId].quantity++;
+		} else {
 		cart.items.push({
 			nr: nr,
 			productName: product[0].productName,
 			quantity: quantity || 1,
-		});
+		});			
+		}
 		res.redirect(303, '/cart');
 	});
 }
