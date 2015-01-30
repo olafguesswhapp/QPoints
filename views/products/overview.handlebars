@@ -1,0 +1,26 @@
+<h1>Unsere QPoints Produkte</h1>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Produkt Nr</td>
+			<td>Name</td>
+			<td>Preis</td>
+			<td>In den Warenkorb</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#products}}
+		<tr class='clickableRow' onclick="window.document.location='/products/{{nr}}';">
+			<td>{{nr}}</td>
+			<td>{{productName}}</td>
+			<td>{{price}}</td>
+			<td>
+				<a href="/cart/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default"><img class="cartIcon" src="{{static '/images/cart-full-icon-S.png'}}"></a></td>
+		</tr>
+		{{/products}}
+	</tbody>
+	
+</table>
+
+
