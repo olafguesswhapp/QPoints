@@ -22,6 +22,17 @@
 			
 		<header>
 			<img src="{{static '/images/QPointsLogo.png'}}">
+			<div class="col-sm-2 pull-right">
+			{{! The following represents a lot of code duplication, so we will probably want to
+				change this in the future }}
+			{{#if cartItems}}
+				<a href="/cart"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}"
+					alt="Cart Empty"></a>
+			{{else}}
+				<a href="/cart"><img class="cartIcon" src="{{static '/images/cart-icon.png'}}"
+					alt="Cart Contains {{cartItems}} Items"></a>
+			{{/if}}
+		</div>
 		</header>
 		{{{body}}}
 	</div>
