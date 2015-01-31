@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Order = require('./order.js');
 var customerSchema = mongoose.Schema({
+	nr: String,
 	firstName: String,
 	lastName: String,
 	email: String,

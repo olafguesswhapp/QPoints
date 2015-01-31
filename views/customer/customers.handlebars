@@ -1,0 +1,24 @@
+<h1>QPoints Kunden</h1>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Kunden Nr</td>
+			<td>Vorname</td>
+			<td>Nachname</td>
+			<td>email</td>
+			<td>Stadt</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#customers}}
+		<tr class='clickableRow' onclick="window.document.location='/customer/{{nr}}';">
+			<td>{{nr}}</td>
+			<td>{{firstName}}</td>
+			<td>{{lastName}}</td>
+			<td>{{email}}</td>
+			<td>{{city}}</td>
+		{{/customers}}
+	</tbody>
+	
+</table>

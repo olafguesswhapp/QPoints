@@ -1,5 +1,6 @@
 var Products = require('../models/products.js'),
 	Q = require('q');
+	
 function getIndexOfCartItem(arr, k){
 	for(var i=0; i<arr.length; i++){
 		var index = arr[i].nr.indexOf(k);

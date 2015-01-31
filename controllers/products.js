@@ -30,11 +30,7 @@ module.exports = {
 		Products.find({ nr : req.params.nr }, function(err, product) {
 			if(err) return res.redirect(303, '/error');
 			if(!product) return next(); 	// pass this on to 404 handler
-			res.render('products/detail', {
-				productName: product[0].productName,
-				nr: product[0].nr,
-				price: product[0].price,
-			});
+			res.render('products/detail', product[0]);
 		});
 	},
 

@@ -12,9 +12,10 @@ function smartJoin(arr, separator){
 
 var _ = require('underscore');
 
-function getCustomerViewModel(customer, orders){
+function getCustomerViewModel(customer){
 	var vm = _.omit(customer, 'salesNotes');
 	return _.extend(vm, {
+		nr: customer.nr,
 		name: smartJoin([vm.firstName, vm.lastName]),
 		fullAddress: smartJoin([
 			customer.address1,
@@ -22,16 +23,8 @@ function getCustomerViewModel(customer, orders){
 			customer.city + ', ' + 
 				customer.state + ' ' + 
 				customer.zip,
-		], '<br>'),
-		orders: orders.map(function(order){
-			return {
-				orderNumber: order.orderNumber,
-				date: order.date,
-				status: order.status,
-				url: '/orders/' + order.orderNumber,
-			};
-		}),
-	});
-}
+			]), 
+		});
+	}
 
 module.exports = getCustomerViewModel;

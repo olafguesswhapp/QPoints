@@ -7,7 +7,8 @@ module.exports = {
 		app.get('/customer/register', this.register);
 		app.post('/customer/register', this.processRegister);
 
-		app.get('/customer/:id', this.home);
+		app.get('/customers', this.clientList);
+		app.get('/customer/:nr', this.detail);
 		app.get('/customer/:id/preferences', this.preferences);
 		app.get('/orders/:id', this.orders);
 
@@ -21,6 +22,7 @@ module.exports = {
 	processRegister: function(req, res, next) {
 		// TODO: back-end validation (safety)
 		var c = new Customer({
+			nr: req.body.nr,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
 			email: req.body.email,
@@ -33,23 +35,37 @@ module.exports = {
 		});
 		c.save(function(err) {
 			if(err) return next(err);
-			res.redirect(303, '/customer/' + c._id);
+			res.redirect(303, '/customers');
 		});
 	},
 
-	home: function(req, res, next) {
-		Customer.findById(req.params.id, function(err, customer) {
+	clientList: function(req, res, next){
+		Customer.find(function(err, customers) {
+			var context = {
+				customers: customers.map(function(customer){
+					return {
+						nr: customer.nr,
+						firstName: customer.firstName,
+						lastName: customer.lastName,
+						email: customer.email,
+						city: customer.city,
+					}
+				})
+			};
+			res.render('customer/customers', context);		
+		})
+	},
+
+	detail: function(req, res, next) {
+		Customer.find({ nr : req.params.nr }, function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
-			customer.getOrders(function(err, orders) {
-				if(err) return next(err);
-				res.render('customer/home', customerViewModel(customer, orders));
-			});
+			res.render('customer/detail', customer[0]);
 		});
 	},
 
 	preferences: function(req, res, next) {
-		Customer.findById(req.params.id, function(err, customer) {
+		Customer.find({ nr : req.params.nr }, function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
 			customer.getOrders(function(err, orders) {
@@ -60,7 +76,7 @@ module.exports = {
 	},
 
 	orders: function(req, res, next) {
-		Customer.findById(req.params.id, function(err, customer) {
+		Customer.find({ nr : req.params.nr }, function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
 			customer.getOrders(function(err, orders) {

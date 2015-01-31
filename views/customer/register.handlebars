@@ -3,13 +3,19 @@
 <div class="formContainer">
     <form class="form-horizontal newsletterForm" role="form" action="/customer/register" method="POST">
         <div class="form-group">
-            <label for="fieldFirstName" class="col-sm-2 control-label">First name</label>
+            <label for="fieldNr" class="col-sm-2 control-label">Kunden Nr</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldNr" name="nr">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldFirstName" class="col-sm-2 control-label">Vorname</label>
             <div class="col-sm-4">
                 <input type="text" class="form-control" required id="fieldFirstName" name="firstName">
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldLastName" class="col-sm-2 control-label">Last name</label>
+            <label for="fieldLastName" class="col-sm-2 control-label">Nachname</label>
             <div class="col-sm-4">
                 <input type="text" class="form-control" required id="fieldLastName" name="lastName">
             </div>
@@ -21,7 +27,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldAddress1" class="col-sm-2 control-label">Address</label>
+            <label for="fieldAddress1" class="col-sm-2 control-label">Adresse</label>
             <div class="col-sm-4">
 				<input type="text" class="form-control" required id="fieldAddress1" name="address1"><br>
                 <input type="text" class="form-control" id="fieldAddress2" name="address2">
@@ -29,13 +35,13 @@
 			<br>
         </div>
         <div class="form-group">
-            <label for="fieldCity" class="col-sm-2 control-label">City</label>
+            <label for="fieldCity" class="col-sm-2 control-label">Stadt</label>
             <div class="col-sm-4">
                 <input type="text" class="form-control" required id="fieldCity" name="city">
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldState" class="col-sm-2 control-label">State</label>
+            <label for="fieldState" class="col-sm-2 control-label">Bundesland</label>
             <div class="col-sm-4">
 				<select id="fieldState" name="state">
 					<option value="NRW">Nordrhein-Westfalen</option> <option value="HE">Hessen</option>
@@ -44,20 +50,20 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldZip" class="col-sm-2 control-label">Postal Code</label>
+            <label for="fieldZip" class="col-sm-2 control-label">PLZ</label>
             <div class="col-sm-4">
                 <input type="text" class="form-control" required id="fieldZip" name="zip">
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldPhone" class="col-sm-2 control-label">Phone</label>
+            <label for="fieldPhone" class="col-sm-2 control-label">Tefl Nr</label>
             <div class="col-sm-4">
                 <input type="phone" class="form-control" required id="fieldPhone" name="phone">
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
-                <button type="submit" class="btn btn-default">Submit</button>
+                <button type="submit" class="btn btn-default">Registrieren</button>
             </div>
         </div>
     </form>
