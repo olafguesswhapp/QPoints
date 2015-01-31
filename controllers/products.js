@@ -5,8 +5,8 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.get('/products/create', this.create);
 		app.post('/products/create', this.productCreation);
-		app.get('/products', this.productsOverview);
-		app.get('/products/:nr', this.productSingle);
+		app.get('/products', this.productsCatalog);
+		app.get('/products/:nr', this.productDetail);
 	},
 
 	create: function(req, res, next) {
@@ -26,11 +26,11 @@ module.exports = {
 		});
 	},
 
-	productSingle: function(req, res, next) {
+	productDetail: function(req, res, next) {
 		Products.find({ nr : req.params.nr }, function(err, product) {
 			if(err) return res.redirect(303, '/error');
 			if(!product) return next(); 	// pass this on to 404 handler
-			res.render('products/single', {
+			res.render('products/detail', {
 				productName: product[0].productName,
 				nr: product[0].nr,
 				price: product[0].price,
@@ -38,7 +38,7 @@ module.exports = {
 		});
 	},
 
-	productsOverview: function (req, res, next) {
+	productsCatalog: function (req, res, next) {
 		Products.find(function(err, products) {
 			var context = {
 				products: products.map(function(product){
@@ -49,7 +49,7 @@ module.exports = {
 					}
 				})
 			};
-			res.render('products/overview', context);		
+			res.render('products/catalog', context);		
 		})
 	},
 };
