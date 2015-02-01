@@ -3,6 +3,7 @@ var main = require('./handlers/main.js');
 var TestMongoDB = require('./handlers/TestMongoDB.js');
 var customerController = require('./controllers/customer.js');
 var productsController = require('./controllers/products.js');
+var reelsController = require('./controllers/reels.js');
 var cart = require('./handlers/cart.js');
 var cartValidation = require('./lib/cartValidation.js');
 
@@ -24,6 +25,9 @@ module.exports = function(app) {
 	
 	// products routes
 	productsController.registerRoutes(app);
+
+	// reel routes
+	reelsController.registerRoutes(app);
 
 	// shopping cart routes
 	app.get('/cart', cart.middleware, cart.home);

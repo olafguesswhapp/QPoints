@@ -1,0 +1,60 @@
+<h1>QPoints Rolle editieren</h1>
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/reels/edit" method="POST">
+        <div class="form-group">
+            <label for="fieldNr" class="col-sm-2 control-label">Rollen Nr</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldNr" name="nr">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldStatus" class="col-sm-2 control-label">Status</label>
+            <div class="col-sm-4">
+                <input type="radio" value="false" class="" required id="fieldStatus" name="reelStatus"><span> Bestellt </span>
+                <input type="radio" value="true" class="" required id="fieldStatus" name="reelStatus"><span> Aktiviert</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldQuantityCodes" class="col-sm-2 control-label">Anzahl Codes</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control" required id="fieldQuantityCodes" 
+                name="quantityCodes">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldAssignedProgram" class="col-sm-2 control-label">Zugeordnetes Programm</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldAssignedProgram" 
+                name="assignedProgram">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldCodesCode0" class="col-sm-2 control-label">Erster Code</label>
+            <div class="col-sm-4">
+				<input type="text" class="form-control" required id="fieldCodesCode0" 
+                name="codes[0][rCode]">
+                <input type="text" class="form-control"  id="fieldCodesCode1" 
+                name="codes[1][rCode]">
+                <input type="text" class="form-control"  id="fieldCodesCode2" 
+                name="codes[2][rCode]">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldCodesStatus0" class="col-sm-2 control-label">Code Status</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control"  required id="fieldCodesStatus0" 
+                name="codes[0][cStatus]">
+                <input type="number" class="form-control"  id="fieldCodesStatus1" 
+                name="codes[1][cStatus]">
+                <input type="number" class="form-control"  id="fieldCodesStatus2" 
+                name="codes[2][cStatus]">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Speichern</button>
+            </div>
+        </div>
+    </form>
+</div>

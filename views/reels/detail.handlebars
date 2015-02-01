@@ -1,0 +1,34 @@
+<h1>Informationen zu Rolle {{nr}}</h1>
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Status</td>
+			<td>Anzahl Barcodes:</td>
+			<td>Zugeordnetes Programm</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>{{#reelStatus}}bestellt{{/reelStatus}}{{^reelStatus}}aktiviert{{/reelStatus}}</td>
+			<td>{{quantityCodes}}</td>
+			<td>{{assignedProgram}}</td>
+	</tbody>	
+</table>
+<h3>Barcodes:</h3>
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Barcode</td>
+			<td>Status</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#codes}}
+		<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
+			<td>{{rCode}}</td>
+			<td>{{cStatus}}</td>
+		{{/codes}}
+	</tbody>	
+</table>
+
+{{!-- <a href="/cart/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default">Produkt zum Warenkorb hinzufügen</a></br> --}}
