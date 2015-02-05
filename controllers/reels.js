@@ -2,10 +2,10 @@ var Reels = require('../models/reels.js');
 
 module.exports = {
 	registerRoutes: function(app) {
-		app.get('/reels/edit', this.reelEdit);
-		app.post('/reels/edit', this.reelEditProcess);
-		app.get('/reels', this.home);
-		app.get('/reels/:nr', this.reelDetail);
+		app.get('/rollen/edit', this.reelEdit);
+		app.post('/rollen/edit', this.reelEditProcess);
+		app.get('/rollen', this.home);
+		app.get('/rollen/:nr', this.reelDetail);
 	},
 
 	// Einzelne Reel erfassen
@@ -21,7 +21,6 @@ module.exports = {
 			firstName: req.body.firstName,
 			reelStatus: req.body.reelStatus,
 			quantityCodes: req.body.quantityCodes,
-			assignedProgram: req.body.assignedProgram,
 			codes: req.body.codes.map(function(Hcode){
 				return {
 					rCode: Hcode.rCode,
@@ -31,7 +30,7 @@ module.exports = {
 		});
 		c.save(function(err) {
 			if(err) return next(err);
-			res.redirect(303, '/reels');
+			res.redirect(303, '/rollen');
 		});
 	},
 
@@ -54,6 +53,7 @@ module.exports = {
 		})
 	},
 
+	// EInzelansicht einer Rolle
 	reelDetail: function(req, res) {
 		Reels.find({ nr : req.params.nr }, function(err, reel) {
 			if(err) return res.redirect(303, '/error');

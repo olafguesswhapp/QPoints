@@ -4,6 +4,7 @@ var TestMongoDB = require('./handlers/TestMongoDB.js');
 var customerController = require('./controllers/customer.js');
 var productsController = require('./controllers/products.js');
 var reelsController = require('./controllers/reels.js');
+var programController = require('./controllers/programs.js');
 var cart = require('./handlers/cart.js');
 var cartValidation = require('./lib/cartValidation.js');
 
@@ -29,11 +30,14 @@ module.exports = function(app) {
 	// reel routes
 	reelsController.registerRoutes(app);
 
+	// program routes
+	programController.registerRoutes(app);
+
 	// shopping cart routes
-	app.get('/cart', cart.middleware, cart.home);
-	app.get('/cart/add', cart.addProcessGet);
-	app.post('/cart/add', cart.addProcessPost);
-	app.get('/cart/checkout', cart.checkout);
+	app.get('/warenkorb', cart.middleware, cart.home);
+	app.get('/warenkorb/add', cart.addProcessGet);
+	app.post('/warenkorb/add', cart.addProcessPost);
+	app.get('/warenkorb/checkout', cart.checkout);
 
 
 };

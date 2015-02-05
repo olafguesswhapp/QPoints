@@ -62,7 +62,7 @@ function addToCart(nr, quantity, req, res, next){
 			quantity: quantity || 1,
 		});			
 		}
-		res.redirect(303, '/cart');
+		res.redirect(303, '/warenkorb');
 	});
 }
 

@@ -11,12 +11,12 @@
 	</thead>
 	<tbody>
 		{{#products}}
-		<tr class='clickableRow' onclick="window.document.location='/products/{{nr}}';">
+		<tr class='clickableRow' onclick="window.document.location='/produkte/{{nr}}';">
 			<td>{{nr}}</td>
 			<td>{{productName}}</td>
 			<td>{{price}}</td>
 			<td>
-				<a href="/cart/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default"><img class="cartIcon" src="{{static '/images/cart-full-icon-S.png'}}"></a></td>
+				<a href="/warenkorb/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default"><img class="cartIcon" src="{{static '/images/cart-full-icon-S.png'}}"></a></td>
 		</tr>
 		{{/products}}
 	</tbody>

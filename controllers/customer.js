@@ -4,19 +4,17 @@ var customerViewModel = require('../viewModels/customer.js');
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/customer/register', this.register);
-		app.post('/customer/register', this.processRegister);
+		app.get('/kunden/anmelden', this.register);
+		app.post('/kunden/anmelden', this.processRegister);
 
-		app.get('/customers', this.clientList);
-		app.get('/customer/:nr', this.detail);
-		app.get('/customer/:id/preferences', this.preferences);
+		app.get('/kunden', this.clientList);
+		app.get('/kunden/:nr', this.detail);
 		app.get('/orders/:id', this.orders);
 
-		app.post('/customer/:id/update', this.ajaxUpdate);
 	},
 
 	register: function(req, res, next) {
-		res.render('customer/register');
+		res.render('kunden/register');
 	},
 
 	processRegister: function(req, res, next) {
@@ -35,7 +33,7 @@ module.exports = {
 		});
 		c.save(function(err) {
 			if(err) return next(err);
-			res.redirect(303, '/customers');
+			res.redirect(303, '/kunden');
 		});
 	},
 

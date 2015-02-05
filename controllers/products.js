@@ -3,10 +3,10 @@ var Products = require('../models/products.js');
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/products/create', this.create);
-		app.post('/products/create', this.productCreation);
-		app.get('/products', this.productsCatalog);
-		app.get('/products/:nr', this.productDetail);
+		app.get('/produkte/create', this.create);
+		app.post('/produkte/create', this.productCreation);
+		app.get('/produkte', this.productsCatalog);
+		app.get('/produkte/:nr', this.productDetail);
 	},
 
 	create: function(req, res, next) {
@@ -22,7 +22,7 @@ module.exports = {
 		});
 		c.save(function(err) {
 			if(err) return next(err);
-			res.redirect(303, '/products');
+			res.redirect(303, '/produkte');
 		});
 	},
 
