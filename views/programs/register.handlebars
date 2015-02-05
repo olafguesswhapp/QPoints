@@ -1,0 +1,68 @@
+<h1>Neues QPoint Programn anlegen:</h1>
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/programm/anlegen" method="POST">
+
+        <div class="form-group">
+            <label for="fieldNr" class="col-sm-2 control-label">Nr</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldNr" name="nr">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldProgramName" class="col-sm-2 control-label">Treueprogramm:</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldProgramName" 
+                name="programName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldCustomer" class="col-sm-2 control-label">Kunde</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldCustomer" name="customer">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldGoalCount" class="col-sm-2 control-label">Notwendige Punkte</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control" required id="fieldGoalCount" 
+                name="goalCount">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldStartDate" class="col-sm-2 control-label">Gültig ab</label>
+            <div class="col-sm-4">
+				<input type="datetime-local" value= "{{dateDefault}}" class="form-control" id="fieldstartDate" name="startDate"><br>
+            </div><br>
+        </div>
+        <div class="form-group">
+            <label for="fieldDeadlineSubmit" class="col-sm-2 control-label">Einlösbar bis</label>
+            <div class="col-sm-4">
+                <input type="datetime-local" value={{dateDefault}} class="form-control" required 
+                id="fieldDeadlineSubmit" name="deadlineSubmit">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldDeadlineScan" class="col-sm-2 control-label">Optional: Treuepunkte Einlese-Frist</label>
+            <div class="col-sm-4">
+                <input type="datetime-local" class="form-control" value= "{{dateDefault}}" required 
+                id="fieldDeadlineScan" 
+                name="deadlineScan">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldAllocatedReels" class="col-sm-2 control-label">Zugeordnete Rollen</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="allocatedReels">
+                    <option value="">später zuordnen</option>
+                    {{#each reels}}<option value="{{reelId}}">{{reelNr}}</option>{{/each}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Speichern</button>
+            </div>
+        </div>
+    </form>
+</div>

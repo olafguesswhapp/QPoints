@@ -1,0 +1,32 @@
+<h1>Treuepunkte Programme</h1>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Nr</td>
+			<td>Treueprogramm Name</td>
+			<td>Notwendige Punkte</td>
+			<td>Gültig ab</td>
+			<td>Lesbar bis</td>
+			<td>Einlösbar bis</td>
+			<td>Rollen</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#programs}}
+		<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
+			<td>{{nr}}</td>
+			<td>{{programName}}</td>
+			<td>{{goalCount}}</td>
+			<td>{{startDate}}</td>
+			<td>{{deadlineScan}}</td>
+			<td>{{deadlineSubmit}}</td>
+			<td>{{#allocatedReels}}
+				{{#if @index}}, {{/if}}<a href="/rollen/{{nr}}">{{nr}}</a>{{/allocatedReels}}</td>
+		</tr>
+		{{/programs}}
+	</tbody>
+	
+</table>
+
+

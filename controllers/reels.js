@@ -36,7 +36,9 @@ module.exports = {
 
 	// Übersicht aller Reels anzeigen
 	home: function(req,res){
-		Reels.find(function(err, reels) {
+		Reels.find({})
+			.populate('assignedProgram')
+			.exec(function(err, reels) {
 			// console.log(reels);
 			var context = {
 				reels: reels.map(function(reel){
@@ -53,12 +55,22 @@ module.exports = {
 		})
 	},
 
-	// EInzelansicht einer Rolle
-	reelDetail: function(req, res) {
-		Reels.find({ nr : req.params.nr }, function(err, reel) {
+	// Einzelansicht einer Rolle
+	reelDetail: function(req, res, next) {
+		Reels.findOne({ nr : req.params.nr })
+			.populate('assignedProgram')
+			.exec( function(err, reel) {
 			if(err) return res.redirect(303, '/error');
-			if(!reel) return next(); 	// pass this on to 404 handler
-			res.render('reels/detail', reel[0]);
+			// if(!reel) return next(); 	// pass this on to 404 handler
+			var context = {
+				nr: reel.nr,
+				reelStatus: reel.reelStatus,
+				quantityCodes: reel.quantityCodes,
+				assignedProgram: reel.assignedProgram,
+				codes: reel.codes,
+			};
+			console.log(context);
+			res.render('reels/detail', context);
 		});
 	},
 };

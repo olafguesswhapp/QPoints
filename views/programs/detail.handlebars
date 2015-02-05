@@ -1,0 +1,36 @@
+<h1>{{nr}} "{{programName}}"</h1>
+
+<h3>Notwendige Anzahl Punkte:</h3>
+<p>{{goalCount}}</p>
+
+<h3>Gültig ab:</h3>
+<p>{{startDate}}</p>
+
+<h3>Einlesbar bis:</h3>
+<p>{{deadlineScan}}</p>
+
+<h3>Einlösbar bis:</h3>
+<p>{{deadlineSubmit}}</p>
+
+<h3>Zugeordnete Rollen:</h3>
+<ul>
+	{{#allocatedReels}}<a href="/rollen/{{nr}}"><li>{{nr}}</li></a>{{/allocatedReels}}
+</ul>
+
+<form class="form-horizontal newsletterForm" role="form" action="/programm/:nr" method="POST">
+    <div class="form-group">
+    	<input type="hidden" name="programId" value="{{id}}">
+    	<input type="hidden" name="programNr" value="{{nr}}">
+        <div class="col-sm-4">
+            <select class="form-control" name="newReelId">
+                <option value="">Neue Rolle zuordnen</option>
+                {{#each reels}}<option value="{{reelId}}">{{reelNr}}</option>{{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-4">
+            <button type="submit" class="btn btn-default">Speichern</button>
+        </div>
+    </div>
+</form>

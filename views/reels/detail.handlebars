@@ -11,7 +11,7 @@
 		<tr>
 			<td>{{#reelStatus}}bestellt{{/reelStatus}}{{^reelStatus}}aktiviert{{/reelStatus}}</td>
 			<td>{{quantityCodes}}</td>
-			<td>{{assignedProgram}}</td>
+			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
 	</tbody>	
 </table>
 <h3>Barcodes:</h3>
