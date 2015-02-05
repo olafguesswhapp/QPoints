@@ -14,7 +14,7 @@ module.exports = {
 
 	// Ein neues Programm anlegen
 	programRegister: function(req,res, next) {
-		Reels.find({}).populate('assignedPrograms').exec(function(err,reels){
+		Reels.find({ 'reelStatus': false }).populate('assignedPrograms').exec(function(err,reels){
 			var context = {
 				dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 				reels: reels.map(function(reel){
@@ -42,8 +42,15 @@ module.exports = {
 		if (req.body.allocatedReels!='') {
 			c.allocatedReels = req.body.allocatedReels;
 		};
-		c.save(function(err) {
+		c.save(function(err, program) {
 			if(err) return next(err);
+			if (req.body.allocatedReels!='') {
+				Reels.findOne({ _id: req.body.allocatedReels}, function(err, reel){
+					reel.reelStatus = true;
+					reel.assignedProgram = program._id;
+					reel.save();
+					});
+				};
 			res.redirect(303, '/programm');
 		});
 	},
@@ -76,7 +83,7 @@ module.exports = {
 		Programs.findOne({ nr : req.params.nr })
 				.populate('allocatedReels')
 				.exec(function(err, program) {
-			Reels.find({}, function(err,reels){
+			Reels.find({ 'reelStatus': false }, function(err,reels){
 				if(!program) return next(); 	// pass this on to 404 handler
 				var context = {
 					id: program._id,
@@ -107,12 +114,13 @@ module.exports = {
 			.populate('assignedPrograms')
 			.exec(function(err, reel){
 			reel.assignedProgram = req.body.programId;
+			reel.reelStatus = true;
 			reel.save();
 		});
 		Programs.findOne({ _id : req.body.programId }, function(err, program){
 			program.allocatedReels.push(req.body.newReelId);
 			program.save();
 			});	
-		res.redirect(303, '/programm/' + req.body.programNr);
+		res.redirect(303, '/programm');
 	},	
 };
