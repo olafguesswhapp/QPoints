@@ -10,11 +10,16 @@ module.exports = {
 
 	// Einzelne Reel erfassen
 	reelEdit: function(req,res){
-		res.render('reels/edit');
+		Reels.findOne({}, {}, {sort: {'nr' : -1}}, function(err, reel){
+			var context = {
+				neueNr : reel.nr.match(/\D+/)[0] + (parseInt(reel.nr.match(/\d+/))+1),
+			};
+			res.render('reels/edit', context);
+		});
 	}, 
 
+	// Rollen anlegen bzw. editieren
 	reelEditProcess: function(req, res) {
-		console.log('die Herausforderung ' + req.body.codes.length);		
 		// TODO: back-end validation (safety)
 		var c = new Reels({
 			nr: req.body.nr,
@@ -39,7 +44,6 @@ module.exports = {
 		Reels.find({})
 			.populate('assignedProgram')
 			.exec(function(err, reels) {
-			// console.log(reels);
 			var context = {
 				reels: reels.map(function(reel){
 					return {
@@ -69,7 +73,6 @@ module.exports = {
 				assignedProgram: reel.assignedProgram,
 				codes: reel.codes,
 			};
-			console.log(context);
 			res.render('reels/detail', context);
 		});
 	},

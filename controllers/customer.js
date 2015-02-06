@@ -10,11 +10,15 @@ module.exports = {
 		app.get('/kunden', this.clientList);
 		app.get('/kunden/:nr', this.detail);
 		app.get('/orders/:id', this.orders);
-
 	},
 
 	register: function(req, res, next) {
-		res.render('kunden/register');
+		Customer.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
+			var context = {
+				neueNr : customer.nr.match(/\D+/)[0] + (parseInt(customer.nr.match(/\d+/))+1),
+			};
+			res.render('customer/register', context);
+		});	
 	},
 
 	processRegister: function(req, res, next) {
@@ -59,17 +63,6 @@ module.exports = {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
 			res.render('customer/detail', customer[0]);
-		});
-	},
-
-	preferences: function(req, res, next) {
-		Customer.find({ nr : req.params.nr }, function(err, customer) {
-			if(err) return next(err);
-			if(!customer) return next(); 	// pass this on to 404 handler
-			customer.getOrders(function(err, orders) {
-				if(err) return next(err);
-				res.render('customer/preferences', customerViewModel(customer, orders));
-			});
 		});
 	},
 

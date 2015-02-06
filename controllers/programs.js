@@ -14,16 +14,25 @@ module.exports = {
 
 	// Ein neues Programm anlegen
 	programRegister: function(req,res, next) {
-		Reels.find({ 'reelStatus': false }).populate('assignedPrograms').exec(function(err,reels){
-			var context = {
-				dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-				reels: reels.map(function(reel){
-					return {
-						reelId: reel._id,
-						reelNr: reel.nr,}
-				}),
-			}
-			res.render('programs/register', context);
+		// das Programm mit der bisher höchsten Programm-Nr selektieren [A]
+		Programs.findOne({}, {}, {sort: {'nr' : -1}}, function(err, program){
+			//Quelle alle noch nicht zugeordneten Rollen [B]
+			Reels.find({ 'reelStatus': false }).populate('assignedPrograms').exec(function(err,reels){
+				// Daten für die Template Erstellung
+				var context = {
+					// die letzte Programm-Nr filetieren (string und nr) und um 1 erhöhen [A]
+					neueNr : program.nr.match(/\D+/)[0] + (parseInt(program.nr.match(/\d+/))+1),
+					// in Start- und Deadline-Datums das heutige Datum setzen
+					dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+					// Liste der noch nicht zugeordneten Rollen erstellen [B]
+					reels: reels.map(function(reel){
+						return {
+							reelId: reel._id,
+							reelNr: reel.nr,}
+					}),
+				}
+				res.render('programs/register', context);
+			});
 		});
 	},
 
