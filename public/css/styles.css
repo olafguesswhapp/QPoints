@@ -4,7 +4,17 @@ body {
 }
 
 header img {
-	max-width: 50%;
+	/*max-width: 50%;*/
+}
+
+.navbar-brand{
+	height: 100%;
+	padding: 0 0;
+	margin-left: 0;
+}
+
+a.cart{
+	padding: 0 0;
 }
 
 .videoWrapper {

@@ -11,6 +11,40 @@
 	<link rel='stylesheet' id='responsive-style-css'  href="{{static '/css/styles.css'}}" type='text/css' media='all' />
 </head>
 <body>
+	<header class="navbar navbar-default">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header">
+		      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" 
+		      data-target=".navbar-collapse">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+		      <a class="navbar-brand" href="/"><img src="{{static '/images/QPointsLogo.png'}}"></a>
+		    </div>
+			<!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class="collapse navbar-collapse" role="navigation">
+			    <ul class="nav navbar-nav">
+			    	<li><a href="/kunden">Kunden<span class="sr-only">(current)</span></a></li>
+			    	<li><a href="/programm">Programme</a></li>
+			    	<li><a href="/rollen">Rollen</a></li>
+			    	<li><a href="/produkte">Produkte</a></li>
+			    </ul>
+			    <ul class="nav navbar-nav navbar-right">
+		  			<li> <!-- CART -->
+						{{#if cartItems}}
+						<a href="/warenkorb" style="padding: 0 15px 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}" alt="Cart Empty"></a>
+						{{else}}
+						<a href="/warenkorb" style="padding: 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-icon.png'}}"
+								alt="Cart Contains {{cartItems}} Items"></a>
+						{{/if}}
+					</li><!-- /CART -->
+				</ul><!-- /.avbar-right -->
+		    </div><!-- /.navbar-collapse -->
+		</div><!-- /.container-fluid -->
+	</header>
 	<div>
 		{{#if flash}}
 			<div class="alert alert-dismissible alert-{{flash.type}}">
@@ -19,23 +53,11 @@
 				<strong>{{flash.intro}}</strong> {{{flash.message}}}
 			</div>
 		{{/if}}
-			
-		<header>
-			<a href="/"><img src="{{static '/images/QPointsLogo.png'}}"></a>
-			<div class="col-sm-2 pull-right">
-			{{! The following represents a lot of code duplication, so we will probably want to
-				change this in the future }}
-			{{#if cartItems}}
-				<a href="/warenkorb"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}"
-					alt="Cart Empty"></a>
-			{{else}}
-				<a href="/warenkorb"><img class="cartIcon" src="{{static '/images/cart-icon.png'}}"
-					alt="Cart Contains {{cartItems}} Items"></a>
-			{{/if}}
-		</div>
-		</header>
+
 		{{{body}}}
 	</div>
-	 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 </body>
 </html>

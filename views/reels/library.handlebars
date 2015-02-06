@@ -14,8 +14,8 @@
 		{{#reels}}
 		<tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';">
 			<td>{{nr}}</td>
-			<td>{{#reelStatus}}bestellt{{/reelStatus}}
-				{{^reelStatus}}aktiviert{{/reelStatus}}</td>
+			<td>{{#reelStatus}}aktiviert{{/reelStatus}}
+				{{^reelStatus}}bestellt{{/reelStatus}}</td>
 			<td>{{quantityCodes}}</td>
 			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
 			<td>{{ersterCode}}</td>
