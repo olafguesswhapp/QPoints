@@ -10,6 +10,7 @@ npm-debug.log
 # Ignore Folders
 public/icons/
 public/images/
+help/
 
 # Backupfiles
 *~

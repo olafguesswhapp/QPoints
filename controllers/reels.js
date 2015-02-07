@@ -1,8 +1,9 @@
 var Reels = require('../models/reels.js');
+var Authent = require('../handlers/authent.js');
 
 module.exports = {
 	registerRoutes: function(app) {
-		app.get('/rollen/edit', this.reelEdit);
+		app.get('/rollen/edit', Authent.CustomerOnly, this.reelEdit);
 		app.post('/rollen/edit', this.reelEditProcess);
 		app.get('/rollen', this.home);
 		app.get('/rollen/:nr', this.reelDetail);

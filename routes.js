@@ -1,5 +1,6 @@
 
 var main = require('./handlers/main.js');
+var Authent = require('./handlers/authent.js');
 var TestMongoDB = require('./handlers/TestMongoDB.js');
 var customerController = require('./controllers/customer.js');
 var productsController = require('./controllers/products.js');
@@ -8,8 +9,11 @@ var programController = require('./controllers/programs.js');
 var cart = require('./handlers/cart.js');
 var cartValidation = require('./lib/cartValidation.js');
 
-
 module.exports = function(app) {
+
+	// Authent routes
+	app.get('/account', Authent.authent);
+	app.get('/account/:id', Authent.authentId);
 
 	// miscellaneous routes
 	app.get('/', main.home);

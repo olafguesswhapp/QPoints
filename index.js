@@ -4,6 +4,12 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var credentials = require('./credentials.js');
+// authentication
+var auth = require('./lib/auth.js')(app, {
+    providers: credentials.authProviders,
+    successRedirect: '/auth/facebook',
+    failureRedirect: 'unauthorized',
+});
 
 var mongoose = require('mongoose');
 // Connect mongoose with mongoDB
@@ -23,13 +29,6 @@ switch(app.get('env')){
 }
 //Mongoose Schema and Model
 var TestDB = require('./models/testDB.js');
-//Mongoose create new Data and Save
-// TestDB.create({
-//     a: 'korean 1st',
-//     b: 'koreanischer zweiter',
-// }, function (err, test) {
-//   if (err) return handleError(err);
-// })
 
 // Email versenden
 // var emailService = require('./lib/email.js')(credentials);
@@ -79,6 +78,9 @@ app.use(function(req, res, next){
     next();
 });
 
+//auth.init() links in Passport middleware;
+auth.init();
+
 // middleware to provide cart data for header
 app.use(function(req, res, next) {
     var cart = req.session.cart;
@@ -88,6 +90,9 @@ app.use(function(req, res, next) {
 
 // add routes
 require('./routes.js')(app);
+
+//now we can specifiy out auth routes
+auth.registerRoutes(app);
 
 //testen Email versand
 app.get('/eBrief', function(req, res){
