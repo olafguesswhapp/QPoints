@@ -2,6 +2,10 @@ exports.home = function(req, res) {
 	res.render('home');
 };
 
+exports.loginDirect = function(req, res){
+    res.redirect(303, '/kunden/login');
+};
+
 exports.newsletter = function(req, res){
     // we will learn about CSRF later...for now, we just
     // provide a dummy value

@@ -1,6 +1,9 @@
 var mongoose = require('mongoose');
 var Order = require('./order.js');
-var customerSchema = mongoose.Schema({
+var Schema = mongoose.Schema;
+var User = require('../models/user.js');
+
+var customerSchema = new Schema({
 	nr: String,
 	firstName: String,
 	lastName: String,
@@ -12,6 +15,7 @@ var customerSchema = mongoose.Schema({
 	zip: String,
 	country: String,
 	phone: String,
+	user: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 customerSchema.methods.getOrders = function(cb){
 	return Order.find({ customerId: this._id }, cb);

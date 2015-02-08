@@ -33,6 +33,9 @@
 			    	<li><a href="/produkte">Produkte</a></li>
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
+			    	<li>{{#if loggedInUser}}<a href="#">{{loggedInUser}}</a></li><!-- login/logout -->
+			    	<li><a href="/logout">Log Out</a></li>
+			    	{{else}}<a href="/kunden/login">Sign In</a></li>{{/if}}
 		  			<li> <!-- CART -->
 						{{#if cartItems}}
 						<a href="/warenkorb" style="padding: 0 15px 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}" alt="Cart Empty"></a>

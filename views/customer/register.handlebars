@@ -1,4 +1,4 @@
-<h1>New Customer</h1>
+<h3>Neuer Kunde</h3>
 
 <div class="formContainer">
     <form class="form-horizontal newsletterForm" role="form" action="/kunden/anmelden" method="POST">
@@ -22,15 +22,21 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldEmail" class="col-sm-2 control-label">Email</label>
+            <label for="fieldEmail" class="col-sm-2 control-label">Email (= Username)</label>
             <div class="col-sm-4">
                 <input type="email" class="form-control" required id="fieldEmail" name="email">
             </div>
         </div>
         <div class="form-group">
+            <label for="fieldPassword" class="col-sm-2 control-label">Passwort</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldPassword" name="password">
+            </div>
+        </div>
+        <div class="form-group">
             <label for="fieldAddress1" class="col-sm-2 control-label">Adresse</label>
             <div class="col-sm-4">
-				<input type="text" class="form-control" required id="fieldAddress1" name="address1"><br>
+				<input type="text" class="form-control" id="fieldAddress1" name="address1">
                 <input type="text" class="form-control" id="fieldAddress2" name="address2">
             </div>
 			<br>
@@ -38,7 +44,7 @@
         <div class="form-group">
             <label for="fieldCity" class="col-sm-2 control-label">Stadt</label>
             <div class="col-sm-4">
-                <input type="text" class="form-control" required id="fieldCity" name="city">
+                <input type="text" class="form-control" id="fieldCity" name="city">
             </div>
         </div>
         <div class="form-group">
@@ -53,18 +59,18 @@
         <div class="form-group">
             <label for="fieldZip" class="col-sm-2 control-label">PLZ</label>
             <div class="col-sm-4">
-                <input type="text" class="form-control" required id="fieldZip" name="zip">
+                <input type="text" class="form-control" id="fieldZip" name="zip">
             </div>
         </div>
         <div class="form-group">
             <label for="fieldPhone" class="col-sm-2 control-label">Tefl Nr</label>
             <div class="col-sm-4">
-                <input type="phone" class="form-control" required id="fieldPhone" name="phone">
+                <input type="phone" class="form-control" id="fieldPhone" name="phone">
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
-                <button type="submit" class="btn btn-default">Registrieren</button>
+                <button type="submit" class="btn btn-default">Anmelden</button>
             </div>
         </div>
     </form>

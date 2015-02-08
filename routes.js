@@ -16,6 +16,7 @@ module.exports = function(app) {
 	app.get('/newsletter', main.newsletter);
 	app.post('/newsletter', main.newsletterProcessPost);
 	app.get('/newsletter/archive', main.newsletterArchive);
+	app.get('/login', main.loginDirect);
 
 	// test MongoDB
 	app.get('/waehlen/:wahl', TestMongoDB.wahl);

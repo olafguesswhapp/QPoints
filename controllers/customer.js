@@ -1,5 +1,8 @@
 var Customer = require('../models/customer.js');
 var customerViewModel = require('../viewModels/customer.js');
+var passport = require('passport');
+var User = require('../models/user.js');
+
 
 module.exports = {
 
@@ -7,16 +10,53 @@ module.exports = {
 		app.get('/kunden/anmelden', this.register);
 		app.post('/kunden/anmelden', this.processRegister);
 
+		app.get('/kunden/login', this.login);
+		app.post('/kunden/login', this.processLogin);
+		app.get('/logout', this.logout);
+
 		app.get('/kunden', this.clientList);
 		app.get('/kunden/:nr', this.detail);
 		app.get('/orders/:id', this.orders);
 	},
 
+	login: function(req, res){
+		res.render('customer/login', { user: req.user, message: req.session.messages });
+	},
+
+	processLogin: function(req, res, next) {
+		passport.authenticate('local', function(err, user, info) {
+			if (err) { return next(err) }
+			if (!user) {
+				req.session.messages =  [info.message];
+				return res.redirect('/kunden/login')
+			}
+			req.logIn(user, function(err) {
+				if (err) { return next(err); }
+				req.session.flash = {
+					type: 'Erfolg',
+					intro: 'Willkommen!',
+					message: 'Du bist richtig eingelogged.',
+					};
+				return res.redirect('/kunden');
+
+			});
+		})(req, res, next);
+	},
+
+	logout: function(req, res){
+		req.logout();
+		res.redirect('/');
+	},
+
+
 	register: function(req, res, next) {
 		Customer.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
-			var context = {
-				neueNr : customer.nr.match(/\D+/)[0] + (parseInt(customer.nr.match(/\d+/))+1),
-			};
+			console.log('erstmalige Anlage von Kunden ' + customer);
+			if (!customer) {
+				var context = {neueNr : 'K10001'};
+			} else {
+				var context = {neueNr : customer.nr.match(/\D+/)[0] + (parseInt(customer.nr.match(/\d+/))+1),};
+			}
 			res.render('customer/register', context);
 		});	
 	},
@@ -35,9 +75,19 @@ module.exports = {
 			zip: req.body.zip,
 			phone: req.body.phone,
 		});
-		c.save(function(err) {
+		c.save(function(err, newCustomer){
 			if(err) return next(err);
-			res.redirect(303, '/kunden');
+			var u = new User({
+				username: req.body.email,
+				password: req.body.password,
+				customer: newCustomer._id,
+			});
+			u.save(function(err, newUser){
+				if(err) return next(err);
+				newCustomer.user.push(newUser._id);
+				newCustomer.save();				
+				res.redirect(303, '/kunden');
+			});
 		});
 	},
 

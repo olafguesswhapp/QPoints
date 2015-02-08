@@ -1,8 +1,13 @@
 var Reels = require('../models/reels.js');
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+};
+
 module.exports = {
 	registerRoutes: function(app) {
-		app.get('/rollen/edit', this.reelEdit);
+		app.get('/rollen/edit', ensureAuthenticated, this.reelEdit);
 		app.post('/rollen/edit', this.reelEditProcess);
 		app.get('/rollen', this.home);
 		app.get('/rollen/:nr', this.reelDetail);

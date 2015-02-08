@@ -4,6 +4,10 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var credentials = require('./credentials.js');
+var auth = require('./lib/auth.js')(app, {
+    successRedirect: '/kunden/login',
+    failureRedirect: 'unauthorized',
+});
 
 var mongoose = require('mongoose');
 // Connect mongoose with mongoDB
@@ -23,13 +27,6 @@ switch(app.get('env')){
 }
 //Mongoose Schema and Model
 var TestDB = require('./models/testDB.js');
-//Mongoose create new Data and Save
-// TestDB.create({
-//     a: 'korean 1st',
-//     b: 'koreanischer zweiter',
-// }, function (err, test) {
-//   if (err) return handleError(err);
-// })
 
 // Email versenden
 // var emailService = require('./lib/email.js')(credentials);
@@ -46,7 +43,8 @@ var handlebars = require('express3-handlebars')
         },
         static: function(name) {
             return require('./lib/static.js').map(name);
-        }
+        },
+
     }
 });	
 app.engine('handlebars', handlebars.engine);
@@ -79,10 +77,15 @@ app.use(function(req, res, next){
     next();
 });
 
+//auth.init() links in Passport middleware;
+auth.init();
+
 // middleware to provide cart data for header
 app.use(function(req, res, next) {
     var cart = req.session.cart;
     res.locals.cartItems = cart && cart.items ? cart.items.length : 0;
+    if (!req.user) return next();
+    res.locals.loggedInUser = req.user.username.split('@')[0];;
     next();
 });
 
