@@ -1,0 +1,37 @@
+<h4>{{actualUserName}} (Username)</h4>
+<h4>Anlage eines neuen Users für Kunden {{customerFirma}}</h4>
+
+<div class="formContainer">
+    <form class="form-horizontal productsForm" role="form" action="/user/anlegen" method="POST">
+        <input type="hidden" name="customer" value='{{actualCustomerId}}'>
+        <div class="form-group">
+            <label for="fieldUserName" class="col-sm-2 control-label">Username (email):</label>
+            <div class="col-sm-4">
+                <input type="email" class="form-control" required id="fieldUserName" name="username">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldPassword" class="col-sm-2 control-label">Passwort</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldPassword" name="password">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldFirstName" class="col-sm-2 control-label">Vorname</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldFirstName" name="firstName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldLastName" class="col-sm-2 control-label">Nachname</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldLastName" name="lastName">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Anlegen</button>
+            </div>
+        </div>
+    </form>
+</div>

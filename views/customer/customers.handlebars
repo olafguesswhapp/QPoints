@@ -4,6 +4,7 @@
 	<thead>
 		<tr>
 			<td>Kunden Nr</td>
+			<td>Firma</td>
 			<td>Vorname</td>
 			<td>Nachname</td>
 			<td>email</td>
@@ -14,6 +15,7 @@
 		{{#customers}}
 		<tr class='clickableRow' onclick="window.document.location='/kunden/{{nr}}';">
 			<td>{{nr}}</td>
+			<td>{{firma}}</td>
 			<td>{{firstName}}</td>
 			<td>{{lastName}}</td>
 			<td>{{email}}</td>

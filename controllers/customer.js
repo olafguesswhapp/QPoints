@@ -2,6 +2,7 @@ var Customer = require('../models/customer.js');
 var customerViewModel = require('../viewModels/customer.js');
 var passport = require('passport');
 var User = require('../models/user.js');
+var moment = require('moment');
 
 
 module.exports = {
@@ -51,7 +52,6 @@ module.exports = {
 
 	register: function(req, res, next) {
 		Customer.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
-			console.log('erstmalige Anlage von Kunden ' + customer);
 			if (!customer) {
 				var context = {neueNr : 'K10001'};
 			} else {
@@ -65,6 +65,7 @@ module.exports = {
 		// TODO: back-end validation (safety)
 		var c = new Customer({
 			nr: req.body.nr,
+			firma: req.body.firma,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
 			email: req.body.email,
@@ -81,6 +82,9 @@ module.exports = {
 				username: req.body.email,
 				password: req.body.password,
 				customer: newCustomer._id,
+				created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+				name: req.body.firstName + ' ' + req.body.lastName,
+				role: 'customer',
 			});
 			u.save(function(err, newUser){
 				if(err) return next(err);
@@ -97,6 +101,7 @@ module.exports = {
 				customers: customers.map(function(customer){
 					return {
 						nr: customer.nr,
+						firma: customer.firma,
 						firstName: customer.firstName,
 						lastName: customer.lastName,
 						email: customer.email,
@@ -109,10 +114,34 @@ module.exports = {
 	},
 
 	detail: function(req, res, next) {
-		Customer.find({ nr : req.params.nr }, function(err, customer) {
+		Customer.findOne({ nr : req.params.nr })
+				.populate('user')
+				.exec(function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
-			res.render('customer/detail', customer[0]);
+			User.find({}, function(err, users){
+				var context = {
+					nr: customer.nr,
+					firma: customer.firma,
+					firstName: customer.firstName,
+					lastName: customer.lastName,
+					email: customer.email,
+					address1: customer.address1,
+					address2: customer.address2,
+					zip: customer.zip,
+					city: customer.city,
+					state: customer.state,
+					phone: customer.phone,
+					user: customer.user.map(function(user){
+						return { 
+							username: user.username,
+							name: user.name,
+							role: user.role,
+						}
+					}),
+				};
+			res.render('customer/detail', context);	
+			});
 		});
 	},
 

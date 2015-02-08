@@ -2,6 +2,7 @@
 var main = require('./handlers/main.js');
 var TestMongoDB = require('./handlers/TestMongoDB.js');
 var customerController = require('./controllers/customer.js');
+var userController = require('./controllers/user.js');
 var productsController = require('./controllers/products.js');
 var reelsController = require('./controllers/reels.js');
 var programController = require('./controllers/programs.js');
@@ -24,6 +25,9 @@ module.exports = function(app) {
 
 	// customer routes
 	customerController.registerRoutes(app);
+
+	// user routes
+	userController.registerRoutes(app);
 	
 	// products routes
 	productsController.registerRoutes(app);
