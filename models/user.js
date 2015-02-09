@@ -12,7 +12,8 @@ var userSchema = new Schema({
 	customer: { type: Schema.Types.ObjectId, ref: 'Customer'},
 	// customerId: { type: Schema.Types.ObjectId, ref: 'Customers' },
 	// authId: String,
-	name: String,
+	firstName: String,
+	lastName: String,
 	role: String,
 	created: Date,
 });

@@ -1,6 +1,5 @@
 var Customer = require('../models/customer.js');
 var customerViewModel = require('../viewModels/customer.js');
-var passport = require('passport');
 var User = require('../models/user.js');
 var moment = require('moment');
 
@@ -11,44 +10,10 @@ module.exports = {
 		app.get('/kunden/anmelden', this.register);
 		app.post('/kunden/anmelden', this.processRegister);
 
-		app.get('/kunden/login', this.login);
-		app.post('/kunden/login', this.processLogin);
-		app.get('/logout', this.logout);
-
 		app.get('/kunden', this.clientList);
 		app.get('/kunden/:nr', this.detail);
 		app.get('/orders/:id', this.orders);
 	},
-
-	login: function(req, res){
-		res.render('customer/login', { user: req.user, message: req.session.messages });
-	},
-
-	processLogin: function(req, res, next) {
-		passport.authenticate('local', function(err, user, info) {
-			if (err) { return next(err) }
-			if (!user) {
-				req.session.messages =  [info.message];
-				return res.redirect('/kunden/login')
-			}
-			req.logIn(user, function(err) {
-				if (err) { return next(err); }
-				req.session.flash = {
-					type: 'Erfolg',
-					intro: 'Willkommen!',
-					message: 'Du bist richtig eingelogged.',
-					};
-				return res.redirect('/kunden');
-
-			});
-		})(req, res, next);
-	},
-
-	logout: function(req, res){
-		req.logout();
-		res.redirect('/');
-	},
-
 
 	register: function(req, res, next) {
 		Customer.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
@@ -63,44 +28,49 @@ module.exports = {
 
 	processRegister: function(req, res, next) {
 		// TODO: back-end validation (safety)
-		var c = new Customer({
-			nr: req.body.nr,
-			firma: req.body.firma,
+		var u = new User({
+			username: req.body.email,
+			password: req.body.password,
+			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
-			email: req.body.email,
-			address1: req.body.address1,
-			address2: req.body.address2,
-			city: req.body.city,
-			state: req.body.state,
-			zip: req.body.zip,
-			phone: req.body.phone,
+			role: 'admin',
 		});
-		c.save(function(err, newCustomer){
-			if(err) return next(err);
-			var u = new User({
-				username: req.body.email,
-				password: req.body.password,
-				customer: newCustomer._id,
-				created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-				name: req.body.firstName + ' ' + req.body.lastName,
-				role: 'customer',
-			});
-			u.save(function(err, newUser){
-				if(err) {
-					console.log(err.errors.username);
-					req.session.flash = {
-						type: 'Warnung',
-						intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
-						message: err.errors.username.message,
-					};
-				} else {
-					newCustomer.user.push(newUser._id);
-					newCustomer.save();
-					res.redirect(303, '/kunden');
-				}
-			});
+		u.save(function(err, newUser){
+			if(err) {
+				req.session.flash = {
+					type: 'Warnung',
+					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+					message: err.errors.username.message,
+				};
+				res.redirect(303, 'kunden/anmelden');
+			} else {
+				var c = new Customer({
+					nr: req.body.nr,
+					company: req.body.company,
+					firstName: req.body.firstName,
+					lastName: req.body.lastName,
+					email: req.body.email,
+					address1: req.body.address1,
+					address2: req.body.address2,
+					city: req.body.city,
+					state: req.body.state,
+					zip: req.body.zip,
+					phone: req.body.phone,
+					user: newUser._id,
+				});
+				c.save(function(err, newCustomer){
+					if(err) {
+						return next(err);
+					} else {
+					newUser.customer = newCustomer._id;
+					newUser.save();
+					res.redirect(303, '/kunden');					
+					}
+				});
+			}
 		});
+
 	},
 
 	clientList: function(req, res, next){
@@ -109,7 +79,7 @@ module.exports = {
 				customers: customers.map(function(customer){
 					return {
 						nr: customer.nr,
-						firma: customer.firma,
+						company: customer.company,
 						firstName: customer.firstName,
 						lastName: customer.lastName,
 						email: customer.email,
@@ -130,7 +100,7 @@ module.exports = {
 			User.find({}, function(err, users){
 				var context = {
 					nr: customer.nr,
-					firma: customer.firma,
+					company: customer.company,
 					firstName: customer.firstName,
 					lastName: customer.lastName,
 					email: customer.email,
@@ -143,7 +113,8 @@ module.exports = {
 					user: customer.user.map(function(user){
 						return { 
 							username: user.username,
-							name: user.name,
+							firstName: user.firstName,
+							lastName: user.lastName,
 							role: user.role,
 						}
 					}),

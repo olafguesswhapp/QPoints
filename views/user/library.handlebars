@@ -1,4 +1,5 @@
-<h3>Kunden {{customerNr}} {{customerFirma}} zugeordnete User</h3>
+<h4>{{customerNr}} {{customerCompany}} zugeordnete User</h4></br>
+<a href="/user/anlegen" class="btn btn-default">Weiteren User anlegen</a>
 
 <table class="table table-striped table-hover">
 	<thead>
@@ -12,7 +13,7 @@
 	<tbody>
 		{{#users}}
 		<tr class='clickableRow'> <!-- onclick="window.document.location='/programm/{{nr}}';" --> 
-			<td>{{name}}</td>
+			<td>{{firstName}} {{lastName}}</td>
 			<td>{{username}}</td>
 			<td>{{role}}</td>
 			<td>{{created}}</td>

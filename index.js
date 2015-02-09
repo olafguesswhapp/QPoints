@@ -5,7 +5,7 @@ var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var credentials = require('./credentials.js');
 var auth = require('./lib/auth.js')(app, {
-    successRedirect: '/kunden/login',
+    successRedirect: '/login',
     failureRedirect: 'unauthorized',
 });
 

@@ -5,7 +5,7 @@ var User = require('../models/user.js');
 
 var customerSchema = new Schema({
 	nr: String,
-	firma: String,
+	company: String,
 	firstName: String,
 	lastName: String,
 	email: String,

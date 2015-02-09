@@ -1,12 +1,13 @@
 var User = require('../models/user.js');
 var Customer = require('../models/customer.js');
+var passport = require('passport');
 var moment = require('moment');
 // var passport = require('passport');
 
 function customerOnly(req, res, next) {
 	if (Object.keys(req.session.passport).length > 0) {
 		User.findById(req.session.passport.user, function(err, user){
-			if(user.role==='customer') return next();
+			if(user.role==='customer' || user.role==='admin') return next();
 		});
 	} else { next('route'); }
 };
@@ -18,6 +19,10 @@ module.exports = {
 		app.post('/user/anlegen', customerOnly, this.processUserRegister);
 
 		app.get('/user', customerOnly, this.userLibrary);
+
+		app.get('/login', this.login);
+		app.post('/login', this.processLogin);
+		app.get('/logout', this.logout);
 	},
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
@@ -27,11 +32,10 @@ module.exports = {
 		Customer.findById(req.user.customer, function(err, customer){
 			var context = {
 				actualCustomerId: customer._id,
-				actualFirma: req.user.firma,
+				customerCompany: customer.company,
 				actualUserName: req.user.username,
 				customerName: customer.firstName + " " + customer.lastName,
 			};
-		console.log('diese KundenID wird ins register template geliefert ' + context.actualCustomerId);
 		res.render('user/register', context);
 		});		
 	},
@@ -43,7 +47,8 @@ module.exports = {
 			password: req.body.password,
 			customer: req.body.customer,
 			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-			name: req.body.firstName + ' ' + req.body.lastName,
+			firstName: req.body.firstName,
+			lastName: req.body.lastName,
 			role: 'user',
 		});
 		u.save(function(err, newUser){
@@ -69,7 +74,8 @@ module.exports = {
 			var context = {
 				users: users.map(function(user){
 					return {
-						name: user.name,
+						firstName: user.firstName,
+						lastName: user.lastName,
 						username: user.username,
 						role: user.role,
 						created: user.created,
@@ -78,10 +84,43 @@ module.exports = {
 			};
 			Customer.findById(req.user.customer, function(err, customer){
 				context.customerNr = customer.nr;
-				context.customerFirma = customer.firma;
+				context.customerCompany = customer.company;
+				res.render('user/library', context);
 			});
-			res.render('user/library', context);
 		});
+	},
+
+	login: function(req, res){
+		res.render('user/login', { user: req.user, message: req.session.messages });
+	},
+
+	processLogin: function(req, res, next) {
+		passport.authenticate('local', function(err, user, info) {
+			if (err) { return next(err) }
+			if (!user) {
+				req.session.flash = {
+					type: 'Warnung',
+					intro: 'Hinweis: ',
+					message: 'Der Username ' + req.body.username + ' wurde bisher nicht angelegt. Bitte diesen als Kunde neu anmelden oder als User eines Kunden anlegen lassen.',
+					};
+				return res.redirect('/kunden/anmelden');
+			}
+			req.logIn(user, function(err) {
+				if (err) { return next(err); }
+				req.session.flash = {
+					type: 'Erfolg',
+					intro: 'Willkommen!',
+					message: 'Du bist richtig eingelogged.',
+					};
+				return res.redirect('/');
+
+			});
+		})(req, res, next);
+	},
+
+	logout: function(req, res){
+		req.logout();
+		res.redirect('/');
 	},
 
 };
