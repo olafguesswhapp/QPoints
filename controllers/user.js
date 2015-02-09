@@ -3,19 +3,21 @@ var Customer = require('../models/customer.js');
 var moment = require('moment');
 // var passport = require('passport');
 
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+function customerOnly(req, res, next) {
+	if (Object.keys(req.session.passport).length > 0) {
+		User.findById(req.session.passport.user, function(err, user){
+			if(user.role==='customer') return next();
+		});
+	} else { next('route'); }
 };
 
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/user/anlegen', this.userRegister);
-		app.post('/user/anlegen', this.processUserRegister);
+		app.get('/user/anlegen', customerOnly, this.userRegister);
+		app.post('/user/anlegen', customerOnly, this.processUserRegister);
 
-		app.get('/user', ensureAuthenticated, this.userLibrary);
-
+		app.get('/user', customerOnly, this.userLibrary);
 	},
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
@@ -45,18 +47,24 @@ module.exports = {
 			role: 'user',
 		});
 		u.save(function(err, newUser){
-			if(err) return next(err);
-			Customer.findById(req.body.customer, function(err, customer){
-				console.log('der neue User ' + newUser);
-				customer.user.push(newUser._id);
-				customer.save();				
-			});
-			res.redirect(303, '/user');
+			if(err) {
+				req.session.flash = {
+					type: 'Warnung',
+					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+					message: err.errors.username.message,
+				};
+				res.redirect(303, 'user/anlegen');
+			} else {
+				Customer.findById(req.body.customer, function(err, customer){
+					customer.user.push(newUser._id);
+					customer.save();				
+				});
+			}
 		});
 	},
 
 	userLibrary: function(req, res, next){
-		if (req.user.role != 'customer' && req.user.role != 'admin') return next();
+		if (!req.user) return next();
 		User.find({ customer : req.user.customer}, function(err, users) {
 			var context = {
 				users: users.map(function(user){
@@ -72,7 +80,7 @@ module.exports = {
 				context.customerNr = customer.nr;
 				context.customerFirma = customer.firma;
 			});
-			res.render('user/library', context);		
+			res.render('user/library', context);
 		});
 	},
 

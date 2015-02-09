@@ -87,10 +87,18 @@ module.exports = {
 				role: 'customer',
 			});
 			u.save(function(err, newUser){
-				if(err) return next(err);
-				newCustomer.user.push(newUser._id);
-				newCustomer.save();				
-				res.redirect(303, '/kunden');
+				if(err) {
+					console.log(err.errors.username);
+					req.session.flash = {
+						type: 'Warnung',
+						intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+						message: err.errors.username.message,
+					};
+				} else {
+					newCustomer.user.push(newUser._id);
+					newCustomer.save();
+					res.redirect(303, '/kunden');
+				}
 			});
 		});
 	},
