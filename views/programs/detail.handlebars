@@ -1,18 +1,22 @@
-<h1>{{nr}} "{{programName}}"</h1>
+<h4>Programm-Nr. {{nr}} "{{programName}}"</h4>
 
-<h3>Notwendige Anzahl Punkte:</h3>
-<p>{{goalCount}}</p>
+<dl class="dl-horizontal">
+  <dt>Notwendige Punkte</dt>
+  <dd>{{goalCount}}</dd>
+  <dt>Gültig ab</dt>
+  <dd>{{startDate}}</dd>
+  <dt>Einlösbar bis</dt>
+  <dd>{{deadlineSubmit}}</dd>
+  <dt>Erstellt von</dt>
+  <dd><a href="/user">{{createdByName}}</a></dd>
+  <dt>Erstellt am</dt>
+  <dd>{{created}}</dd>
+</dl>
 
-<h3>Gültig ab:</h3>
-<p>{{startDate}}</p>
+{{!-- Einlesbar bis: --}}
+{{!-- {{deadlineScan}} --}}
 
-<h3>Einlesbar bis:</h3>
-<p>{{deadlineScan}}</p>
-
-<h3>Einlösbar bis:</h3>
-<p>{{deadlineSubmit}}</p>
-
-<h3>Zugeordnete Rollen:</h3>
+<h4>Zugeordnete Rollen:</h4>
 <ul>
 	{{#allocatedReels}}<a href="/rollen/{{nr}}"><li>{{nr}}</li></a>{{/allocatedReels}}
 </ul>

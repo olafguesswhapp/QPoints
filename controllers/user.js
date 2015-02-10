@@ -41,7 +41,6 @@ module.exports = {
 	},
 
 	processUserRegister: function(req, res, next){
-		console.log('stimmt die CustomerID ' + req.body.actualCustomerId);
 		var u = new User({
 			username: req.body.username,
 			password: req.body.password,
@@ -78,7 +77,7 @@ module.exports = {
 						lastName: user.lastName,
 						username: user.username,
 						role: user.role,
-						created: user.created,
+						created: moment(user.created).format("DD.MM.YY"),
 					}
 				})
 			};
