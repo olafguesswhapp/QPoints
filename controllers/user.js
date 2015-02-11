@@ -9,7 +9,7 @@ function customerOnly(req, res, next) {
 		User.findById(req.session.passport.user, function(err, user){
 			if(user.role==='customer' || user.role==='admin') return next();
 		});
-	} else { next('route'); }
+	} else { res.redirect('/login'); }
 };
 
 module.exports = {
@@ -110,9 +110,11 @@ module.exports = {
 					type: 'Erfolg',
 					intro: 'Willkommen!',
 					message: 'Du bist richtig eingelogged.',
-					};
+					};	
+				if (!(JSON.stringify(user._id) == JSON.stringify(req.session.cart.user))) {
+				req.session.cart = { items: [], total: 0}; 
+				}
 				return res.redirect('/');
-
 			});
 		})(req, res, next);
 	},

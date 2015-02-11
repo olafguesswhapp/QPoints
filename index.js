@@ -44,7 +44,9 @@ var handlebars = require('express3-handlebars')
         static: function(name) {
             return require('./lib/static.js').map(name);
         },
-
+        itemSumOld: function(items){
+            return items.price * items.quantity;
+        },
     }
 });	
 app.engine('handlebars', handlebars.engine);

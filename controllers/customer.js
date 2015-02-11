@@ -34,7 +34,7 @@ module.exports = {
 			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
-			role: 'admin',
+			role: 'customer',
 		});
 		u.save(function(err, newUser){
 			if(err) {

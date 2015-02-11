@@ -1,4 +1,4 @@
-<h1>Ihr Warenkorb</h1>
+<h3>Warenkorb von {{name}}</h3>
 {{#each cart.errors}}
 	<div class="alert alert-danger">{{.}}</div>
 {{/each}}
@@ -12,6 +12,8 @@
 			<td>Produkt Nr</td>
 			<td>Name</td>
 			<td>Anzahl</td>
+			<td>Einzelpreis</td>
+			<td>Summe</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -20,8 +22,19 @@
 				<td>{{nr}}</td>
 				<td>{{productName}}</td>
 				<td>{{quantity}}</td>
+				<td>{{price}}</td>
+				<td>{{itemSum}}</td>
 			</tr>
 		{{/each}}
+		{{#if cart.total}}
+			<tr class="info">
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>Gesamt</td>
+				<td>{{cart.total}}</td>
+			</tr>
+		{{/if}}
 	</tbody>
 </table>
 

@@ -1,24 +1,48 @@
 var Reels = require('../models/reels.js');
+var User = require('../models/user.js');
+var moment = require('moment');
+
+function adminOnly(req, res, next) {
+	if (Object.keys(req.session.passport).length > 0) {
+		User.findById(req.session.passport.user, function(err, user){
+			if(user.role==='admin') {return next();
+			} else {
+				req.session.flash = {
+					type: 'Warnung',
+					intro: 'Sie haben nicht das Recht Rollen anzulegen .',
+					message: 'Bitte wenden Sie sich an unserer Administration.'
+				};
+				res.redirect('/rollen');
+			}
+		});
+	} else { 
+		res.redirect('/login');
+		}
+};
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+  res.redirect('/login');
 };
 
 module.exports = {
 	registerRoutes: function(app) {
-		app.get('/rollen/edit', ensureAuthenticated, this.reelEdit);
-		app.post('/rollen/edit', this.reelEditProcess);
-		app.get('/rollen', this.home);
-		app.get('/rollen/:nr', this.reelDetail);
+		app.get('/rollen/edit', adminOnly, this.reelEdit);
+		app.post('/rollen/edit', adminOnly, this.reelEditProcess);
+		app.get('/rollen', ensureAuthenticated, this.library);
+		app.get('/rollen/:nr', ensureAuthenticated, this.reelDetail);
 	},
 
 	// Einzelne Reel erfassen
 	reelEdit: function(req,res){
 		Reels.findOne({}, {}, {sort: {'nr' : -1}}, function(err, reel){
-			var context = {
-				neueNr : reel.nr.match(/\D+/)[0] + (parseInt(reel.nr.match(/\d+/))+1),
-			};
+			if (!reel) {
+				var context = {neueNr : 'R1000001'};
+			} else {
+				var context = {
+					neueNr : reel.nr.match(/\D+/)[0] + (parseInt(reel.nr.match(/\d+/))+1),
+				};
+			}
 			res.render('reels/edit', context);
 		});
 	}, 
@@ -28,15 +52,16 @@ module.exports = {
 		// TODO: back-end validation (safety)
 		var c = new Reels({
 			nr: req.body.nr,
-			firstName: req.body.firstName,
-			reelStatus: req.body.reelStatus,
+			reelStatus: 'erfasst',
 			quantityCodes: req.body.quantityCodes,
 			codes: req.body.codes.map(function(Hcode){
 				return {
 					rCode: Hcode.rCode,
-					cStatus: Hcode.cStatus,
+					cStatus: 0,
 				}
 			}),
+			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+			createdBy: req.user._id,
 		});
 		c.save(function(err) {
 			if(err) return next(err);
@@ -45,21 +70,30 @@ module.exports = {
 	},
 
 	// Übersicht aller Reels anzeigen
-	home: function(req,res){
+	library: function(req,res){
 		Reels.find({})
 			.populate('assignedProgram')
 			.exec(function(err, reels) {
-			var context = {
-				reels: reels.map(function(reel){
-					return {
-						nr: reel.nr,
-						reelStatus: reel.reelStatus,
-						quantityCodes: reel.quantityCodes,
-						assignedProgram: reel.assignedProgram,
-						ersterCode: reel.codes[0].rCode,
+			if (reels.length > 0) {
+				var context = {
+					reels: reels.map(function(reel){
+						return {
+							nr: reel.nr,
+							reelStatus: reel.reelStatus,
+							quantityCodes: reel.quantityCodes,
+							assignedProgram: reel.assignedProgram,
+							ersterCode: reel.codes[0].rCode,
+						}
+					})
+				};				
+			} else {
+				var context = {
+					// customerCompany: user.customer.company,
+					reels: {
+						reelStatus: 'Es ist noch keine Rolle erfasst.',
 					}
-				})
-			};
+				};
+			}
 			res.render('reels/library', context);		
 		})
 	},

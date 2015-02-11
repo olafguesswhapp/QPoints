@@ -121,7 +121,7 @@ module.exports = {
 							programs: {
 								programName: 'Sie haben noch kein Programm angelegt',
 							}
-						}
+						};
 					}
 				res.render('programs/library', context);		
 			});
@@ -134,7 +134,7 @@ module.exports = {
 				.populate('allocatedReels', 'nr')
 				.populate('createdBy', 'firstName lastName')
 				.exec(function(err, program) {
-			Reels.find({ 'reelStatus': false }, function(err,reels){
+			Reels.find({ 'reelStatus': 'erfasst' }, function(err,reels){
 				if(!program) return next(); 	// pass this on to 404 handler
 				var context = {
 					id: program._id,

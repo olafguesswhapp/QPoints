@@ -1,0 +1,39 @@
+<h3>Bestellung von {{name}}</h3>
+<p>Hiermit bestellen Sie für</p>
+<ul class="list-unstyled">
+	<li>{{company}}</li>
+	<li>{{address1}} {{address2}}</li>
+	<li>{{zip}} {{city}}</li>
+</ul>
+<p>folgendes:</p>
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<td>Produkt Nr</td>
+			<td>Name</td>
+			<td>Anzahl</td>
+			<td>Einzelpreis</td>
+			<td>Summe</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#each cart.items}}
+			<tr>
+				<td>{{nr}}</td>
+				<td>{{productName}}</td>
+				<td>{{quantity}}</td>
+				<td>{{price}}</td>
+				<td>{{itemSum}}</td>
+			</tr>
+		{{/each}}
+				<tr class="info">
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>Gesamt</td>
+				<td>{{cart.total}}</td>
+			</tr>
+	</tbody>
+</table>
+
+<a class="btn btn-primary" href="/warenkorb/checkout">Bestellen bestätigen</a>

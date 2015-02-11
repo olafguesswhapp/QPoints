@@ -1,4 +1,4 @@
-<h1>QPoints Rollen:</h1>
+<h3>QPoints Rollen:</h3>
 
 <table class="table table-striped table-hover">
 	<thead>
@@ -14,8 +14,7 @@
 		{{#reels}}
 		<tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';">
 			<td>{{nr}}</td>
-			<td>{{#reelStatus}}aktiviert{{/reelStatus}}
-				{{^reelStatus}}bestellt{{/reelStatus}}</td>
+			<td>{{reelStatus}}</td>
 			<td>{{quantityCodes}}</td>
 			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
 			<td>{{ersterCode}}</td>

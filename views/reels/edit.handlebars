@@ -10,13 +10,6 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldStatus" class="col-sm-2 control-label">Status</label>
-            <div class="col-sm-4">
-                <input type="radio" value="false" class="" required id="fieldStatus" name="reelStatus"><span> Bestellt </span>
-                <input type="radio" value="true" class="" required id="fieldStatus" name="reelStatus"><span> Aktiviert</span>
-            </div>
-        </div>
-        <div class="form-group">
             <label for="fieldQuantityCodes" class="col-sm-2 control-label">Anzahl Codes</label>
             <div class="col-sm-4">
                 <input type="number" class="form-control" required id="fieldQuantityCodes" 
@@ -35,20 +28,10 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldCodesStatus0" class="col-sm-2 control-label">Code Status</label>
-            <div class="col-sm-4">
-                <input type="number" class="form-control"  required id="fieldCodesStatus0" 
-                name="codes[0][cStatus]">
-                <input type="number" class="form-control"  id="fieldCodesStatus1" 
-                name="codes[1][cStatus]">
-                <input type="number" class="form-control"  id="fieldCodesStatus2" 
-                name="codes[2][cStatus]">
-            </div>
-        </div>
-        <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
                 <button type="submit" class="btn btn-default">Speichern</button>
             </div>
         </div>
     </form>
+    <script type="text/javascript">document.getElementById('fieldQuantityCodes').focus();</script>
 </div>
