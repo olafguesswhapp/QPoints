@@ -29,10 +29,10 @@ module.exports = {
 	programRegister: function(req,res, next) {
 		// das Programm mit der bisher höchsten Programm-Nr selektieren [A]
 		Programs.findOne({}, {}, {sort: {'nr' : -1}}, function(err, program){
-			//Quelle alle noch nicht zugeordneten Rollen [B]
-			Reels.find({ 'reelStatus': false }).populate('assignedPrograms').exec(function(err,reels){
-				// Daten für die Template Erstellung
-				User.findById(req.user._id).populate('customer', '_id company').exec(function(err, user){
+			User.findById(req.user._id).populate('customer', '_id company').exec(function(err, user){
+				//Quelle alle noch nicht zugeordneten Rollen [B]
+				Reels.find({ 'reelStatus': 'zugeordnet', 'customer': user.customer._id }).populate('assignedPrograms').exec(function(err,reels){
+					// Daten für die Template Erstellung
 					if (!program) {
 						var newProgramNr = 'P100001';
 					} else {
@@ -51,12 +51,12 @@ module.exports = {
 							return {
 								reelId: reel._id,
 								reelNr: reel.nr,}
-						}),
-					};
+						}), // Reels map 
+					}; // context
 				res.render('programs/register', context);
-				});
-			});
-		});
+				}); // Reels Find
+			}); // Users Find
+		}); // Programms Find
 	},
 
 	// Programm Anlage umsetzen
@@ -130,35 +130,38 @@ module.exports = {
 
 	// Programm Detail-Ansicht
 	programDetail: function(req,res, next){
-		Programs.findOne({ nr : req.params.nr })
-				.populate('allocatedReels', 'nr')
-				.populate('createdBy', 'firstName lastName')
-				.exec(function(err, program) {
-			Reels.find({ 'reelStatus': 'erfasst' }, function(err,reels){
-				if(!program) return next(); 	// pass this on to 404 handler
-				var context = {
-					id: program._id,
-					nr: program.nr,
-					programName: program.programName,
-					goalCount: program.goalCount,
-					startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
-					deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
-					// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
-					created: moment(program.created).format("DD.MM.YY HH:mm"),
-					createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
-					allocatedReels: program.allocatedReels.map(function(reel){
-						return {nr: reel.nr}
-					}),
-					customer: program.customer,
-				};
-				context.reels = reels.map(function(reel){
-					return {
-						reelId: reel._id,
-						reelNr: reel.nr,}
+		User.findById(req.user._id, function(err, user){
+			Programs.findOne({ nr : req.params.nr })
+					.populate('allocatedReels', 'nr')
+					.populate('createdBy', 'firstName lastName')
+					.exec(function(err, program) {
+				Reels.find({ 'reelStatus': 'zugeordnet' , 'customer' : user.customer})
+					.exec(function(err,reels){
+					if(!program) return next(); 	// pass this on to 404 handler
+					var context = {
+						id: program._id,
+						nr: program.nr,
+						programName: program.programName,
+						goalCount: program.goalCount,
+						startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
+						deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
+						// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
+						created: moment(program.created).format("DD.MM.YY HH:mm"),
+						createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
+						allocatedReels: program.allocatedReels.map(function(reel){
+							return {nr: reel.nr}
+						}),
+						customer: program.customer,
+					};
+					context.reels = reels.map(function(reel){
+						return {
+							reelId: reel._id,
+							reelNr: reel.nr,}
+					});
+					res.render('programs/detail', context);
 				});
-				res.render('programs/detail', context);
-			});
-		});
+			}); // Programs find
+		}); // User for Customer reference
 	},
 
 	// Programm eine neue Rolle zuordnen
@@ -167,7 +170,7 @@ module.exports = {
 			.populate('assignedPrograms')
 			.exec(function(err, reel){
 			reel.assignedProgram = req.body.programId;
-			reel.reelStatus = true;
+			reel.reelStatus = 'verbunden';
 			reel.save();
 		});
 		Programs.findOne({ _id : req.body.programId }, function(err, program){

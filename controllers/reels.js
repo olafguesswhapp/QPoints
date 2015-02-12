@@ -71,31 +71,33 @@ module.exports = {
 
 	// Übersicht aller Reels anzeigen
 	library: function(req,res){
-		Reels.find({})
-			.populate('assignedProgram')
-			.exec(function(err, reels) {
-			if (reels.length > 0) {
-				var context = {
-					reels: reels.map(function(reel){
-						return {
-							nr: reel.nr,
-							reelStatus: reel.reelStatus,
-							quantityCodes: reel.quantityCodes,
-							assignedProgram: reel.assignedProgram,
-							ersterCode: reel.codes[0].rCode,
-						}
-					})
-				};				
-			} else {
-				var context = {
-					// customerCompany: user.customer.company,
-					reels: {
-						reelStatus: 'Es ist noch keine Rolle erfasst.',
-					}
-				};
-			}
-			res.render('reels/library', context);		
-		})
+		User.findById(req.user._id, function(err, user){
+			Reels.find({'customer': user.customer })
+				.populate('assignedProgram')
+				.exec(function(err, reels) {
+				if (reels.length > 0) {
+					var context = {
+						reels: reels.map(function(reel){
+							return {
+								nr: reel.nr,
+								reelStatus: reel.reelStatus,
+								quantityCodes: reel.quantityCodes,
+								assignedProgram: reel.assignedProgram,
+								ersterCode: reel.codes[0].rCode,
+							}
+						}) // reels.map
+					}; // context				
+				} else { // if Reels length 
+					var context = {
+						// customerCompany: user.customer.company,
+						reels: {
+							reelStatus: 'Sie haben noch keine Rollen bestellt.',
+						} 
+					}; // contexxt
+				} // if reels.length else
+				res.render('reels/library', context);		
+			}) // Reels find 
+		}); // User find
 	},
 
 	// Einzelansicht einer Rolle

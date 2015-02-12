@@ -122,6 +122,7 @@ module.exports = {
 				address2: user.customer.address2,
 				zip: user.customer.zip,
 				city: user.customer.city,
+				email: user.customer.email,
 			};
 			res.render('cart/checkout', context);
 		});
