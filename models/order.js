@@ -3,11 +3,12 @@ var Schema = mongoose.Schema;
 var Reels = require('../models/reels.js');
 var User = require('../models/user.js');
 var Customer = require('../models/customer.js');
+var Products = require('../models/products.js');
 
 var orderSchema = new Schema({
 	nr: String,
 	orderStatus: String,
-	items: [{ prodNr: String, prodQuantity: Number, prodPrice: Number, prodSum: Number}],
+	items: [{ prodNr: { type: Schema.Types.ObjectId, ref: 'Products'}, prodQuantity: Number, prodPrice: Number, prodSum: Number}],
 	total: Number,
 	customer: { type: Schema.Types.ObjectId, ref: 'Customer'},
 	approved: Date,

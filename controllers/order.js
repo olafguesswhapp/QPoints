@@ -9,6 +9,7 @@ module.exports = {
 	// order routes
 	registerRoutes: function(app){
 		app.get('/bestellungen/bestaetigt', this.confirmed);
+		app.get('/bestellungen', this.home);
 	},
 
 	// order confirmed
@@ -71,17 +72,50 @@ module.exports = {
 							reel.save();
 						} // if for still reel product unallocated
 					}); // ForEach 
-				} else { // enough unused reels?
-				} // enough unused reels?
-			// ToDo Payment process !!!
-			o.save(function(err, savedOrder){
-				if(err) return next(err);
-				req.session.cart = { items: [], total: 0}; //REQ.SESSION.LÖSCHEN!!!
-				next(); //ändern in redirect nach bestellung/nr
-			}); // Save new Ordner in DB
+				} else { }// enough unused reels?
+				// ToDo Payment process !!!
+				o.save(function(err, savedOrder){
+					if(err) return next(err);
+					req.session.cart = { items: [], total: 0}; //REQ.SESSION.LÖSCHEN!!!
+					res.redirect(303, '/bestellungen');
+				}); // Save new Ordner in DB
 			}); // Reels
 
 		}); // Order
 		}); // User
 	},
+
+	home: function(req, res, next){
+		User.findById(req.user._id, function(err, user){
+			Order.find({'customer' : user.customer})
+						.populate('approvedBy', 'firstName lastName')
+						.exec(function(err, orders){
+				console.log(orders);
+				var context = {
+					orders: orders.map(function(order){
+						return {
+							nr: order.nr,
+							orderStatus: order.orderStatus,
+							approvedName: order.approvedBy.firstName + ' ' + order.approvedBy.lastName,
+							approved: moment(order.approved).format('YYYY-MM-DD'),
+							paymentStatus: order.paymentStatus,
+							deliveryStatus: order.deliveryStatus,
+							total: order.total,
+							items: order.items.map(function(item){
+								return {
+									prodNr: item.prodNr,
+									// prodName: item.prodNr.productName,
+									prodQuantity: item.prodQuantity,
+									prodPrice: item.prodPrice,
+									prodSum: item.prodSum,
+								}
+							}), // items.map
+						}
+					}), // orders.map
+				}; // var context
+				res.render('order/library', context);
+			}); // Orders find
+		}); // User find
+	},
+
 };
