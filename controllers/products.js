@@ -41,7 +41,7 @@ module.exports = {
 					return {
 						nr: product.nr,
 						productName: product.productName,
-						price: product.price,
+						price: product.price.toFixed(2),
 					}
 				})
 			};

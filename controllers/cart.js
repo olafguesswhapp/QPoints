@@ -18,6 +18,7 @@ function middleware(req, res, next){
 	req.cart = {
 		items: cart.items.map(function(item){
 			return {
+				_id: item._id,
 				nr: item.nr,
 				productName: item.productName,
 				quantity: item.quantity,
@@ -53,19 +54,21 @@ function addToCart(nr, guest, req, res, next){
 		var findId = getIndexOfCartItem(cart.items, nr, req);
 		if (findId>-1) {
 			cart.items[findId].quantity++;
-			cart.items[findId].itemSum = cart.items[findId].price * cart.items[findId].quantity;
+			cart.items[findId].itemSum = (cart.items[findId].price * cart.items[findId].quantity).toFixed(2);
 		} else {
 		cart.items.push({
+			_id: product._id,
 			nr: nr,
 			productName: product.productName,
-			price: product.price,
+			price: product.price.toFixed(2),
 			quantity: 1, // quantity ||
-			itemSum: product.price,
+			itemSum: product.price.toFixed(2),
 		});			
 		}
 		cart.total = 0;
 		cart.user = req.user._id;
 		for(var i in cart.items) {cart.total += cart.items[i].itemSum}
+		cart.total = parseFloat(cart.total).toFixed(2);
 		res.redirect(303, '/warenkorb');
 	});
 }
@@ -94,7 +97,7 @@ module.exports = {
 				var context = {
 					name: user.firstName + ' ' + user.lastName,
 					cart: req.session.cart,
-				};	
+				}; // context
 			} else {
 				var context = {
 					name: user.firstName + ' ' + user.lastName,

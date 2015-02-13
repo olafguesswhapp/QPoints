@@ -39,7 +39,7 @@ module.exports = {
 				orderStatus: 'erfasst',
 				items: req.session.cart.items.map(function(item){
 					return {
-					prodNr: item.nr,
+					prodId: item._id,
 					prodQuantity: item.quantity,
 					prodPrice: item.price,
 					prodSum: item.itemSum,
@@ -89,25 +89,24 @@ module.exports = {
 		User.findById(req.user._id, function(err, user){
 			Order.find({'customer' : user.customer})
 						.populate('approvedBy', 'firstName lastName')
+						.populate('items.prodId', 'nr productName')
 						.exec(function(err, orders){
-				console.log(orders);
 				var context = {
 					orders: orders.map(function(order){
 						return {
 							nr: order.nr,
 							orderStatus: order.orderStatus,
 							approvedName: order.approvedBy.firstName + ' ' + order.approvedBy.lastName,
-							approved: moment(order.approved).format('YYYY-MM-DD'),
+							approved: moment(order.approved).format('DD.MM.YYYY'),
 							paymentStatus: order.paymentStatus,
 							deliveryStatus: order.deliveryStatus,
-							total: order.total,
+							total: order.total.toFixed(2),
 							items: order.items.map(function(item){
 								return {
-									prodNr: item.prodNr,
-									// prodName: item.prodNr.productName,
+									nr: item.prodId,
 									prodQuantity: item.prodQuantity,
-									prodPrice: item.prodPrice,
-									prodSum: item.prodSum,
+									prodPrice: item.prodPrice.toFixed(2),
+									prodSum: item.prodSum.toFixed(2),
 								}
 							}), // items.map
 						}

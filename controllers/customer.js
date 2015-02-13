@@ -7,8 +7,8 @@ var moment = require('moment');
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/kunden/anmelden', this.register);
-		app.post('/kunden/anmelden', this.processRegister);
+		app.get('/anmelden', this.register);
+		app.post('/anmelden', this.processRegister);
 
 		app.get('/kunden', this.clientList);
 		app.get('/kunden/:nr', this.detail);

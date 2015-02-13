@@ -5,7 +5,8 @@
 		<tr>
 			<td>Produkt Nr</td>
 			<td>Name</td>
-			<td>Preis</td>
+			<td class="text-right">Preis</td>
+			<td></td>
 			<td>In den Warenkorb</td>
 		</tr>
 	</thead>
@@ -14,7 +15,8 @@
 		<tr class='clickableRow' onclick="window.document.location='/produkte/{{nr}}';">
 			<td>{{nr}}</td>
 			<td>{{productName}}</td>
-			<td>{{price}}</td>
+			<td class="text-right">{{price}} €</td>
+			<td></td>
 			<td>
 				<a href="/warenkorb/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default"><img class="cartIcon" src="{{static '/images/cart-full-icon-S.png'}}"></a></td>
 		</tr>

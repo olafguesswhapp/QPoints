@@ -8,7 +8,7 @@ var Products = require('../models/products.js');
 var orderSchema = new Schema({
 	nr: String,
 	orderStatus: String,
-	items: [{ prodNr: { type: Schema.Types.ObjectId, ref: 'Products'}, prodQuantity: Number, prodPrice: Number, prodSum: Number}],
+	items: [{ prodId: { type: Schema.Types.ObjectId, ref: 'Products'}, prodQuantity: Number, prodPrice: Number, prodSum: Number}],
 	total: Number,
 	customer: { type: Schema.Types.ObjectId, ref: 'Customer'},
 	approved: Date,

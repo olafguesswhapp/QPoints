@@ -22,8 +22,8 @@
 				<td>{{nr}}</td>
 				<td>{{productName}}</td>
 				<td>{{quantity}}</td>
-				<td>{{price}}</td>
-				<td>{{itemSum}}</td>
+				<td>{{price}} €</td>
+				<td>{{itemSum}} €</td>
 			</tr>
 		{{/each}}
 		{{#if cart.total}}
@@ -32,7 +32,7 @@
 				<td></td>
 				<td></td>
 				<td>Gesamt</td>
-				<td>{{cart.total}}</td>
+				<td>{{cart.total}} €</td>
 			</tr>
 		{{/if}}
 	</tbody>

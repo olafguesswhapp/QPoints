@@ -27,16 +27,16 @@
 			<!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="collapse navbar-collapse" role="navigation">
 			    <ul class="nav navbar-nav">
-			    	<li><a href="/kunden">Kunden<span class="sr-only">(current)</span></a></li>
-			    	<li><a href="/user">User</a></li>
-			    	<li><a href="/programm">Programme</a></li>
+			    	<li><a href="/programm">Programme<span class="sr-only">(current)</span></a></li>
 			    	<li><a href="/rollen">Rollen</a></li>
 			    	<li><a href="/produkte">Produkte</a></li>
+			    	<li><a href="/bestellungen">Bestellungen</a></li>
+			    	<li><a href="/user">User</a></li>
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
 			    	<li>{{#if loggedInUser}}<a href="#">{{loggedInUser}}</a></li><!-- login/logout -->
 			    	<li><a href="/logout">Log Out</a></li>
-			    	{{else}}<a href="/login">Sign In</a></li>{{/if}}
+			    	{{else}}<a href="/login">Anmelden</a></li>{{/if}}
 		  			<li> <!-- CART -->
 						{{#if cartItems}}
 						<a href="/warenkorb" style="padding: 0 15px 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}" alt="Cart Empty"></a>

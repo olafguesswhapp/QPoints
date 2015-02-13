@@ -3,11 +3,13 @@
 		var Items = document.getElementsByClassName('orderItems');
 		for (i=0;i<Items.length;i++)
 			{Items[i].style.display = "table-row";}
+		document.getElementById('infoOrderItems').style.display = "none";
 	};
 	function dissapearItems(){
 		var Items = document.getElementsByClassName('orderItems');
 		for (i=0;i<Items.length;i++)
 			{Items[i].style.display = "none";}
+		document.getElementById('infoOrderItems').style.display = "block";
 	};	
 </script>
 <h3>Ihre Bestellungen:</h3>
@@ -33,19 +35,20 @@
 			<td>{{approved}}</td>
 			<td>{{paymentStatus}}</td>
 			<td>{{deliveryStatus}}</td>
-			<td>{{total}}</td>
+			<td>{{total}} €</td>
 		</tr>
 		{{#items}}
 		<tr class="orderItems warning" style="display: none;" onclick='dissapearItems();'>
-			<td class="text-right">{{prodNr}}</td>
-			<td class="text-right">{{prodName}}</td>
-			<td class="text-right">Anzahl</td>
+			<td class="text-right">{{nr.nr}}</td>
+			<td class="text-right">{{nr.productName}}</td>
+			<td class="text-right">Anzahl:</td>
 			<td>{{prodQuantity}}</td>
 			<td class="text-right">Einzelpreis</td>
-			<td>{{prodPrice}}</td>
-			<td>{{prodSum}}</td>
+			<td>{{prodPrice}} €</td>
+			<td>{{prodSum}} €</td>
 		</tr>
 		{{/items}}
 		{{/orders}}
 	</tbody>	
 </table>
+<p id="infoOrderItems">Auf die Bestellung drücken um mehr Details zu sehen</p>
