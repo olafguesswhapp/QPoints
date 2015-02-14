@@ -1,6 +1,6 @@
-var Customer = require('../models/customer.js');
+var Customers = require('../models/customers.js');
 var customerViewModel = require('../viewModels/customer.js');
-var User = require('../models/user.js');
+var CUsers = require('../models/cusers.js');
 var moment = require('moment');
 
 
@@ -16,7 +16,7 @@ module.exports = {
 	},
 
 	register: function(req, res, next) {
-		Customer.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
+		Customers.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
 			if (!customer) {
 				var context = {neueNr : 'K10001'};
 			} else {
@@ -28,7 +28,7 @@ module.exports = {
 
 	processRegister: function(req, res, next) {
 		// TODO: back-end validation (safety)
-		var u = new User({
+		var u = new CUsers({
 			username: req.body.email,
 			password: req.body.password,
 			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
@@ -43,9 +43,9 @@ module.exports = {
 					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
 					message: err.errors.username.message,
 				};
-				res.redirect(303, 'kunden/anmelden');
+				res.redirect(303, '/anmelden');
 			} else {
-				var c = new Customer({
+				var c = new Customers({
 					nr: req.body.nr,
 					company: req.body.company,
 					firstName: req.body.firstName,
@@ -74,7 +74,7 @@ module.exports = {
 	},
 
 	clientList: function(req, res, next){
-		Customer.find(function(err, customers) {
+		Customers.find(function(err, customers) {
 			var context = {
 				customers: customers.map(function(customer){
 					return {
@@ -92,12 +92,12 @@ module.exports = {
 	},
 
 	detail: function(req, res, next) {
-		Customer.findOne({ nr : req.params.nr })
+		Customers.findOne({ nr : req.params.nr })
 				.populate('user')
 				.exec(function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
-			User.find({}, function(err, users){
+			CUsers.find({}, function(err, users){
 				var context = {
 					nr: customer.nr,
 					company: customer.company,
@@ -125,7 +125,7 @@ module.exports = {
 	},
 
 	orders: function(req, res, next) {
-		Customer.find({ nr : req.params.nr }, function(err, customer) {
+		Customers.find({ nr : req.params.nr }, function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
 			customer.getOrders(function(err, orders) {
@@ -136,7 +136,7 @@ module.exports = {
 	},
 
 	ajaxUpdate: function(req, res) {
-		Customer.findById(req.params.id, function(err, customer) {
+		Customers.findById(req.params.id, function(err, customer) {
 			if(err) return next(err);
 			if(!customer) return next(); 	// pass this on to 404 handler
 			if(req.body.firstName){

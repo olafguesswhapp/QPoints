@@ -1,4 +1,4 @@
-var Customer = require('../models/customer.js');
+var Customers = require('../models/customers.js');
 
 // convenience function for joining fields
 function smartJoin(arr, separator){

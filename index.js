@@ -8,6 +8,8 @@ var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',
     failureRedirect: 'unauthorized',
 });
+//Mongoose Schema and Model
+var TestDB = require('./models/testDB.js');
 
 var mongoose = require('mongoose');
 // Connect mongoose with mongoDB
@@ -25,8 +27,6 @@ switch(app.get('env')){
     default:
     throw new Error('Unknown execution environment: ' + app.get('env'));
 }
-//Mongoose Schema and Model
-var TestDB = require('./models/testDB.js');
 
 // Email versenden
 // var emailService = require('./lib/email.js')(credentials);

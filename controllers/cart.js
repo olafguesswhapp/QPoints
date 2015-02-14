@@ -1,5 +1,5 @@
 var Products = require('../models/products.js');
-var User = require('../models/user.js');
+var CUsers = require('../models/cusers.js');
 var Q = require('q');
 
 // in order to have quantities instead of many times the same product in cart
@@ -52,6 +52,7 @@ function addToCart(nr, req, res, next){
 		if(err) return next(err);
 		if(!product) return next(new Error('Unbekanntes QPoints Produkt: ' + nr));
 		var findId = getIndexOfCartItem(cart.items, nr, req);
+		console.log('item Id' + findId);
 		if (findId>-1) {
 			cart.items[findId].quantity++;
 			cart.items[findId].itemSum = (cart.items[findId].price * cart.items[findId].quantity).toFixed(2);
@@ -65,9 +66,11 @@ function addToCart(nr, req, res, next){
 			itemSum: product.price.toFixed(2),
 		});	// cart item push if 1st cart		
 		} // end else
-		cart.total = 0;
-		for(var i in cart.items) {cart.total += cart.items[i].itemSum}
-		cart.total = parseFloat(cart.total).toFixed(2);
+		var cartTotal =0;
+		for(var i in cart.items) {
+			cartTotal = parseFloat(cartTotal) +parseFloat(cart.items[i].itemSum);
+		}
+		cart.total= cartTotal.toFixed(2);
 		req.session.flash = {
 			type: 'Danke',
 			intro: 'Wir habe ein "' + product.productName + '" dem Warenkorb hinzugefügt.',
@@ -91,9 +94,11 @@ function substractFromCart(nr, req, res, next){
 				cart.items.splice(findId,1);
 			}
 		} 
-		cart.total = 0;
-		for(var i in cart.items) {cart.total += cart.items[i].itemSum}
-		cart.total = parseFloat(cart.total).toFixed(2);
+		var cartTotal =0;
+		for(var i in cart.items) {
+			cartTotal = parseFloat(cartTotal) +parseFloat(cart.items[i].itemSum);
+		}
+		cart.total= cartTotal.toFixed(2);
 		req.session.flash = {
 			type: 'Danke',
 			intro: 'Wir habe den Warenkorb um ein "' + product.productName + '" reduziert.',
@@ -122,20 +127,16 @@ module.exports = {
 	},
 
 	home : function(req, res, next){
-		User.findById(req.user._id, function(err, user){
-			if (req.session.cart) {
+		CUsers.findById(req.user._id, function(err, user){
+			if (req.session.cart.items.length>0) {
 				var context = {
+					cartActive: true,
 					name: user.firstName + ' ' + user.lastName,
 					cart: req.session.cart,
 				}; // context
 			} else {
 				var context = {
-					name: user.firstName + ' ' + user.lastName,
-					cart: {
-						items: {
-							productName: 'Sie haben noch keine Produkte in den Warenkorb gelegt',
-						}
-					}
+					cartActive: false,
 				}; 
 			}
 			res.render('cart/cart', context);
@@ -143,7 +144,7 @@ module.exports = {
 	},
 
 	checkout : function(req, res, next){
-		User.findById(req.user._id)
+		CUsers.findById(req.user._id)
 					.populate('customer')
 					.exec(function(err, user){
 			var cart = req.session.cart;

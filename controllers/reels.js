@@ -1,10 +1,10 @@
 var Reels = require('../models/reels.js');
-var User = require('../models/user.js');
+var CUsers = require('../models/cusers.js');
 var moment = require('moment');
 
 function adminOnly(req, res, next) {
 	if (Object.keys(req.session.passport).length > 0) {
-		User.findById(req.session.passport.user, function(err, user){
+		CUsers.findById(req.session.passport.user, function(err, user){
 			if(user.role==='admin') {return next();
 			} else {
 				req.session.flash = {
@@ -21,8 +21,10 @@ function adminOnly(req, res, next) {
 };
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login');
+	if (req.isAuthenticated()) { return next(); }
+	req.session.lastPage = req.path;
+	console.log(req.path);
+	res.redirect('/login');
 };
 
 module.exports = {
@@ -71,7 +73,7 @@ module.exports = {
 
 	// Übersicht aller Reels anzeigen
 	library: function(req,res){
-		User.findById(req.user._id, function(err, user){
+		CUsers.findById(req.user._id, function(err, user){
 			Reels.find({'customer': user.customer })
 				.populate('assignedProgram')
 				.exec(function(err, reels) {

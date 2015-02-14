@@ -40,5 +40,8 @@
 		{{/if}}
 	</tbody>
 </table>
-
+{{#if cartActive}}
 <a class="btn btn-primary" href="/warenkorb/checkout">Checkout</a>
+{{else}}
+<p>Sie haben dem Warenkorb noch kein Produkt hinzugefügt.</p>
+{{/if}}

@@ -1,12 +1,12 @@
-var User = require('../models/user.js');
-var Customer = require('../models/customer.js');
+var CUsers = require('../models/cusers.js');
+var Customers = require('../models/customers.js');
 var passport = require('passport');
 var moment = require('moment');
 // var passport = require('passport');
 
 function customerOnly(req, res, next) {
 	if (Object.keys(req.session.passport).length > 0) {
-		User.findById(req.session.passport.user, function(err, user){
+		CUsers.findById(req.session.passport.user, function(err, user){
 			if(user.role==='customer' || user.role==='admin') return next();
 		});
 	} else { res.redirect('/login'); }
@@ -29,7 +29,7 @@ module.exports = {
 	userRegister: function(req, res, next){
 		if (!req.user) return next();
 		if (req.user.role != 'customer' && req.user.role != 'admin') return next();
-		Customer.findById(req.user.customer, function(err, customer){
+		Customers.findById(req.user.customer, function(err, customer){
 			var context = {
 				actualCustomerId: customer._id,
 				customerCompany: customer.company,
@@ -41,7 +41,7 @@ module.exports = {
 	},
 
 	processUserRegister: function(req, res, next){
-		var u = new User({
+		var u = new CUser ({
 			username: req.body.username,
 			password: req.body.password,
 			customer: req.body.customer,
@@ -59,7 +59,7 @@ module.exports = {
 				};
 				res.redirect(303, 'user/anlegen');
 			} else {
-				Customer.findById(req.body.customer, function(err, customer){
+				Customers.findById(req.body.customer, function(err, customer){
 					customer.user.push(newUser._id);
 					customer.save();				
 				});
@@ -69,7 +69,7 @@ module.exports = {
 
 	userLibrary: function(req, res, next){
 		if (!req.user) return next();
-		User.find({ customer : req.user.customer}, function(err, users) {
+		CUsers.find({ customer : req.user.customer}, function(err, users) {
 			var context = {
 				users: users.map(function(user){
 					return {
@@ -81,7 +81,7 @@ module.exports = {
 					}
 				})
 			};
-			Customer.findById(req.user.customer, function(err, customer){
+			Customers.findById(req.user.customer, function(err, customer){
 				context.customerNr = customer.nr;
 				context.customerCompany = customer.company;
 				res.render('user/library', context);
@@ -90,6 +90,7 @@ module.exports = {
 	},
 
 	login: function(req, res){
+		req.session.lastPage = req.header('Referer').slice(3+req.headers.host.length + req.protocol.length);
 		res.render('user/login', { user: req.user, message: req.session.messages });
 	},
 
@@ -102,7 +103,7 @@ module.exports = {
 					intro: 'Hinweis: ',
 					message: 'Der Username ' + req.body.username + ' wurde bisher nicht angelegt. Bitte diesen als Kunde neu anmelden oder als User eines Kunden anlegen lassen.',
 					};
-				return res.redirect('/kunden/anmelden');
+				return res.redirect('/anmelden');
 			}
 			req.logIn(user, function(err) {
 				if (err) { return next(err); }
@@ -111,10 +112,14 @@ module.exports = {
 					intro: 'Willkommen!',
 					message: 'Du bist richtig eingelogged.',
 					};	
-				if (!(JSON.stringify(user._id) == JSON.stringify(req.session.cart.user))) {
-				req.session.cart = { items: [], total: 0}; 
+				if(req.session.hasOwnProperty('cart')){
+					if(req.session.cart.hasOwnProperty('user')){
+						if (!(JSON.stringify(user._id) == JSON.stringify(req.session.cart.user))) {
+						req.session.cart = { items: [], total: 0}; 
+						}
+					}
 				}
-				return res.redirect('/');
+				return res.redirect(req.session.lastPage);
 			});
 		})(req, res, next);
 	},

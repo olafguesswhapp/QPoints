@@ -1,16 +1,14 @@
 var mongoose = require('mongoose');
-var Customer = require('../models/customer.js');
 var Schema = mongoose.Schema;
+var Customers = require('../models/customers.js');
 var uniqueValidator = require('mongoose-unique-validator');
 var bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
-// var Customers = require('../models/customer.js');
 
-var userSchema = new Schema({
+var cUsersSchema = new Schema({
 	username: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
-	customer: { type: Schema.Types.ObjectId, ref: 'Customer'},
-	// customerId: { type: Schema.Types.ObjectId, ref: 'Customers' },
+	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
 	// authId: String,
 	firstName: String,
 	lastName: String,
@@ -19,11 +17,11 @@ var userSchema = new Schema({
 });
 
 // make sure username (email) is unique
-userSchema.plugin(uniqueValidator, { message: 
+cUsersSchema.plugin(uniqueValidator, { message: 
 	'Diese Email-Adresse (Email = Username) wird bereits von einem anderen User verwendet.' });
 
 // Bcrypt middleware
-userSchema.pre('save', function(next, done) {
+cUsersSchema.pre('save', function(next, done) {
 	var user = this; 
 	if(!user.isModified('password')) return next(); // Bcrypt middleware
 	bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
@@ -37,7 +35,7 @@ userSchema.pre('save', function(next, done) {
 });
 
 // Password verification
-userSchema.methods.comparePassword = function(candidatePassword, cb) {
+cUsersSchema.methods.comparePassword = function(candidatePassword, cb) {
 	bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
 		if(err) return cb(err);
 		cb(null, isMatch);
@@ -45,9 +43,8 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
 };
 
 // Check email is unique
-userSchema.methods.emailIsUnique = function(email){
+cUsersSchema.methods.emailIsUnique = function(email){
+};
 
-}
-
-var User = mongoose.model('User', userSchema, 'users');
-module.exports = User;
+var CUsers = mongoose.model('CUsers', cUsersSchema, 'users');
+module.exports = CUsers;

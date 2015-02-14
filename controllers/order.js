@@ -1,6 +1,6 @@
-var Order = require('../models/order.js');
+var Orders = require('../models/orders.js');
 var Products = require('../models/products.js');
-var User = require('../models/user.js');
+var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
 var moment = require('moment');
 
@@ -25,9 +25,9 @@ module.exports = {
 			next();
 		}
 		// 
-		User.findById(req.user._id, function(err, user){
+		CUsers.findById(req.user._id, function(err, user){
 			// neuste BestellungsNr definieren
-			Order.findOne({}, {}, {sort: {'nr' : -1}})
+			Orders.findOne({}, {}, {sort: {'nr' : -1}})
 				.populate('items.prodId', 'nr')
 				.exec(function(err, order){
 			if (!order) {
@@ -36,7 +36,7 @@ module.exports = {
 				var orderNr = order.nr.match(/\D+/)[0] + (parseInt(order.nr.match(/\d+/))+1);
 			}
 			// neue Order speichern
-			var o = new Order ({
+			var o = new Orders ({
 				nr: orderNr,
 				orderStatus: 'erfasst',
 				items: req.session.cart.items.map(function(item){
@@ -85,13 +85,13 @@ module.exports = {
 				}); // Save new Ordner in DB
 			}); // Reels
 
-		}); // Order
-		}); // User
+		}); // Orders
+		}); // Users
 	},
 
 	home: function(req, res, next){
-		User.findById(req.user._id, function(err, user){
-			Order.find({'customer' : user.customer})
+		CUsers.findById(req.user._id, function(err, user){
+			Orders.find({'customer' : user.customer})
 						.populate('approvedBy', 'firstName lastName')
 						.populate('items.prodId', 'nr productName')
 						.exec(function(err, orders){
@@ -118,7 +118,7 @@ module.exports = {
 				}; // var context
 				res.render('order/library', context);
 			}); // Orders find
-		}); // User find
+		}); // Users find
 	},
 
 };

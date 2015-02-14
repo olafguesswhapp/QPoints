@@ -1,7 +1,7 @@
 var Programs = require('../models/programs.js');
 var Reels = require('../models/reels.js');
-var Customer = require('../models/customer.js');
-var User = require('../models/user.js');
+var Customers = require('../models/customers.js');
+var CUsers = require('../models/cusers.js');
 var moment = require('moment');
 
 function LoggedInUserOnly(req, res, next) {
@@ -11,6 +11,8 @@ function LoggedInUserOnly(req, res, next) {
 			intro: 'Sie müssen bitte als User eingelogged sein.',
 			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
 		};
+		req.session.lastPage = req.path;
+		console.log(req.path);
 		return res.redirect(303, '/login');
 	} else { return next();}
 };
@@ -29,7 +31,7 @@ module.exports = {
 	programRegister: function(req,res, next) {
 		// das Programm mit der bisher höchsten Programm-Nr selektieren [A]
 		Programs.findOne({}, {}, {sort: {'nr' : -1}}, function(err, program){
-			User.findById(req.user._id).populate('customer', '_id company').exec(function(err, user){
+			CUsers.findById(req.user._id).populate('customer', '_id company').exec(function(err, user){
 				//Quelle alle noch nicht zugeordneten Rollen [B]
 				Reels.find({ 'reelStatus': 'zugeordnet', 'customer': user.customer._id }).populate('assignedPrograms').exec(function(err,reels){
 					// Daten für die Template Erstellung
@@ -91,7 +93,7 @@ module.exports = {
 
 	// Übersicht aller angelegten Programme
 	library: function(req,res){
-		User.findById(req.user._id)
+		CUsers.findById(req.user._id)
 			.populate('customer', 'id company')
 			.exec(function(err, user) {			
 			Programs.find({customer: user.customer._id})
@@ -130,7 +132,7 @@ module.exports = {
 
 	// Programm Detail-Ansicht
 	programDetail: function(req,res, next){
-		User.findById(req.user._id, function(err, user){
+		CUsers.findById(req.user._id, function(err, user){
 			Programs.findOne({ nr : req.params.nr })
 					.populate('allocatedReels', 'nr')
 					.populate('createdBy', 'firstName lastName')

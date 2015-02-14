@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Programs = require('../models/programs.js');
-var Customer = require('../models/customer.js');
-var User = require('../models/user.js');
+var Customers = require('../models/customers.js');
+var CUsers = require('../models/cusers.js');
 
 var reelsSchema = new Schema({
 	nr: String,
@@ -10,8 +10,8 @@ var reelsSchema = new Schema({
 	quantityCodes: Number,
 	codes: [{rCode: String, cStatus: String, consumer: String, updated: Date}],
 	created: Date,
-	createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
-	customer: { type: Schema.Types.ObjectId, ref: 'Customer'},
+	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
+	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
 	assignedProgram: { type: Schema.Types.ObjectId, ref: 'Programs' },
 	
 });
