@@ -27,7 +27,9 @@ module.exports = {
 		// 
 		User.findById(req.user._id, function(err, user){
 			// neuste BestellungsNr definieren
-			Order.findOne({}, {}, {sort: {'nr' : -1}}, function(err, order){
+			Order.findOne({}, {}, {sort: {'nr' : -1}})
+				.populate('items.prodId', 'nr')
+				.exec(function(err, order){
 			if (!order) {
 				var orderNr = 'B1000001';
 			} else {
@@ -40,6 +42,7 @@ module.exports = {
 				items: req.session.cart.items.map(function(item){
 					return {
 					prodId: item._id,
+					prodNr: item.nr,
 					prodQuantity: item.quantity,
 					prodPrice: item.price,
 					prodSum: item.itemSum,
@@ -49,19 +52,20 @@ module.exports = {
 				customer: user.customer,
 				approved: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 				approvedBy: user._id,
-				paymentStatus: 'start',
-				deliveryStatus: 'start',
+				paymentStatus: 'offen',
+				deliveryStatus: 'offen',
 			}); // new Order
 			// check if Reels where ordered
 			var RequiReels = 0;
 			for(var i=0; i < o.items.length; i++){
-				if(o.items[i].prodNr=='R10001'){
+				if(o.items[i].prodNr =='R10001'){
 					RequiReels = o.items[i].prodQuantity;
 					break;}
 			}
+			
 			// allocate Reels
 			Reels.find({ 'reelStatus': 'erfasst'}, function(err,reels){
-				if (reels.length >= RequiReels) { // enoght unused reels to allocate
+				if (RequiReels>0 && reels.length >= RequiReels) { // enoght unused reels to allocate
 					reels.forEach(function(reel, index){
 						if(index<=o.items.length){
 							o.allocatedReels.push(reels[index]);

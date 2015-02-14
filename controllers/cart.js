@@ -46,7 +46,7 @@ function middleware(req, res, next){
 		});
 };
 
-function addToCart(nr, guest, req, res, next){
+function addToCart(nr, req, res, next){
 	var cart = req.session.cart || (req.session.cart = { items: [] });
 	Products.findOne({nr : nr} , function(err, product){
 		if(err) return next(err);
@@ -63,14 +63,44 @@ function addToCart(nr, guest, req, res, next){
 			price: product.price.toFixed(2),
 			quantity: 1, // quantity ||
 			itemSum: product.price.toFixed(2),
-		});			
-		}
+		});	// cart item push if 1st cart		
+		} // end else
 		cart.total = 0;
-		cart.user = req.user._id;
 		for(var i in cart.items) {cart.total += cart.items[i].itemSum}
 		cart.total = parseFloat(cart.total).toFixed(2);
-		res.redirect(303, '/warenkorb');
-	});
+		req.session.flash = {
+			type: 'Danke',
+			intro: 'Wir habe ein "' + product.productName + '" dem Warenkorb hinzugefügt.',
+			message: 'Vielen Dank',
+		};
+		res.redirect('back');
+	}); // Products find
+}
+
+function substractFromCart(nr, req, res, next){
+	var cart = req.session.cart || (req.session.cart = { items: [] });
+	Products.findOne({nr : nr} , function(err, product){
+		if(err) return next(err);
+		if(!product) return next(new Error('Unbekanntes QPoints Produkt: ' + nr));
+		var findId = getIndexOfCartItem(cart.items, nr, req);
+		if (findId>-1) {
+			if (cart.items[findId].quantity>1){
+				cart.items[findId].quantity--;
+				cart.items[findId].itemSum = (cart.items[findId].price * cart.items[findId].quantity).toFixed(2);
+			} else if (cart.items[findId].quantity==1){
+				cart.items.splice(findId,1);
+			}
+		} 
+		cart.total = 0;
+		for(var i in cart.items) {cart.total += cart.items[i].itemSum}
+		cart.total = parseFloat(cart.total).toFixed(2);
+		req.session.flash = {
+			type: 'Danke',
+			intro: 'Wir habe den Warenkorb um ein "' + product.productName + '" reduziert.',
+			message: 'Vielen Dank',
+		};
+		res.redirect('back');
+	}); // Products find
 }
 
 module.exports = {
@@ -79,16 +109,16 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.get('/warenkorb', middleware, this.home);
 		app.get('/warenkorb/add', this.addProcessGet);
-		app.post('/warenkorb/add', this.addProcessPost);
+		app.get('/warenkorb/sub', this.subProcessGet);
 		app.get('/warenkorb/checkout', this.checkout);
 	},
 
 	addProcessGet : function(req, res, next){
-		addToCart(req.query.nr, req.query.guests, req, res, next);
+		addToCart(req.query.nr, req, res, next);
 	},
 
-	addProcessPost : function(req, res, next){
-		addToCart(req.body.nr, req.body.guests, req, res, next);
+	subProcessGet : function(req, res, next){
+		substractFromCart(req.query.nr, req, res, next);
 	},
 
 	home : function(req, res, next){

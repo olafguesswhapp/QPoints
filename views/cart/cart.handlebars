@@ -11,9 +11,10 @@
 		<tr>
 			<td>Produkt Nr</td>
 			<td>Name</td>
-			<td>Anzahl</td>
+			<td >Anzahl</td>
 			<td>Einzelpreis</td>
 			<td>Summe</td>
+			<td>Anzahl +/-</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -24,6 +25,7 @@
 				<td>{{quantity}}</td>
 				<td>{{price}} €</td>
 				<td>{{itemSum}} €</td>
+				<td><a href="/warenkorb/add?nr={{nr}}" data-nr="{{nr}}"><img src="{{static '/images/plus-icon.png'}}"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/warenkorb/sub?nr={{nr}}" data-nr="{{nr}}"><img src="{{static '/images/minus-icon.png'}}"></a></td>
 			</tr>
 		{{/each}}
 		{{#if cart.total}}
@@ -33,6 +35,7 @@
 				<td></td>
 				<td>Gesamt</td>
 				<td>{{cart.total}} €</td>
+				<td></td>
 			</tr>
 		{{/if}}
 	</tbody>
