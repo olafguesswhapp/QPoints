@@ -67,9 +67,9 @@ module.exports = {
 			Reels.find({ 'reelStatus': 'erfasst'}, function(err,reels){
 				if (RequiReels>0 && reels.length >= RequiReels) { // enoght unused reels to allocate
 					reels.forEach(function(reel, index){
-						if(index<=o.items.length){
+						if(index<RequiReels){
 							o.allocatedReels.push(reels[index]);
-							o.orderStatus = 'Rollen zugeordnet';
+							o.orderStatus = 'Rolle/n zugeordnet';
 							o.deliveryStatus = 'versendbar';
 							reel.customer = o.customer;
 							reel.reelStatus = 'zugeordnet';

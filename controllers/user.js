@@ -41,7 +41,7 @@ module.exports = {
 	},
 
 	processUserRegister: function(req, res, next){
-		var u = new CUser ({
+		var u = new CUsers ({
 			username: req.body.username,
 			password: req.body.password,
 			customer: req.body.customer,
@@ -63,6 +63,7 @@ module.exports = {
 					customer.user.push(newUser._id);
 					customer.save();				
 				});
+				res.redirect(303, '/user');
 			}
 		});
 	},

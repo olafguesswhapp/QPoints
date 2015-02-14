@@ -52,7 +52,6 @@ function addToCart(nr, req, res, next){
 		if(err) return next(err);
 		if(!product) return next(new Error('Unbekanntes QPoints Produkt: ' + nr));
 		var findId = getIndexOfCartItem(cart.items, nr, req);
-		console.log('item Id' + findId);
 		if (findId>-1) {
 			cart.items[findId].quantity++;
 			cart.items[findId].itemSum = (cart.items[findId].price * cart.items[findId].quantity).toFixed(2);
