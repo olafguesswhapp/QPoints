@@ -56,6 +56,7 @@ module.exports = {
 			nr: req.body.nr,
 			reelStatus: 'erfasst',
 			quantityCodes: req.body.quantityCodes,
+			activatedCodes: 0,
 			codes: req.body.codes.map(function(Hcode){
 				return {
 					rCode: Hcode.rCode,
@@ -84,6 +85,7 @@ module.exports = {
 								nr: reel.nr,
 								reelStatus: reel.reelStatus,
 								quantityCodes: reel.quantityCodes,
+								activatedCodes: reel.activatedCodes,
 								assignedProgram: reel.assignedProgram,
 								ersterCode: reel.codes[0].rCode,
 							}
@@ -105,7 +107,8 @@ module.exports = {
 	// Einzelansicht einer Rolle
 	reelDetail: function(req, res, next) {
 		Reels.findOne({ nr : req.params.nr })
-			.populate('assignedProgram')
+			.populate('assignedProgram', 'nr programName')
+			.populate('codes.consumer', 'firstName lastName')
 			.exec( function(err, reel) {
 			if(err) return res.redirect(303, '/error');
 			// if(!reel) return next(); 	// pass this on to 404 handler
@@ -113,6 +116,7 @@ module.exports = {
 				nr: reel.nr,
 				reelStatus: reel.reelStatus,
 				quantityCodes: reel.quantityCodes,
+				activatedCodes: reel.activatedCodes,
 				assignedProgram: reel.assignedProgram,
 				codes: reel.codes,
 			};

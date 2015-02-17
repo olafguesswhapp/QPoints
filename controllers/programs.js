@@ -172,7 +172,7 @@ module.exports = {
 			.populate('assignedPrograms')
 			.exec(function(err, reel){
 			reel.assignedProgram = req.body.programId;
-			reel.reelStatus = 'verbunden';
+			reel.reelStatus = 'aktiviert';
 			reel.save();
 		});
 		Programs.findOne({ _id : req.body.programId }, function(err, program){

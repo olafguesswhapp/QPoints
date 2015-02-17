@@ -8,12 +8,12 @@ var reelsSchema = new Schema({
 	nr: String,
 	reelStatus: String,
 	quantityCodes: Number,
-	codes: [{rCode: String, cStatus: String, consumer: String, updated: Date}],
+	activatedCodes: Number,
+	codes: [{rCode: String, cStatus: String, consumer:{ type: Schema.Types.ObjectId, ref: 'CUsers'}, updated: Date}],
 	created: Date,
 	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
 	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
 	assignedProgram: { type: Schema.Types.ObjectId, ref: 'Programs' },
-	
 });
 
 var Reels = mongoose.model('Reels', reelsSchema,'reels');

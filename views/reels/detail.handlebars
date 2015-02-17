@@ -3,14 +3,14 @@
 	<thead>
 		<tr>
 			<td>Status</td>
-			<td>Anzahl Barcodes:</td>
+			<td>Verwendung</td>
 			<td>Zugeordnetes Programm</td>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
 			<td>{{reelStatus}}</td>
-			<td>{{quantityCodes}}</td>
+			<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
 			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
 	</tbody>	
 </table>
@@ -19,14 +19,14 @@
 	<thead>
 		<tr>
 			<td>Barcode</td>
-			<td>Status</td>
+			<td>Eingelöst durch</td>
 		</tr>
 	</thead>
 	<tbody>
 		{{#codes}}
 		<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
 			<td>{{rCode}}</td>
-			<td>{{cStatus}}</td>
+			<td>{{#if cStatus}}{{consumer.firstName}}{{else}}{{cStatus}}{{/if}}</td>
 		{{/codes}}
 	</tbody>	
 </table>

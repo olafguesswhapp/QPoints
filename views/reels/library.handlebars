@@ -5,8 +5,8 @@
 		<tr>
 			<td>Nr</td>
 			<td>Status</td>
-			<td>Anzahl</td>
 			<td>Zugeordnetes Programm</td>
+			<td>Verwendung</td>
 			<td>Erster Code</td>
 		</tr>
 	</thead>
@@ -15,8 +15,8 @@
 		<tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';">
 			<td>{{nr}}</td>
 			<td>{{reelStatus}}</td>
-			<td>{{quantityCodes}}</td>
 			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
+			<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
 			<td>{{ersterCode}}</td>
 		{{/reels}}
 	</tbody>	

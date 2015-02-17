@@ -18,8 +18,6 @@ var customersSchema = new Schema({
 	phone: String,
 	user: [{ type: Schema.Types.ObjectId, ref: 'CUsers' }],
 });
-customersSchema.methods.getOrders = function(cb){
-	return Orders.find({ customerId: this._id }, cb);
-};
+
 var Customers = mongoose.model('Customers', customersSchema);
 module.exports = Customers;

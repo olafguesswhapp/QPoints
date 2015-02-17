@@ -1,0 +1,18 @@
+<h3>Scan Test - eingelogged als {{name}}</h3>
+
+<div class="formContainer">
+	<form class="form-horizontal productsForm" role="form" action="/apitest" method="POST">
+		<div class="form-group">
+			<label for="fieldInputCode" class="col-sm-2 control-label">Code auf QPoint eingeben</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" required id="fieldInputCode" name="qpInput">
+			</div>
+		</div>
+		<div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Absenden</button>
+            </div>
+        </div>
+	</form>
+	<script type="text/javascript">document.getElementById('fieldInputCode').focus();</script>
+</div>

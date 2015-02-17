@@ -12,7 +12,6 @@ module.exports = {
 
 		app.get('/kunden', this.clientList);
 		app.get('/kunden/:nr', this.detail);
-		app.get('/orders/:id', this.orders);
 	},
 
 	register: function(req, res, next) {
@@ -120,17 +119,6 @@ module.exports = {
 					}),
 				};
 			res.render('customer/detail', context);	
-			});
-		});
-	},
-
-	orders: function(req, res, next) {
-		Customers.find({ nr : req.params.nr }, function(err, customer) {
-			if(err) return next(err);
-			if(!customer) return next(); 	// pass this on to 404 handler
-			customer.getOrders(function(err, orders) {
-				if(err) return next(err);
-				res.render('customer/preferences', customerViewModel(customer, orders));
 			});
 		});
 	},

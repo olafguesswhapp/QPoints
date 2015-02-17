@@ -11,7 +11,7 @@ var programsSchema = new Schema({
 	goalCount: Number,
 	startDate: Date,
 	deadlineSubmit: Date,
-	deadlineScan: Date,
+	deadlineScan: Date, // currently not in use
 	created: Date,
 	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
 	allocatedReels: [{ type: Schema.Types.ObjectId, ref: 'Reels' }],
