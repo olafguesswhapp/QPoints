@@ -11,15 +11,35 @@
   <dd><a href="/user">{{createdByName}}</a></dd>
   <dt>Erstellt am</dt>
   <dd>{{created}}</dd>
+  <dt>Kunden am Ziel:</dt>
+  <dd>{{usersNearGoal.reachedGoal}}</dd>
+  <dt>1 Punkt vom Ziel:</dt>
+  <dd>{{usersNearGoal.reachedGoalm1}}</dd>
+  <dt>2 Punkte vom Ziel:</dt>
+  <dd>{{usersNearGoal.reachedGoalm2}}</dd>
 </dl>
 
 {{!-- Einlesbar bis: --}}
 {{!-- {{deadlineScan}} --}}
 
 <h4>Zugeordnete Rollen:</h4>
-<ul>
-	{{#allocatedReels}}<a href="/rollen/{{nr}}"><li>{{nr}}</li></a>{{/allocatedReels}}
-</ul>
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <td>Rolle Nr</td>
+      <td>Punkte</td>
+    </tr>
+  </thead>
+  <tbody>
+    {{#allocatedReels}}
+    <tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';"> 
+      <td>{{nr}}</td>
+      <td>{{activatedCodes}} von {{quantityCodes}}</td>
+    </tr>  
+    {{/allocatedReels}}
+  </tbody>
+</table>
+
 
 <form class="form-horizontal newsletterForm" role="form" action="/programm/:nr" method="POST">
     <div class="form-group">

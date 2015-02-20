@@ -50,7 +50,7 @@ module.exports = {
 	}, 
 
 	// Rollen anlegen bzw. editieren
-	reelEditProcess: function(req, res) {
+	reelEditProcess: function(req, res, next) {
 		// TODO: back-end validation (safety)
 		var c = new Reels({
 			nr: req.body.nr,
@@ -67,7 +67,11 @@ module.exports = {
 			createdBy: req.user._id,
 		});
 		c.save(function(err) {
-			if(err) return next(err);
+			if(err) req.session.flash = {
+					type: 'Warnung',
+					intro: 'Die Rolle kann nicht angelegt werden.',
+					message: err.message,
+				};;
 			res.redirect(303, '/rollen');
 		});
 	},

@@ -52,6 +52,7 @@ module.exports = {
 									};
 									code.cStatus = 1;
 									code.consumer = req.user._id;
+									code.updated = new Date();
 									reel.activatedCodes++; 
 									reel.save(function(err) {
 										if (err) { return next(err); }

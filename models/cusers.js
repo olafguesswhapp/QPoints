@@ -42,9 +42,5 @@ cUsersSchema.methods.comparePassword = function(candidatePassword, cb) {
 	});
 };
 
-// Check email is unique
-cUsersSchema.methods.emailIsUnique = function(email){
-};
-
 var CUsers = mongoose.model('CUsers', cUsersSchema, 'users');
 module.exports = CUsers;

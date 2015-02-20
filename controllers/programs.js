@@ -134,8 +134,8 @@ module.exports = {
 	programDetail: function(req,res, next){
 		CUsers.findById(req.user._id, function(err, user){
 			Programs.findOne({ nr : req.params.nr })
-					.populate('allocatedReels', 'nr')
-					.populate('createdBy', 'firstName lastName')
+					.populate('allocatedReels')
+					.populate('createdBy')
 					.exec(function(err, program) {
 				Reels.find({ 'reelStatus': 'zugeordnet' , 'customer' : user.customer})
 					.exec(function(err,reels){
@@ -150,16 +150,24 @@ module.exports = {
 						// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 						created: moment(program.created).format("DD.MM.YY HH:mm"),
 						createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
-						allocatedReels: program.allocatedReels.map(function(reel){
-							return {nr: reel.nr}
-						}),
 						customer: program.customer,
+						usersNearGoal: program.usersNearGoal(function(err, consumers){
+
+						}),
+						allocatedReels: program.allocatedReels.map(function(reel){
+							return {
+								nr: reel.nr,
+								quantityCodes: reel.quantityCodes,
+								activatedCodes: reel.activatedCodes,
+							}
+						}),
 					};
 					context.reels = reels.map(function(reel){
 						return {
 							reelId: reel._id,
 							reelNr: reel.nr,}
 					});
+
 					res.render('programs/detail', context);
 				});
 			}); // Programs find
