@@ -5,8 +5,9 @@
 	<thead>
 		<tr>
 			<td>Nr</td>
-			<td>Treueprogramm Name</td>
-			<td>Notwendige Punkte</td>
+			<td>Name</td>
+			<td>Status</td>
+			<td>Ziel Punkte</td>
 			<td>Gültig ab</td>
 			{{!-- <td>Lesbar bis</td> --}}
 			<td>Einlösbar bis</td>
@@ -18,6 +19,7 @@
 		<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
 			<td>{{nr}}</td>
 			<td>{{programName}}</td>
+			<td>{{programStatus}}</td>
 			<td>{{goalCount}}</td>
 			<td>{{startDate}}</td>
 			{{!-- <td>{{deadlineScan}}</td> --}}

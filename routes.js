@@ -10,6 +10,7 @@ var programController = require('./controllers/programs.js');
 var cartController = require('./controllers/cart.js');
 var orderController = require('./controllers/order.js');
 var transactionController = require('./controllers/transaction.js');
+var resetController = require('./controllers/reset.js');
 
 module.exports = function(app) {
 
@@ -47,4 +48,6 @@ module.exports = function(app) {
 	// transaction routes
 	transactionController.registerRoutes(app);
 
+	// reset route
+	resetController.registerRoutes(app);
 };

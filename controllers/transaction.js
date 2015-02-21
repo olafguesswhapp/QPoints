@@ -1,5 +1,24 @@
 var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
+var Programs = require('../models/programs.js');
+
+// Check whether Program still does have reel with free codes
+checkProgramsReels = function(programId, cb){
+	var progReelStatus = true;
+	Programs.findById(programId)
+			.populate('allocatedReels', 'nr reelStatus')
+			.exec(function(err, program){	    
+	    program.allocatedReels.forEach(function(reels){
+	        if (reels.reelStatus=='erfüllt') {progReelStatus=false;}
+	    }); // forEach AllocatedReels
+	    if (progReelStatus == false) {
+					program.programStatus = 'inaktiv';
+					program.save(function(err){
+						if (err) { return next(err); }
+					});
+	    } // end if progReelStatus=false
+    }); // Users find
+}; // method checkProgramsReels
 
 module.exports = {
 
@@ -19,7 +38,7 @@ module.exports = {
 
 	processCodeRequest: function(req, res, next){
 		Reels.findOne({'codes.rCode' : req.body.qpInput})
-					.populate('assignedProgram', 'programName startDate deadlineSubmit')
+					.populate('assignedProgram', '_id programName startDate deadlineSubmit')
 					.exec(function(err, reel){
 			if(err) {
 				req.session.flash = {
@@ -54,6 +73,10 @@ module.exports = {
 									code.consumer = req.user._id;
 									code.updated = new Date();
 									reel.activatedCodes++; 
+									if (reel.activatedCodes==reel.quantityCodes){
+										reel.reelStatus='erfüllt';
+										checkProgramsReels(reel.assignedProgram._id);
+									} // if activatedCodes = quantityCodes
 									reel.save(function(err) {
 										if (err) { return next(err); }
 									});

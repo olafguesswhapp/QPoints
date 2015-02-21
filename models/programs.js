@@ -6,6 +6,7 @@ var Customers = require('../models/customers.js');
 
 var programsSchema = new Schema({
 	nr: String,
+    programStatus: String,
 	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
 	programName: String,
 	goalCount: Number,
@@ -21,7 +22,7 @@ var programsSchema = new Schema({
 programsSchema.methods.usersNearGoal = function(cb){
 	var consolidConsumer = [];
     var nrCodesPerUser = new Array;
-    var nrUsersNearGoalCount = {'reachedGoal': 0, 'reachedGoalm1': 0, 'reachedGoalm2':0};
+    var nrUsersNearGoalCount = {};
     var prev;
 
     // across all reels asigned to the programm record the user of each
@@ -45,18 +46,21 @@ programsSchema.methods.usersNearGoal = function(cb){
         prev = nrCodesPerUser.length-1;
     } // Varaiable a returns the scanned codes per User ID!
 
+    // prepare keys inside nrUsersNearGoalCount array
+    for(i=0; i < this.goalCount; i++){
+        nrUsersNearGoalCount['reachedGoalm' + i] = 0;
+    } // for loop to create keys within nrUsersNearGoalCount
+
     // how many users have reached the "goal" of codes to scan,
     // how many users are missing only 1 or 2 codes to reach the goal
     prev = this.goalCount;
     nrCodesPerUser.forEach(function(user){
-        if(user.count== prev) {nrUsersNearGoalCount.reachedGoal++}
-        if(user.count== prev-1) {nrUsersNearGoalCount.reachedGoalm1++}
-        if(user.count== prev-2) {nrUsersNearGoalCount.reachedGoalm2++}
         if(user.count> prev) { // Users who collected more than target
-            nrUsersNearGoalCount.reachedGoal=+ parseInt(user.count/prev);
-            if ((user.count % prev) == prev-1) {nrUsersNearGoalCount.reachedGoalm1++}
-            if ((user.count % prev) == prev-2) {nrUsersNearGoalCount.reachedGoalm2++}
-        } // end if Users who collected more than target
+            nrUsersNearGoalCount.reachedGoalm0 =+ parseInt(user.count/prev);
+            if ((user.count % prev)>0){nrUsersNearGoalCount['reachedGoalm' + (user.count % prev)]++;}
+        } else { // else if Users who collected more than target
+            nrUsersNearGoalCount['reachedGoalm' + (prev-user.count)]++;
+        }// end if Users who collected more than target
     }); // forEach user
     return nrUsersNearGoalCount;
 };

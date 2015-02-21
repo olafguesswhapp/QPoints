@@ -66,6 +66,7 @@ module.exports = {
 		// TODO: back-end validation (safety)
 		var c = new Programs({
 			nr: req.body.nr,
+			programStatus: 'erstellt',
 			customer: req.body.customerId,
 			programName: req.body.programName,
 			goalCount: req.body.goalCount,
@@ -77,6 +78,7 @@ module.exports = {
 		});
 		if (req.body.allocatedReels!='') {
 			c.allocatedReels = req.body.allocatedReels;
+			c.programStatus = 'aktiviert';
 		};
 		c.save(function(err, program) {
 			if(err) return next(err);
@@ -105,10 +107,11 @@ module.exports = {
 							programs: programs.map(function(program){
 								return {
 									nr: program.nr,
+									programStatus: program.programStatus,
 									programName: program.programName,
 									goalCount: program.goalCount,
-									startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
-									deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
+									startDate: moment(program.startDate).format("DD.MM.YY"),
+									deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY"),
 									// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 									allocatedReels: program.allocatedReels.map(function(reel){
 										return {nr: reel.nr}
@@ -143,6 +146,7 @@ module.exports = {
 					var context = {
 						id: program._id,
 						nr: program.nr,
+						programStatus: program.programStatus,
 						programName: program.programName,
 						goalCount: program.goalCount,
 						startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
@@ -185,6 +189,7 @@ module.exports = {
 		});
 		Programs.findOne({ _id : req.body.programId }, function(err, program){
 			program.allocatedReels.push(req.body.newReelId);
+			program.programStatus = 'aktiviert';
 			program.save();
 			});	
 		res.redirect(303, '/programm');
