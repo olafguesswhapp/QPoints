@@ -20,10 +20,22 @@ checkProgramsReels = function(programId, cb){
     }); // Users find
 }; // method checkProgramsReels
 
+function LoggedInUserOnly(req, res, next) {
+	if (!req.user) {
+		req.session.flash = {
+			type: 'Warnung',
+			intro: 'Sie müssen bitte als User eingelogged sein.',
+			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
+		};
+		req.session.lastPage = req.path;
+		return res.redirect(303, '/login');
+	} else { return next();}
+};
+
 module.exports = {
 
 	registerRoutes: function(app){
-		app.get('/apitest', this.codeRequest);
+		app.get('/apitest', LoggedInUserOnly, this.codeRequest);
 		app.post('/apitest', this.processCodeRequest);
 
 		app.get('/sammler/:id', this.detail); // id erstmal als user (später echter consumer)

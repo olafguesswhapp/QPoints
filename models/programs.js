@@ -57,7 +57,9 @@ programsSchema.methods.usersNearGoal = function(cb){
     nrCodesPerUser.forEach(function(user){
         if(user.count> prev) { // Users who collected more than target
             nrUsersNearGoalCount.reachedGoalm0 =+ parseInt(user.count/prev);
-            if ((user.count % prev)>0){nrUsersNearGoalCount['reachedGoalm' + (user.count % prev)]++;}
+            if ((user.count % prev)>0){
+                nrUsersNearGoalCount['reachedGoalm' + (prev - parseInt(user.count % prev))]++;
+            }
         } else { // else if Users who collected more than target
             nrUsersNearGoalCount['reachedGoalm' + (prev-user.count)]++;
         }// end if Users who collected more than target

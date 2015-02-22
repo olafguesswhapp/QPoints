@@ -79,6 +79,7 @@ module.exports = {
 	library: function(req,res){
 		CUsers.findById(req.user._id, function(err, user){
 			Reels.find({'customer': user.customer })
+				.sort('nr')
 				.populate('assignedProgram')
 				.exec(function(err, reels) {
 				if (reels.length > 0) {
@@ -121,7 +122,14 @@ module.exports = {
 				quantityCodes: reel.quantityCodes,
 				activatedCodes: reel.activatedCodes,
 				assignedProgram: reel.assignedProgram,
-				codes: reel.codes,
+				codes: reel.codes.map(function(code){
+					return {
+						rCode: code.rCode,
+						cStatus: code.cStatus,
+						consumer: code.consumer,
+						updated: moment(code.updated).format('DD.MM.YYYY   HH:mm'),
+					}
+				}), // end codes map
 			};
 			res.render('reels/detail', context);
 		});
