@@ -2,6 +2,7 @@ var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
 var Programs = require('../models/programs.js');
 var Customers = require('../models/customers.js');
+var moment = require('moment');
 
 // Check whether Program still does have reel with free codes
 checkProgramsReels = function(programId, cb){
@@ -98,6 +99,7 @@ module.exports = {
 		app.get('/meinepunkte', this.myPoints);
 		app.get('/einzuloesen', this.toRedeem);
 		app.get('/firma/:nr', this.customerDetail);
+		app.get('/program/:nr', this.programDetail);
 	},
 
 	scan: function(req, res, next){
@@ -190,12 +192,13 @@ module.exports = {
 
 	myPoints: function(req, res, next){
 		CUsers.findById(req.user._id)
-			.populate('particiPrograms.program', 'programName programStatus goalCount customer')
+			.populate('particiPrograms.program', 'nr programName programStatus goalCount customer')
 			.exec(function(err, user){
 				var context ={
 					layout: 'app',
 					programs: user.particiPrograms.map(function(partiProgram){
 						return {
+							nr: partiProgram.program.nr,
 							programName: partiProgram.program.programName,
 							programStatus: partiProgram.program.programStatus,
 							programCustomer: partiProgram.program.customer,
@@ -218,12 +221,13 @@ module.exports = {
 
 	toRedeem: function(req, res, next){
 		CUsers.findById(req.user._id)
-				.populate('finishedPrograms.program', 'programName programStatus goalCount customer')
+				.populate('finishedPrograms.program', 'nr programName programStatus goalCount customer')
 				.exec(function(err, user){
 			var context ={
 				layout: 'app',
 				programs: user.finishedPrograms.map(function(finishedProgram){
 					return {
+						nr: finishedProgram.program.nr,
 						programName: finishedProgram.program.programName,
 						programStatus: finishedProgram.program.programStatus,
 						programCustomer: finishedProgram.program.customer,
@@ -260,4 +264,21 @@ module.exports = {
 			res.render('transaction/customer', context);
 		}); // CustomersFind
 	}, // customerDetail
+
+	programDetail: function(req, res, next){
+		Programs.findOne({ nr : req.params.nr }, function(err, program){
+			var context = {
+				layout: 'app',
+				nr: program.nr,
+				programStatus: program.programStatus,
+				programName: program.programName,
+				goalCount: program.goalCount,
+				startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
+				deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
+				// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
+			}; // context
+			res.render('transaction/program', context);
+
+		}); // ProgramsFindOne
+	}, // programDetail
 };
