@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Customers = require('../models/customers.js');
+var Programs = require('../models/programs.js');
 var uniqueValidator = require('mongoose-unique-validator');
 var bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
@@ -9,6 +10,8 @@ var cUsersSchema = new Schema({
 	username: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
 	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
+	particiPrograms: [{program: { type: Schema.Types.ObjectId, ref: 'Programs'}, count: Number}],
+	finishedPrograms: [{program: { type: Schema.Types.ObjectId, ref: 'Programs'}, finishedCount: Number}],
 	// authId: String,
 	firstName: String,
 	lastName: String,

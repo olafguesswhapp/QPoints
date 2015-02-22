@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
 	<meta name="generator" content="Sublime Text 2" />
 
-	<title>QPoints</title>
+	<title>QPoints App</title>
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 	<link rel='stylesheet' id='responsive-style-css'  href="{{static '/css/styles.css'}}" type='text/css' media='all' />
@@ -27,25 +27,13 @@
 			<!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="collapse navbar-collapse" role="navigation">
 			    <ul class="nav navbar-nav">
-			    	<li><a href="/programm">Programme<span class="sr-only">(current)</span></a></li>
-			    	<li><a href="/rollen">Rollen</a></li>
-			    	<li><a href="/produkte">Produkte</a></li>
-			    	<li><a href="/bestellungen">Bestellungen</a></li>
-			    	<li><a href="/user">User</a></li>
-			    	<li><a href="/zentrale">test App</a></li>
+			    	<li><a href="/scan">Scan<span class="sr-only">(current)</span></a></li>
+			    	<li><a href="/meinepunkte">Meine Punkte</a></li>
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
 			    	<li>{{#if loggedInUser}}<a href="#">{{loggedInUser}}</a></li><!-- login/logout -->
 			    	<li><a href="/logout">Log Out</a></li>
 			    	{{else}}<a href="/login">Anmelden</a></li>{{/if}}
-		  			<li> <!-- CART -->
-						{{#if cartItems}}
-						<a href="/warenkorb" style="padding: 0 15px 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-full-icon.png'}}" alt="Cart Empty"></a>
-						{{else}}
-						<a href="/warenkorb" style="padding: 0; display: table-cell; vertical-align: middle; height: 50px;"><img class="cartIcon" src="{{static '/images/cart-icon.png'}}"
-								alt="Cart Contains {{cartItems}} Items"></a>
-						{{/if}}
-					</li><!-- /CART -->
 				</ul><!-- /.avbar-right -->
 		    </div><!-- /.navbar-collapse -->
 		</div><!-- /.container-fluid -->

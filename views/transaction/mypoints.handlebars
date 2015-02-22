@@ -1,0 +1,21 @@
+<h3>Meine QPoints Programme:</h3>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Program</td>
+			<td>Firma</td>
+			<td>Status</td>
+			<td>Punkte</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#programs}}
+		<tr class='clickableRow'> <!-- onclick="window.document.location='/rollen/{{nr}}';" -->
+			<td>{{programName}}</td>
+			<td>{{company}}</td>
+			<td>{{programStatus}}</td>
+			<td>{{count}} von {{goalCount}}</td>
+		{{/programs}}
+	</tbody>	
+</table>
