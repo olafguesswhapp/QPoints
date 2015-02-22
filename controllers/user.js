@@ -91,7 +91,10 @@ module.exports = {
 	},
 
 	login: function(req, res){
-		req.session.lastPage = req.header('Referer').slice(3+req.headers.host.length + req.protocol.length);
+		if (req.session.lastPage==''){
+			req.session.lastPage = req.header('Referer').slice(3+req.headers.host.length + req.protocol.length);
+			if (req.session.lastPage=='/login'){req.session.lastPage='/';}
+		} // end if check whether req.lastPage = ''
 		res.render('user/login', { user: req.user, message: req.session.messages });
 	},
 
@@ -120,7 +123,9 @@ module.exports = {
 						}
 					}
 				}
-				return res.redirect(req.session.lastPage);
+				var lastPage = req.session.lastPage;
+				req.session.lastPage='';
+				return res.redirect(lastPage);
 			});
 		})(req, res, next);
 	},

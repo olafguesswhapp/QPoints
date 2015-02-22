@@ -23,7 +23,6 @@ function adminOnly(req, res, next) {
 function ensureAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) { return next(); }
 	req.session.lastPage = req.path;
-	console.log(req.path);
 	res.redirect('/login');
 };
 

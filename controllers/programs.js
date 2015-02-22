@@ -12,7 +12,6 @@ function LoggedInUserOnly(req, res, next) {
 			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
 		};
 		req.session.lastPage = req.path;
-		console.log(req.path);
 		return res.redirect(303, '/login');
 	} else { return next();}
 };
