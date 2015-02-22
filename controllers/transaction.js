@@ -59,14 +59,11 @@ updateUserfinishedStats = function(userId, programId){
 		var i = true;
 		var progArray = new Array;
 		user.finishedPrograms.forEach(function(finishedProgram){
-			console.log(finishedProgram.program._id);
-			console.log(programId);
 			if(JSON.stringify(finishedProgram.program._id)==JSON.stringify(programId)){
 				finishedProgram.finishedCount++;
 				i=false;
 			} // User already has reached once goal in program
 		}); // forEach finishedProgram
-		console.log('erstemal program vollständig ' + i);
 		if (i==true){ // 1st time goal in this program has been reached
 			progArray={
 				program: programId,
@@ -100,6 +97,7 @@ module.exports = {
 
 		app.get('/meinepunkte', this.myPoints);
 		app.get('/einzuloesen', this.toRedeem);
+		app.get('/firma/:nr', this.customerDetail);
 	},
 
 	scan: function(req, res, next){
@@ -208,9 +206,10 @@ module.exports = {
 				}; // define context
 				context.programs.forEach(function(program){
 					Customers.findById(program.programCustomer)
-						.select('company')
+						.select('nr company')
 						.exec(function(err, cust){
 							program.company = cust.company;
+							program.companyNr = cust.nr;
 						}); // Customers find
 				}); // forEach context.programs
 				res.render('transaction/mypoints', context);
@@ -235,12 +234,30 @@ module.exports = {
 			}; // define context
 			context.programs.forEach(function(program){
 				Customers.findById(program.programCustomer)
-					.select('company')
+					.select('nr company')
 					.exec(function(err, cust){
 						program.company = cust.company;
+						program.companyNr = cust.nr
 					}); // Customers find
 			}); // forEach context.programs
 			res.render('transaction/toRedeem', context);
 		}); // CUSers FindById
 	}, // toRedeem
+
+	customerDetail: function(req, res, next){
+		Customers.findOne( {nr: req.params.nr}, function(err, customer){
+			var context = {
+				layout: 'app',
+				nr: customer.nr,
+				company: customer.company,
+				email: customer.email,
+				address1: customer.address1,
+				address2: customer.address2,
+				zip: customer.zip,
+				city: customer.city,
+				phone: customer.phone
+			};
+			res.render('transaction/customer', context);
+		}); // CustomersFind
+	}, // customerDetail
 };
