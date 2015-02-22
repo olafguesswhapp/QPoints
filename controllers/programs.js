@@ -83,7 +83,7 @@ module.exports = {
 			if(err) return next(err);
 			if (req.body.allocatedReels!='') {
 				Reels.findOne({ _id: req.body.allocatedReels}, function(err, reel){
-					reel.reelStatus = true;
+					reel.reelStatus = 'aktiviert';
 					reel.assignedProgram = program._id;
 					reel.save();
 					});

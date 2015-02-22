@@ -53,15 +53,20 @@ updateUserStats = function(userId, programId, goalCount){
 
 // when a user reached a program's goal updated the users finished stats
 updateUserfinishedStats = function(userId, programId){
-	CUsers.findById(userId, function(err, user){
+	CUsers.findById(userId)
+		.populate('finishedPrograms.program', '_id')
+		.exec(function(err, user){
 		var i = true;
 		var progArray = new Array;
 		user.finishedPrograms.forEach(function(finishedProgram){
+			console.log(finishedProgram.program._id);
+			console.log(programId);
 			if(JSON.stringify(finishedProgram.program._id)==JSON.stringify(programId)){
 				finishedProgram.finishedCount++;
 				i=false;
 			} // User already has reached once goal in program
 		}); // forEach finishedProgram
+		console.log('erstemal program vollständig ' + i);
 		if (i==true){ // 1st time goal in this program has been reached
 			progArray={
 				program: programId,
@@ -93,7 +98,8 @@ module.exports = {
 		app.get('/scan', LoggedInUserOnly, this.scan);
 		app.post('/scan', this.processScan);
 
-		app.get('/meinepunkte', this.myPoints); // id erstmal als user (später echter consumer)
+		app.get('/meinepunkte', this.myPoints);
+		app.get('/einzuloesen', this.toRedeem);
 	},
 
 	scan: function(req, res, next){
@@ -208,6 +214,33 @@ module.exports = {
 						}); // Customers find
 				}); // forEach context.programs
 				res.render('transaction/mypoints', context);
-			}); // CUSers FindById		
+			}); // CUSers FindById
 	}, // myPoints
+
+	toRedeem: function(req, res, next){
+		CUsers.findById(req.user._id)
+				.populate('finishedPrograms.program', 'programName programStatus goalCount customer')
+				.exec(function(err, user){
+			var context ={
+				layout: 'app',
+				programs: user.finishedPrograms.map(function(finishedProgram){
+					return {
+						programName: finishedProgram.program.programName,
+						programStatus: finishedProgram.program.programStatus,
+						programCustomer: finishedProgram.program.customer,
+						goalCount: finishedProgram.program.goalCount,
+						finishedCount: finishedProgram.finishedCount
+					}
+				}), // map programs
+			}; // define context
+			context.programs.forEach(function(program){
+				Customers.findById(program.programCustomer)
+					.select('company')
+					.exec(function(err, cust){
+						program.company = cust.company;
+					}); // Customers find
+			}); // forEach context.programs
+			res.render('transaction/toRedeem', context);
+		}); // CUSers FindById
+	}, // toRedeem
 };

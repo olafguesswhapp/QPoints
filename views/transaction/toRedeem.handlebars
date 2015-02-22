@@ -1,0 +1,21 @@
+<h3>Noch einzulösende Punkte:</h3>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<td>Program</td>
+			<td>Firma</td>
+			<td>Status</td>
+			<td>Gesammelt</td>
+		</tr>
+	</thead>
+	<tbody>
+		{{#programs}}
+		<tr class='clickableRow'> <!-- onclick="window.document.location='/rollen/{{nr}}';" -->
+			<td>{{programName}}</td>
+			<td>{{company}}</td>
+			<td>{{programStatus}}</td>
+			<td>{{finishedCount}} mal {{goalCount}} Punkte</td>
+		{{/programs}}
+	</tbody>	
+</table>
