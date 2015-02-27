@@ -150,8 +150,7 @@ module.exports = {
 						reel.codes.forEach(function(code){
 							if (code.rCode == req.body.qpInput){
 								if(code.cStatus=='0'){
-									var qpMessage = 'QPoint ' + code.rCode + ' Status ' 
-										+ code.cStatus + ' Rolle ' + reel.nr;	
+									var qpMessage = 'QPoint ' + code.rCode  + ' Rolle ' + reel.nr;	
 									req.session.flash = {
 										type: 'Erfolg',
 										intro: 'Der QPoint gehört zum Program ' + reel.assignedProgram.programName,
@@ -206,27 +205,36 @@ module.exports = {
 		CUsers.findById(req.user._id)
 			.populate('particiPrograms.program', 'nr programName programStatus goalCount customer')
 			.exec(function(err, user){
-				var context ={
-					layout: 'app',
-					programs: user.particiPrograms.map(function(partiProgram){
-						return {
-							nr: partiProgram.program.nr,
-							programName: partiProgram.program.programName,
-							programStatus: partiProgram.program.programStatus,
-							programCustomer: partiProgram.program.customer,
-							goalCount: partiProgram.program.goalCount,
-							count: partiProgram.count
-						}
-					}), // map programs
-				}; // define context
-				context.programs.forEach(function(program){
-					Customers.findById(program.programCustomer)
-						.select('nr company')
-						.exec(function(err, cust){
-							program.company = cust.company;
-							program.companyNr = cust.nr;
-						}); // Customers find
-				}); // forEach context.programs
+				if (typeof user.particiPrograms.program === 'undefined'){ // if user has not yet collected any code
+					var context = {
+						layout: 'app',
+						// programs: {
+						// 	programName: 'Bisher wurde noch kein Treuepunkt erfasst',
+						// },
+					};
+				} else { // user already has collected one or more codes
+					var context ={
+						layout: 'app',
+						programs: user.particiPrograms.map(function(partiProgram){
+							return {
+								nr: partiProgram.program.nr,
+								programName: partiProgram.program.programName,
+								programStatus: partiProgram.program.programStatus,
+								programCustomer: partiProgram.program.customer,
+								goalCount: partiProgram.program.goalCount,
+								count: partiProgram.count
+							}
+						}), // map programs
+					}; // define context
+					context.programs.forEach(function(program){
+						Customers.findById(program.programCustomer)
+							.select('nr company')
+							.exec(function(err, cust){
+								program.company = cust.company;
+								program.companyNr = cust.nr;
+							}); // Customers find
+					}); // forEach context.programs
+				} // check whether user has already collected a code
 				res.render('transaction/mypoints', context);
 			}); // CUSers FindById
 	}, // myPoints
