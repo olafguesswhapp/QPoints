@@ -4,12 +4,25 @@ var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
 var moment = require('moment');
 
+
+function LoggedInUserOnly(req, res, next) {
+	if (!req.user) {
+		req.session.flash = {
+			type: 'Warnung',
+			intro: 'Sie müssen bitte als User eingelogged sein.',
+			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
+		};
+		req.session.lastPage = req.path;
+		return res.redirect(303, '/login');
+	} else { return next();}
+};
+
 module.exports = {
 
 	// order routes
 	registerRoutes: function(app){
 		app.get('/bestellungen/bestaetigt', this.confirmed);
-		app.get('/bestellungen', this.home);
+		app.get('/bestellungen', LoggedInUserOnly, this.home);
 	},
 
 	// order confirmed

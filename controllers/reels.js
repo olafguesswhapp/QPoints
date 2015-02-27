@@ -23,6 +23,11 @@ function adminOnly(req, res, next) {
 function ensureAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) { return next(); }
 	req.session.lastPage = req.path;
+	req.session.flash = {
+		type: 'Warnung',
+		intro: 'Sie müssen bitte als User eingelogged sein.',
+		message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
+	};
 	res.redirect('/login');
 };
 

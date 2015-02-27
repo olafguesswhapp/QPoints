@@ -4,6 +4,18 @@ var Programs = require('../models/programs.js');
 var Customers = require('../models/customers.js');
 var moment = require('moment');
 
+function LoggedInUserOnly(req, res, next) {
+	if (!req.user) {
+		req.session.flash = {
+			type: 'Warnung',
+			intro: 'Sie müssen bitte als User eingelogged sein.',
+			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
+		};
+		req.session.lastPage = req.path;
+		return res.redirect(303, '/login');
+	} else { return next();}
+};
+
 // Check whether Program still does have reel with free codes
 checkProgramsReels = function(programId, cb){
 	var progReelStatus = true;
@@ -96,7 +108,7 @@ module.exports = {
 		app.get('/scan', LoggedInUserOnly, this.scan);
 		app.post('/scan', this.processScan);
 
-		app.get('/meinepunkte', this.myPoints);
+		app.get('/meinepunkte', LoggedInUserOnly, this.myPoints);
 		app.get('/einzuloesen', this.toRedeem);
 		app.get('/firma/:nr', this.customerDetail);
 		app.get('/program/:nr', this.programDetail);
