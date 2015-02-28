@@ -205,7 +205,7 @@ module.exports = {
 		CUsers.findById(req.user._id)
 			.populate('particiPrograms.program', 'nr programName programStatus goalCount customer')
 			.exec(function(err, user){
-				if (typeof user.particiPrograms.program === 'undefined'){ // if user has not yet collected any code
+				if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
 					var context = {
 						layout: 'app',
 						// programs: {
