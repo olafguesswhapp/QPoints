@@ -27,10 +27,16 @@ module.exports = {
 	},
 
 	productDetail: function(req, res, next) {
-		Products.find({ nr : req.params.nr }, function(err, product) {
+		Products.findOne({ nr : req.params.nr }, function(err, product) {
 			if(err) return res.redirect(303, '/error');
 			if(!product) return next(); 	// pass this on to 404 handler
-			res.render('products/detail', product[0]);
+			console.log(product);
+			var context = {
+				nr: product.nr,
+				productName: product.productName,
+				price: product.price.toFixed(2),
+			};
+			res.render('products/detail', context);
 		});
 	},
 
