@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
+var methodOverride = require('method-override');
 var credentials = require('./credentials.js');
 var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',

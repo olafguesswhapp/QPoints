@@ -23,6 +23,10 @@ module.exports = function(app) {
 	// test MongoDB
 	app.get('/waehlen/:wahl', TestMongoDB.wahl);
 	app.get('/testMongo', TestMongoDB.testMongo);
+	app.get('/api', TestMongoDB.testapi);
+	app.get('/apishow/:nr', TestMongoDB.apiShow);
+	app.post('/apiNewReel', TestMongoDB.apiNewReel);
+	app.delete('/apideleteuser', TestMongoDB.deleteUser);
 
 	// customer routes
 	customerController.registerRoutes(app);
