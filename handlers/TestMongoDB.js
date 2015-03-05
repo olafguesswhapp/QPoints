@@ -4,6 +4,42 @@ var Programs = require('../models/programs.js');
 var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var moment = require('moment');
+var request = require('request');
+
+// return data sets
+function returnData (searchId, req, res, cb){
+    var search = searchId.substring(0,1);
+    if (search == 'P'){
+        console.log('Program ' + searchId);
+        Programs.findOne({nr: searchId}, function(err, program){
+            if(!err){
+                cb(program, req, res);
+            }
+    });
+    } else if (search == 'R'){
+        console.log('Reel ' + searchId);
+        Reels.findOne({nr: searchId}, function(err, reels){
+            if(!err){
+                cb(reels, req, res);
+            }
+    });
+    } else if (search == 'K'){
+        console.log('Customer ' + searchId);
+        Customers.findOne({nr: searchId}, function(err, customers){
+            if(!err){
+                cb(customers, req, res);
+            }
+        });
+    };
+};
+
+function publish(context, req, res){
+    res.status(200).json(context);
+};
+
+function publishErr(err, req, res){
+    res.status(500).json({ message: err });
+};
 
 //testen Sessions Merken
 exports.wahl = function(req,res){
@@ -84,35 +120,8 @@ exports.apiNewReel = function(req, res){
 
 // test JSON endpoint with 
 exports.apiShow = function(req, res) {
-  var searchId = req.params.nr.substring(0,1)
-  if (searchId == 'P'){
-    console.log('Program ' + req.params.nr);
-    Programs.findOne({nr: req.params.nr}, function(err, program){
-        if(!err){
-            res.status(200).json({ results: program});
-        } else {
-            res.status(500).json({ message: err});
-        }
-    });
-  } else if (searchId == 'R'){
-    console.log('Reel ' + req.params.nr);
-    Reels.findOne({nr: req.params.nr}, function(err, reels){
-        if(!err){
-            res.status(200).json({ results: reels});
-        } else {
-            res.status(500).json({ message: err});
-        }
-    });
-  } else if (searchId == 'K'){
-    console.log('Customer ' + req.params.nr);
-    Customers.findOne({nr: req.params.nr}, function(err, customers){
-        if(!err){
-            res.status(200).json({ results: customers});
-        } else {
-            res.status(500).json({ message: err});
-        }
-    });
-  };
+  var searchId = req.params.nr;
+  returnData (searchId, req, res, publish);
 };
 
 // Delete a user
@@ -137,3 +146,34 @@ exports.deleteUser = function(req, res) {
     }
   });
 };
+
+//test sending HTTP call request
+exports.sendHttp = function(req, res){
+    res.render('transaction/requestHttp');
+};
+
+//test sending HTTP call
+exports.processSendHttp = function(req, res){
+    searchId = req.body.reqInput;
+    // console.log('suche gestartet');
+    // returnData (searchId, req, res, publish);
+    request.post(
+        'http://localhost:3000/apireceiverequest',
+        { form: { reqInput: searchId } },
+        function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                res.status(200).json(JSON.parse(body));
+                console.log(JSON.parse(body).programName);
+            }
+        }
+    );
+};
+
+// receive API request
+exports.processApiRequest = function(req, res){
+    searchId = req.body.reqInput;
+    console.log('suche gestartet');
+    returnData (searchId, req, res, publish);
+};
+
+// 

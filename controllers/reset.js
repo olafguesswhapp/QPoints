@@ -132,6 +132,20 @@ module.exports = {
 				console.log('created Reels');
 			}); // reels save
 		}); // CUsers find
+		CUsers.find({}, function(err, user){
+			user.forEach(function(User){
+				if (User.finishedPrograms){
+					User.update({$set: { finishedPrograms: [] }}, function(err, message){
+						console.log(message);
+					}); // User.update
+				} //if User.finishedPrograms
+				if (User.particiPrograms){
+					User.update({$set: { particiPrograms: [] }}, function(err, message){
+						console.log(message);
+					}); // User.update
+				} //if User.particiPrograms
+			}); // user.forEach
+		}); //CUsers find 'all'
 		res.redirect(303, '/programm');
 	}, // reset
 

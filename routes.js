@@ -27,6 +27,9 @@ module.exports = function(app) {
 	app.get('/apishow/:nr', TestMongoDB.apiShow);
 	app.post('/apiNewReel', TestMongoDB.apiNewReel);
 	app.delete('/apideleteuser', TestMongoDB.deleteUser);
+	app.get('/apirequest', TestMongoDB.sendHttp);
+	app.post('/apirequest', TestMongoDB.processSendHttp);
+	app.post('/apireceiverequest', TestMongoDB.processApiRequest);
 
 	// customer routes
 	customerController.registerRoutes(app);
