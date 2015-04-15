@@ -30,6 +30,8 @@ module.exports = function(app) {
 	app.get('/apirequest', TestMongoDB.sendHttp);
 	app.post('/apirequest', TestMongoDB.processSendHttp);
 	app.post('/apireceiverequest', TestMongoDB.processApiRequest);
+	app.post('/apirequestprograms', TestMongoDB.processApiReqPrograms);
+	app.post('/apicodecheck', TestMongoDB.processApiCodeCheck);
 
 	// customer routes
 	customerController.registerRoutes(app);
