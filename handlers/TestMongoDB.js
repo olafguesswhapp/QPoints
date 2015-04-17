@@ -216,7 +216,7 @@ exports.processApiCodeCheck = function (req, res) {
         }
     }); // CUsers findOne
     Reels.findOne({'codes.rCode' : req.body.qpInput})
-                .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount')
+                .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus')
                 .exec(function(err, reel){
         if(err) {
             res.status(200).json(message = "Leider ist ein Fehler aufgetreten.");
@@ -247,6 +247,9 @@ exports.processApiCodeCheck = function (req, res) {
                                     name: reel.assignedProgram.programName,
                                     nr: reel.assignedProgram.nr,
                                     goalCount: reel.assignedProgram.goalCount,
+                                    programStatus: reel.assignedProgram.programStatus,
+                                    startDate: reel.assignedProgram.startDate,
+                                    endDate: reel.assignedProgram.deadlineSubmit,
                                     message: "Der QPoint gehört zum Program " + reel.assignedProgram.programName + " . " + qpMessage,
                                 };
                                 res.status(200).json(context);
