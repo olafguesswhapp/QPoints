@@ -5,7 +5,7 @@ var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var moment = require('moment');
 var request = require('request');
-var mongoose = require('mongoose');
+var qplib = require('../lib/qpointlib.js');
 
 // return data sets
 function returnData (searchId, req, res, cb){
@@ -243,7 +243,7 @@ exports.processApiCodeCheck = function (req, res) {
                                 reel.save(function(err) {
                                     if (err) { return next(err); }
                                 });
-                                updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalCount);
+                                qplib.updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalCount);
                                 context = {
                                     success: true,
                                     name: reel.assignedProgram.programName,
