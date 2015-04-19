@@ -35,6 +35,7 @@ function returnData (searchId, req, res, cb){
 };
 
 function publish(context, req, res){
+    console.log(context);
     res.status(200).json(context);
 };
 
@@ -185,6 +186,8 @@ exports.processApiReqPrograms = function(req, res){
             .exec(function(err, user){
         if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
             var context = 'Bisher wurde noch kein Treuepunkt erfasst';
+            publish(context, req, res);
+            return;
         } else { // user already has collected one or more codes
             var context ={
                 programs: user.particiPrograms.map(function(partiProgram){
@@ -203,90 +206,3 @@ exports.processApiReqPrograms = function(req, res){
         res.status(200).json(context);
     }); // CUSers find
 };
-
-// receive API request to check Code
-exports.processApiCodeCheck = function (req, res) {
-    console.log(req.body);
-    var APIUser = '';
-    // User identifizieren
-    CUsers.findOne({'username' : req.body.user}, '_id', function(err, user){
-        if(err) {
-            return next;
-        } else {
-            APIUser = user._id;
-        }
-    }); // CUsers findOne
-    Reels.findOne({'codes.rCode' : req.body.qpInput})
-                .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus')
-                .populate('customer')
-                .exec(function(err, reel){
-        if(err) {
-            res.status(200).json(message = "Leider ist ein Fehler aufgetreten.");
-        } // if err
-        if (!reel) {
-            res.status(200).json(message = "Dieser QPoint ist nicht vorhanden");
-        } else {// if !reel
-            // gefunden
-            if (reel.reelStatus == "aktiviert"){
-                if(new Date()<= reel.assignedProgram.deadlineSubmit){
-                    reel.codes.forEach(function(code){
-                        if (code.rCode == req.body.qpInput){
-                            if(code.cStatus=='0'){ 
-                                code.cStatus = 1;
-                                code.consumer = APIUser;
-                                code.updated = new Date();
-                                reel.activatedCodes++; 
-                                if (reel.activatedCodes==reel.quantityCodes){
-                                    reel.reelStatus='erfüllt';
-                                    checkProgramsReels(reel.assignedProgram._id);
-                                } // if activatedCodes = quantityCodes
-                                reel.save(function(err) {
-                                    if (err) { return next(err); }
-                                });
-                                qplib.updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalCount);
-                                context = {
-                                    success: true,
-                                    name: reel.assignedProgram.programName,
-                                    nr: reel.assignedProgram.nr,
-                                    goalCount: reel.assignedProgram.goalCount,
-                                    programStatus: reel.assignedProgram.programStatus,
-                                    startDate: reel.assignedProgram.startDate,
-                                    endDate: reel.assignedProgram.deadlineSubmit,
-                                    company: reel.customer.company,
-                                    address1: reel.customer.address1,
-                                    address2: reel.customer.address2,
-                                    city: reel.customer.city,
-                                    zip: reel.customer.zip,
-                                    country: reel.customer.country,
-                                    phone: reel.customer.phone,
-                                    message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
-                                };
-                            } else { // if cStatus = 0
-                                var context = {
-                                    success: false,
-                                    message: "Der QPoint " + code.rCode + " der Rolle " + reel.nr + " wurde bereits verwendet.",
-                                };
-                            } // if cStatus not 0
-                            console.log(context);   
-                            res.status(200).json(context);
-                        } // if qpInput
-                    }); // reel.codes forEach   
-            } else { // if Dates
-                context = {
-                    success: false,
-                    message : "Das Programm ist bereits abgelaufen. Die Rolle ist damit nicht mehr gültig"
-                };
-                console.log(context);
-                res.status(200).json(context);
-            } // else if Dates
-            } else {// if reel = aktiviert
-            context = {
-                success: false,
-                message : "Der QPoint wurde noch nicht einem Programm zugeordnet, Bitte wenden Sie sich an den Ladeninhaber"
-            };
-            console.log(context);
-            res.status(200).json(context);
-            } // if else reels nicht aktiviert
-        } // if else = reels gefunden
-    }); // Reels find
-}; // API processCodeRequest

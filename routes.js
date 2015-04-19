@@ -2,6 +2,7 @@
 var main = require('./handlers/main.js');
 var TestMongoDB = require('./handlers/TestMongoDB.js');
 
+var apiController = require('./controllers/api.js');
 var customerController = require('./controllers/customer.js');
 var userController = require('./controllers/user.js');
 var productsController = require('./controllers/products.js');
@@ -20,6 +21,9 @@ module.exports = function(app) {
 	app.post('/newsletter', main.newsletterProcessPost);
 	app.get('/newsletter/archive', main.newsletterArchive);
 
+	// api Controller
+	apiController.registerRoutes(app);
+
 	// test MongoDB
 	app.get('/waehlen/:wahl', TestMongoDB.wahl);
 	app.get('/testMongo', TestMongoDB.testMongo);
@@ -31,7 +35,6 @@ module.exports = function(app) {
 	app.post('/apirequest', TestMongoDB.processSendHttp);
 	app.post('/apireceiverequest', TestMongoDB.processApiRequest);
 	app.post('/apirequestprograms', TestMongoDB.processApiReqPrograms);
-	app.post('/apicodecheck', TestMongoDB.processApiCodeCheck);
 
 	// customer routes
 	customerController.registerRoutes(app);
