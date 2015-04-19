@@ -5,6 +5,7 @@ var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var moment = require('moment');
 var request = require('request');
+var mongoose = require('mongoose');
 
 // return data sets
 function returnData (searchId, req, res, cb){
@@ -217,6 +218,7 @@ exports.processApiCodeCheck = function (req, res) {
     }); // CUsers findOne
     Reels.findOne({'codes.rCode' : req.body.qpInput})
                 .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus')
+                .populate('customer')
                 .exec(function(err, reel){
         if(err) {
             res.status(200).json(message = "Leider ist ein Fehler aufgetreten.");
@@ -242,7 +244,7 @@ exports.processApiCodeCheck = function (req, res) {
                                     if (err) { return next(err); }
                                 });
                                 updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalCount);
-                                var context = {
+                                context = {
                                     success: true,
                                     name: reel.assignedProgram.programName,
                                     nr: reel.assignedProgram.nr,
@@ -250,18 +252,23 @@ exports.processApiCodeCheck = function (req, res) {
                                     programStatus: reel.assignedProgram.programStatus,
                                     startDate: reel.assignedProgram.startDate,
                                     endDate: reel.assignedProgram.deadlineSubmit,
+                                    company: reel.customer.company,
+                                    address1: reel.customer.address1,
+                                    address2: reel.customer.address2,
+                                    city: reel.customer.city,
+                                    zip: reel.customer.zip,
+                                    country: reel.customer.country,
+                                    phone: reel.customer.phone,
                                     message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
                                 };
-                                console.log(context);
-                                res.status(200).json(context);
                             } else { // if cStatus = 0
                                 var context = {
                                     success: false,
                                     message: "Der QPoint " + code.rCode + " der Rolle " + reel.nr + " wurde bereits verwendet.",
                                 };
-                                console.log(context);   
-                                res.status(200).json(context);
                             } // if cStatus not 0
+                            console.log(context);   
+                            res.status(200).json(context);
                         } // if qpInput
                     }); // reel.codes forEach   
             } else { // if Dates
@@ -282,5 +289,4 @@ exports.processApiCodeCheck = function (req, res) {
             } // if else reels nicht aktiviert
         } // if else = reels gefunden
     }); // Reels find
-}; // processCodeRequest
- 
+}; // API processCodeRequest
