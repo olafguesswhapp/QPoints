@@ -41,7 +41,7 @@ module.exports = {
 	processApiCodeScan: function(req, res, next) {
 		APIUser = res.locals.apiuser;
 		Reels.findOne({'codes.rCode' : req.body.qpInput})
-                    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus')
+                    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus programKey')
                     .populate('customer')
                     .exec(function(err, reel){
             if(err) {
@@ -92,6 +92,7 @@ module.exports = {
                                         country: reel.customer.country,
                                         phone: reel.customer.phone,
                                         message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
+                                        key: reel.assignedProgram.programKey, // Beispiel Code = 2T@
                                     };
                                 } else { // if cStatus = 0
                                     context = {

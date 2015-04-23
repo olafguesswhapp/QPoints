@@ -74,6 +74,7 @@ module.exports = {
 			deadlineScan: req.body.deadlineSubmit, //vorerst das gleiche Datum - kann aber später geändert werden
 			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 			createdBy: req.user._id,
+			programKey: "abc123"
 		});
 		if (req.body.allocatedReels!='') {
 			c.allocatedReels = req.body.allocatedReels;

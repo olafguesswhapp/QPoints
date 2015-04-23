@@ -16,6 +16,7 @@ var programsSchema = new Schema({
 	created: Date,
 	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
 	allocatedReels: [{ type: Schema.Types.ObjectId, ref: 'Reels' }],
+    programKey: String,
 });
 
 // Codes per User method
