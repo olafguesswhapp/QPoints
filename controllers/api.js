@@ -4,9 +4,9 @@ var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
 var qplib = require('../lib/qpointlib.js');
 
-function publish(context, req, res){
+function publish(context, statusCode, req, res){
     console.log(context);
-    res.status(200).json(context);
+    res.status(statusCode).json(context);
 };
 
 function checkUser(req, res, next) {
@@ -18,13 +18,15 @@ function checkUser(req, res, next) {
                 success: false,
                 message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
             };
-            publish(context, req, res);
+            statusCode = 400;
+            publish(context, statusCode, req, res);
         } else if (!user) {
             context = {
                 success: false,
                 message: "Wir konnten Sie als User nicht finden. Bitte verwenden Sie Ihre Email als User oder melden Sie sich neu an",
             };
-            publish(context, req, res);
+            statusCode = 400;
+            publish(context, statusCode, req, res);
         } else {
             res.locals.apiuser = user._id;
             return next();
@@ -40,6 +42,7 @@ module.exports = {
 
 	processApiCodeScan: function(req, res, next) {
 		APIUser = res.locals.apiuser;
+        var statusCode = 0;
 		Reels.findOne({'codes.rCode' : req.body.qpInput})
                     .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus programKey')
                     .populate('customer')
@@ -49,14 +52,16 @@ module.exports = {
                 success: false,
                 message: "Leider ist ein Fehler aufgetreten.",
             };
-            publish(context, req, res);
+            statusCode = 400;
+            publish(context, statusCode, req, res);
             } // if err
             if (!reel) {
                 context = {
                     success: false,
                     message: "Dieser QPoint ist nicht vorhanden.", 
                 };
-                publish(context, req, res);
+                statusCode = 400;
+                publish(context, statusCode, req, res);
             } else {// if !reel
                 // gefunden
                 if (reel.reelStatus == "aktiviert"){
@@ -99,8 +104,9 @@ module.exports = {
                                         success: false,
                                         message: "Der QPoint " + code.rCode + " der Rolle " + reel.nr + " wurde bereits verwendet.",
                                     };
+                                    statusCode = 200;
                                 } // if cStatus not 0
-                                res.status(200).json(context);
+                                publish(context, statusCode, req, res);
                             } // if qpInput
                         }); // reel.codes forEach   
                     } else { // if Dates
@@ -108,14 +114,16 @@ module.exports = {
                             success: false,
                             message : "Das Programm ist bereits abgelaufen. Die Rolle ist damit nicht mehr gültig"
                         };
-                        publish(context, req, res);
+                        statusCode = 400;
+                        publish(context, statusCode, req, res);
                     } // else if Dates
                 } else {// if reel = aktiviert
                 context = {
                     success: false,
                     message : "Der QPoint wurde noch nicht einem Programm zugeordnet, Bitte wenden Sie sich an den Ladeninhaber"
                 };
-                publish(context, req, res);
+                statusCode = 400;
+                publish(context, statusCode, req, res);
                 } // if else reels nicht aktiviert
             } // if else = reels gefunden
         }); // Reels find
