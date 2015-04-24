@@ -47,7 +47,7 @@ updateUserStats = function(userId, programId, goalCount){
 					i= false;
 					if(particiProgram.count==goalCount){
 						particiProgram.count = 0;
-						updateUserfinishedStats(userId, programId);
+						updateUserHitGoalStats(userId, programId);
 					} // with new Code goal has been acchieved
 				} // if User already participates in the program
 			}); // forEach particiProgram
@@ -64,25 +64,25 @@ updateUserStats = function(userId, programId, goalCount){
 		}); // CUserFind
 }; // function update User Stats with scanned Program codes
 
-// when a user reached a program's goal updated the users finished stats
-updateUserfinishedStats = function(userId, programId){
+// when a user reached a program's goal updated the users HitGoal stats
+updateUserHitGoalStats = function(userId, programId){
 	CUsers.findById(userId)
-		.populate('finishedPrograms.program', '_id')
+		.populate('hitGoalPrograms.program', '_id')
 		.exec(function(err, user){
 		var i = true;
 		var progArray = new Array;
-		user.finishedPrograms.forEach(function(finishedProgram){
-			if(JSON.stringify(finishedProgram.program._id)==JSON.stringify(programId)){
-				finishedProgram.finishedCount++;
+		user.hitGoalPrograms.forEach(function(hitGoalProgram){
+			if(JSON.stringify(hitGoalProgram.program._id)==JSON.stringify(programId)){
+				hitGoalProgram.hitGoalCount++;
 				i=false;
 			} // User already has reached once goal in program
-		}); // forEach finishedProgram
+		}); // forEach hitGoalProgram
 		if (i==true){ // 1st time goal in this program has been reached
 			progArray={
 				program: programId,
-				finishedCount: 1
+				hitGoalCount: 1
 			};
-			user.finishedPrograms.push(progArray);
+			user.hitGoalPrograms.push(progArray);
 		} // 1st time goal in this program has been reached
 		user.save(function(err){
 			if (err) { return next(err);}
@@ -241,18 +241,18 @@ module.exports = {
 
 	toRedeem: function(req, res, next){
 		CUsers.findById(req.user._id)
-				.populate('finishedPrograms.program', 'nr programName programStatus goalCount customer')
+				.populate('hitGoalPrograms.program', 'nr programName programStatus goalCount customer')
 				.exec(function(err, user){
 			var context ={
 				layout: 'app',
-				programs: user.finishedPrograms.map(function(finishedProgram){
+				programs: user.hitGoalPrograms.map(function(hitGoalProgram){
 					return {
-						nr: finishedProgram.program.nr,
-						programName: finishedProgram.program.programName,
-						programStatus: finishedProgram.program.programStatus,
-						programCustomer: finishedProgram.program.customer,
-						goalCount: finishedProgram.program.goalCount,
-						finishedCount: finishedProgram.finishedCount
+						nr: hitGoalProgram.program.nr,
+						programName: hitGoalProgram.program.programName,
+						programStatus: hitGoalProgram.program.programStatus,
+						programCustomer: hitGoalProgram.program.customer,
+						goalCount: hitGoalProgram.program.goalCount,
+						hitGoalCount: hitGoalProgram.hitGoalCount
 					}
 				}), // map programs
 			}; // define context

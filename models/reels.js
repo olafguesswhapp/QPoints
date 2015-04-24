@@ -10,7 +10,7 @@ var reelsSchema = new Schema({
 	reelStatus: String,
 	quantityCodes: Number,
 	activatedCodes: Number,
-	codes: [{rCode: { type: String, unique: true }, cStatus: String, consumer:{ type: Schema.Types.ObjectId, ref: 'CUsers'}, updated: Date}],
+	codes: [{rCode: { type: String, unique: true }, cStatus: Number, consumer:{ type: Schema.Types.ObjectId, ref: 'CUsers'}, updated: Date}],
 	created: Date,
 	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
 	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},

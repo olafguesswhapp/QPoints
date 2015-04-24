@@ -38,6 +38,7 @@ module.exports = {
 
 	registerRoutes: function(app) {
 		app.post('/apicodecheck', checkUser, this.processApiCodeScan);
+        app.post('/apicoderedeem', checkUser, this.processApiCodeRedeem);
 	},
 
 	processApiCodeScan: function(req, res, next) {
@@ -68,14 +69,14 @@ module.exports = {
                     if(new Date()<= reel.assignedProgram.deadlineSubmit){
                         reel.codes.forEach(function(code){
                             if (code.rCode == req.body.qpInput){
-                                if(code.cStatus=='0'){ 
+                                if(code.cStatus==0){ 
                                     code.cStatus = 1;
                                     code.consumer = APIUser;
                                     code.updated = new Date();
                                     reel.activatedCodes++; 
                                     if (reel.activatedCodes==reel.quantityCodes){
                                         reel.reelStatus='erfüllt';
-                                        checkProgramsReels(reel.assignedProgram._id);
+                                        qplib.checkProgramsReels(reel.assignedProgram._id);
                                     } // if activatedCodes = quantityCodes
                                     reel.save(function(err) {
                                         if (err) { return next(err); }
@@ -99,17 +100,28 @@ module.exports = {
                                         message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
                                         key: reel.assignedProgram.programKey, // Beispiel Code = 2T@
                                     };
-                                } else { // if cStatus = 0
+                                } else { // if cStatus != 0
                                     context = {
                                         success: false,
                                         message: "Der QPoint " + code.rCode + " der Rolle " + reel.nr + " wurde bereits verwendet.",
                                     };
                                     statusCode = 200;
-                                } // if cStatus not 0
+                                } // if cStatus != 0
                                 publish(context, statusCode, req, res);
                             } // if qpInput
                         }); // reel.codes forEach   
-                    } else { // if Dates
+                    } else { // if Date is not valid
+                        code.cStatus = 9;
+                        code.consumer = APIUser;
+                        code.updated = new Date();
+                        reel.activatedCodes++; 
+                        if (reel.activatedCodes==reel.quantityCodes){
+                            reel.reelStatus='erfüllt';
+                            qplib.checkProgramsReels(reel.assignedProgram._id);
+                        } // if activatedCodes = quantityCodes
+                        reel.save(function(err) {
+                            if (err) { return next(err); }
+                        });
                         context = {
                             success: false,
                             message : "Das Programm ist bereits abgelaufen. Die Rolle ist damit nicht mehr gültig"
@@ -127,6 +139,66 @@ module.exports = {
                 } // if else reels nicht aktiviert
             } // if else = reels gefunden
         }); // Reels find
-	},
+	}, // Function processApiCodeScan
+
+    processApiCodeRedeem: function (req, res, next){
+        APIUser = res.locals.apiuser;
+        var counter = req.body.programGoal;
+        var allocReels = [];
+        Programs.findOne({'nr' : req.body.programNr}, function(err, programs){
+            allocReels = programs.allocatedReels.map(function(allocatedReel){
+                return allocatedReel;
+            }); // map programs
+            allocReels.forEach(function(reelId){
+                if (counter != 0) {
+                    Reels.findById(reelId, function(err, reel){
+                        reel.codes.forEach(function(codesInReel){
+                            if (counter!=0 && codesInReel.cStatus == 1 && JSON.stringify(APIUser)==JSON.stringify(codesInReel.consumer)) {
+                                counter -= 1;
+                                codesInReel.cStatus = 2; // Change status of Code
+                                // DATUM OF REDEEM EINTRAGEN!!!
+                                console.log(codesInReel.rCode);
+                            } // counter!=0 and cStatus=1
+                        }); // codes.forEach
+                        reel.save(function(err) {
+                            if (err) { return next(err); }
+                        });
+                    }); // Reels findById
+                } // if counter 1= 0
+            }); // allocReels.forEach
+            // Update User Stats a) reduce hitGoalCounter b) increase redeemdCounter
+            CUsers.findById(APIUser, function(err, cUser){
+                cUser.hitGoalPrograms.forEach(function(progHitGoal){
+                    if (JSON.stringify(progHitGoal.program)==JSON.stringify(programs._id)){
+                        progHitGoal.hitGoalCount -= 1;
+                    } // found redeemed Program
+                }); // hitGoalProgram.forEach
+                var i = true;
+                cUser.redeemPrograms.forEach(function(redeemProgram){
+                    if(JSON.stringify(redeemProgram.program)==JSON.stringify(programs._id)){ // does User already redeemed Program?
+                        redeemProgram.redeemCount++;
+                        i= false;
+                    } // if User already redeempates in the program
+                }); // forEach redeemProgram
+                if (i==true){ // 1st Program Code - therefore expand User Stats
+                    var progArray = {
+                        program: programs._id,
+                        redeemCount: 1
+                    };
+                    cUser.redeemPrograms.push(progArray);
+                } // 1st Program Code - therefore expand User Stats
+                cUser.save(function(err){
+                    if (err) { return next(err);}
+                }); // save updated User Stats
+            }); // CUsers findById
+            context = {
+                success: true,
+                message : "TESTEN",
+                reels: allocReels,
+            }; // context
+            statusCode = 200;
+            publish(context, statusCode, req, res);
+        }); // Programs find
+    }, // Function processApiCodeRedeem
 
 };
