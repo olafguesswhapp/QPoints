@@ -144,6 +144,16 @@ module.exports = {
 						console.log(message);
 					}); // User.update
 				} //if User.particiPrograms
+				if (User.redeemPrograms){
+					User.update({$set: { redeemPrograms: [] }}, function(err, message){
+						console.log(message);
+					}); // User.update
+				} //if User.particiPrograms
+				if (User.finishedPrograms){
+					User.update({$set: { finishedPrograms: [] }}, function(err, message){
+						console.log(message);
+					}); // User.update
+				} //if User.particiPrograms
 			}); // user.forEach
 		}); //CUsers find 'all'
 		res.redirect(303, '/programm');

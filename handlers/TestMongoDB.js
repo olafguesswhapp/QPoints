@@ -182,7 +182,7 @@ exports.processApiReqPrograms = function(req, res){
     userId = req.body.userId;
     console.log(userId);
     CUsers.findOne({ username: userId})
-            .populate('particiPrograms.program', 'nr programName programStatus goalCount customer')
+            .populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
             .exec(function(err, user){
         if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
             var context = 'Bisher wurde noch kein Treuepunkt erfasst';
@@ -196,7 +196,7 @@ exports.processApiReqPrograms = function(req, res){
                         programName: partiProgram.program.programName,
                         programStatus: partiProgram.program.programStatus,
                         // programCustomer: partiProgram.program.customer,
-                        goalCount: partiProgram.program.goalCount,
+                        goalToHit: partiProgram.program.goalToHit,
                         count: partiProgram.count,
                     }
                 }) // map programs

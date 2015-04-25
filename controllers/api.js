@@ -7,7 +7,78 @@ var qplib = require('../lib/qpointlib.js');
 function publish(context, statusCode, req, res){
     console.log(context);
     res.status(statusCode).json(context);
+}; // pubilsh
+
+function markEachCode(reelId, indexEditedCodes, APIUser) {
+    Reels.findById(reelId, function(err, reel){
+        reel.codes.forEach(function(codesInReel){
+            if (indexEditedCodes != 0 && codesInReel.cStatus == 1 && JSON.stringify(APIUser)==JSON.stringify(codesInReel.consumer)) {
+                indexEditedCodes--; // mark only required number of codes to be redeemed (therefore the index)
+                codesInReel.cStatus = 2; // Edit status of Code to "redeem = 2"
+            }
+        }); // codes.forEach
+        reel.save(function(err) {
+            if (err) { return next(err); }
+        });
+    }); // Reels findById
+    return indexEditedCodes;
 };
+
+function updateUserStats(APIUser, programId, programNr, callback){
+    var correctUser = false;
+    CUsers.findById(APIUser, function(err, cUser){
+        // Update HitGoalStats of User (decrease)
+        cUser.hitGoalPrograms.forEach(function(progHitGoal){
+            if (JSON.stringify(progHitGoal.program)==JSON.stringify(programId)){
+                correctUser = true;
+                progHitGoal.hitGoalCount--; // HitGoal Stats decrease (since codes are beeing redeemed)
+            } // found redeemed Program
+        }); // hitGoalProgram.forEach
+        // Update RedeemStats of User (Increase)
+        var firstTime = true; // marks if this User has redeemd this program for the 1st time
+        cUser.redeemPrograms.forEach(function(redeemProgram){
+            if(JSON.stringify(redeemProgram.program)==JSON.stringify(programId)){
+                redeemProgram.redeemCount++;
+                firstTime= false; // yes, User did already redeem this Program once before (only increase counter)
+            } // if User already has redeemd in the program
+        }); // forEach redeemProgram
+        if (firstTime==true){ // it is the 1st time
+            var programArray = {
+                program: programId,
+                redeemCount: 1
+            };
+            cUser.redeemPrograms.push(programArray);
+        } // it is the 1st time
+        cUser.save(function(err){
+            if (err) { return next(err);}
+        }); // save updated User Stats
+        if (correctUser) {
+            callback(programNr);
+        } else {
+            return false;
+        }
+        return;
+    }); // CUsers findById
+}; // updateUserStats
+
+function updateProgramStats(programNr){
+    var programArray = [];
+    Programs.findOne({'nr' : programNr}, function(err, updateProgram){
+        updateProgram.hitGoalsCount--;
+        updateProgram.redeemCount++;
+        programArray = {
+            programName: updateProgram.programName,
+            hitGoalsCount: updateProgram.hitGoalsCount,
+            redeemCount: updateProgram.redeemCount,
+        };
+        updateProgram.save(function(err){
+            if (err) { return next(err);}
+        }); // save updated User Stats
+        console.log('vor rückehr vom Callback');
+        console.log(programArray);
+        return programArray;
+    }); // Program FindOne
+}; // updateProgramStats
 
 function checkUser(req, res, next) {
 	console.log(req.body);
@@ -45,7 +116,7 @@ module.exports = {
 		APIUser = res.locals.apiuser;
         var statusCode = 0;
 		Reels.findOne({'codes.rCode' : req.body.qpInput})
-                    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalCount programStatus programKey')
+                    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalToHit programStatus programKey')
                     .populate('customer')
                     .exec(function(err, reel){
             if(err) {
@@ -73,7 +144,7 @@ module.exports = {
                                     code.cStatus = 1;
                                     code.consumer = APIUser;
                                     code.updated = new Date();
-                                    reel.activatedCodes++; 
+                                    reel.activatedCodes++;
                                     if (reel.activatedCodes==reel.quantityCodes){
                                         reel.reelStatus='erfüllt';
                                         qplib.checkProgramsReels(reel.assignedProgram._id);
@@ -81,12 +152,12 @@ module.exports = {
                                     reel.save(function(err) {
                                         if (err) { return next(err); }
                                     });
-                                    qplib.updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalCount);
+                                    qplib.updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalToHit);
                                     context = {
                                         success: true,
                                         name: reel.assignedProgram.programName,
                                         nr: reel.assignedProgram.nr,
-                                        goalCount: reel.assignedProgram.goalCount,
+                                        goalToHit: reel.assignedProgram.goalToHit,
                                         programStatus: reel.assignedProgram.programStatus,
                                         startDate: reel.assignedProgram.startDate,
                                         endDate: reel.assignedProgram.deadlineSubmit,
@@ -100,6 +171,7 @@ module.exports = {
                                         message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
                                         key: reel.assignedProgram.programKey, // Beispiel Code = 2T@
                                     };
+                                    statusCode = 200;
                                 } else { // if cStatus != 0
                                     context = {
                                         success: false,
@@ -143,62 +215,47 @@ module.exports = {
 
     processApiCodeRedeem: function (req, res, next){
         APIUser = res.locals.apiuser;
-        var counter = req.body.programGoal;
-        var allocReels = [];
+        var indexEditedCodes = req.body.programGoal;
+        var reelIdArray = [];
         Programs.findOne({'nr' : req.body.programNr}, function(err, programs){
-            allocReels = programs.allocatedReels.map(function(allocatedReel){
+            reelIdArray = programs.allocatedReels.map(function(allocatedReel){
                 return allocatedReel;
             }); // map programs
-            allocReels.forEach(function(reelId){
-                if (counter != 0) {
-                    Reels.findById(reelId, function(err, reel){
-                        reel.codes.forEach(function(codesInReel){
-                            if (counter!=0 && codesInReel.cStatus == 1 && JSON.stringify(APIUser)==JSON.stringify(codesInReel.consumer)) {
-                                counter -= 1;
-                                codesInReel.cStatus = 2; // Change status of Code
-                                // DATUM OF REDEEM EINTRAGEN!!!
-                                console.log(codesInReel.rCode);
-                            } // counter!=0 and cStatus=1
-                        }); // codes.forEach
-                        reel.save(function(err) {
-                            if (err) { return next(err); }
-                        });
-                    }); // Reels findById
+            reelIdArray.forEach(function(reelId, index){
+                if (indexEditedCodes != 0) {
+                    indexEditedCodes = markEachCode(reelId, indexEditedCodes, APIUser);
                 } // if counter 1= 0
+                if (index == reelIdArray.length-1){ // perform next Step (in sync) after ForEach Index complete
+                    updateUserStats(APIUser, programs._id, req.body.programNr, updateProgramStats)
+                    console.log('bis hier zurück?');
+                    context = {
+                        success: true,
+                        message : "Herzliche Glückwünsche, Punkte wurden eingelöst",
+                        reels: reelIdArray,
+                    }; // context
+                    statusCode = 200;
+                    publish(context, statusCode, req, res);
+                }
             }); // allocReels.forEach
-            // Update User Stats a) reduce hitGoalCounter b) increase redeemdCounter
-            CUsers.findById(APIUser, function(err, cUser){
-                cUser.hitGoalPrograms.forEach(function(progHitGoal){
-                    if (JSON.stringify(progHitGoal.program)==JSON.stringify(programs._id)){
-                        progHitGoal.hitGoalCount -= 1;
-                    } // found redeemed Program
-                }); // hitGoalProgram.forEach
-                var i = true;
-                cUser.redeemPrograms.forEach(function(redeemProgram){
-                    if(JSON.stringify(redeemProgram.program)==JSON.stringify(programs._id)){ // does User already redeemed Program?
-                        redeemProgram.redeemCount++;
-                        i= false;
-                    } // if User already redeempates in the program
-                }); // forEach redeemProgram
-                if (i==true){ // 1st Program Code - therefore expand User Stats
-                    var progArray = {
-                        program: programs._id,
-                        redeemCount: 1
-                    };
-                    cUser.redeemPrograms.push(progArray);
-                } // 1st Program Code - therefore expand User Stats
-                cUser.save(function(err){
-                    if (err) { return next(err);}
-                }); // save updated User Stats
-            }); // CUsers findById
-            context = {
-                success: true,
-                message : "TESTEN",
-                reels: allocReels,
-            }; // context
-            statusCode = 200;
-            publish(context, statusCode, req, res);
         }); // Programs find
+
+                // context = {
+                //     success: false,
+                //     programName: programs.programName,
+                //     message : req.body.user + ' hat noch nicht genug Punkt für Einlösung gesammelt',
+                // }; // context
+                // statusCode = 400;
+                // publish(context, statusCode, req, res);
+
+                // context = {
+                //     success: false,
+                //     programName: programs.programName,
+                //     message : "Wir konnten nicht genug dem User und Program zugeordnete & eingelöst Punkte finden",
+                //     reels: allocReels,
+                // }; // context
+                // statusCode = 400;
+                // publish(context, statusCode, req, res);
+
     }, // Function processApiCodeRedeem
 
 };

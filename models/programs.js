@@ -9,7 +9,9 @@ var programsSchema = new Schema({
     programStatus: String,
 	customer: { type: Schema.Types.ObjectId, ref: 'Customers'},
 	programName: String,
-	goalCount: Number,
+	goalToHit: Number,
+    hitGoalsCount: Number,
+    redeemCount: Number,
 	startDate: Date,
 	deadlineSubmit: Date,
 	deadlineScan: Date, // currently not in use
@@ -48,13 +50,13 @@ programsSchema.methods.usersNearGoal = function(cb){
     } // Varaiable a returns the scanned codes per User ID!
 
     // prepare keys inside nrUsersNearGoalCount array
-    for(i=0; i < this.goalCount; i++){
+    for(i=0; i < this.goalToHit; i++){
         nrUsersNearGoalCount['reachedGoalm' + i] = 0;
     } // for loop to create keys within nrUsersNearGoalCount
 
     // how many users have reached the "goal" of codes to scan,
     // how many users are missing only 1 or 2 codes to reach the goal
-    prev = this.goalCount;
+    prev = this.goalToHit;
     nrCodesPerUser.forEach(function(user){
         if(user.count> prev) { // Users who collected more than target
             nrUsersNearGoalCount.reachedGoalm0 =+ parseInt(user.count/prev);

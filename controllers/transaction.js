@@ -3,6 +3,7 @@ var Reels = require('../models/reels.js');
 var Programs = require('../models/programs.js');
 var Customers = require('../models/customers.js');
 var moment = require('moment');
+var qplib = require('../lib/qpointlib.js');
 
 function LoggedInUserOnly(req, res, next) {
 	if (!req.user) {
@@ -33,62 +34,6 @@ checkProgramsReels = function(programId, cb){
 	    } // end if progReelStatus=false
     }); // Users find
 }; // function checkProgramsReels
-
-// when a code is scanned update the code/program in the stats of the user
-updateUserStats = function(userId, programId, goalCount){
-	CUsers.findById(userId)
-		.populate('particiPrograms.program', '_id')
-		.exec(function(err, user){
-			var i = true;
-			var progArray = new Array;
-			user.particiPrograms.forEach(function(particiProgram){
-				if(JSON.stringify(particiProgram.program._id)==JSON.stringify(programId)){ // does User already participate in Program?
-					particiProgram.count++;
-					i= false;
-					if(particiProgram.count==goalCount){
-						particiProgram.count = 0;
-						updateUserHitGoalStats(userId, programId);
-					} // with new Code goal has been acchieved
-				} // if User already participates in the program
-			}); // forEach particiProgram
-			if (i==true){ // 1st Program Code - therefore expand User Stats
-				progArray = {
-					program: programId,
-					count: 1
-				};
-				user.particiPrograms.push(progArray);
-			} // 1st Program Code - therefore expand User Stats
-			user.save(function(err){
-				if (err) { return next(err);}
-			}); // save updated User Stats
-		}); // CUserFind
-}; // function update User Stats with scanned Program codes
-
-// when a user reached a program's goal updated the users HitGoal stats
-updateUserHitGoalStats = function(userId, programId){
-	CUsers.findById(userId)
-		.populate('hitGoalPrograms.program', '_id')
-		.exec(function(err, user){
-		var i = true;
-		var progArray = new Array;
-		user.hitGoalPrograms.forEach(function(hitGoalProgram){
-			if(JSON.stringify(hitGoalProgram.program._id)==JSON.stringify(programId)){
-				hitGoalProgram.hitGoalCount++;
-				i=false;
-			} // User already has reached once goal in program
-		}); // forEach hitGoalProgram
-		if (i==true){ // 1st time goal in this program has been reached
-			progArray={
-				program: programId,
-				hitGoalCount: 1
-			};
-			user.hitGoalPrograms.push(progArray);
-		} // 1st time goal in this program has been reached
-		user.save(function(err){
-			if (err) { return next(err);}
-		}); // save updated User Stats
-	}); // CUsersFind
-}; // function updateUserFinishedStats
 
 function LoggedInUserOnly(req, res, next) {
 	if (!req.user) {
@@ -126,7 +71,7 @@ module.exports = {
 
 	processScan: function(req, res, next){
 		Reels.findOne({'codes.rCode' : req.body.qpInput})
-					.populate('assignedProgram', '_id programName startDate deadlineSubmit goalCount')
+					.populate('assignedProgram', '_id programName startDate deadlineSubmit goalToHit')
 					.exec(function(err, reel){
 			if(err) {
 				req.session.flash = {
@@ -167,7 +112,7 @@ module.exports = {
 									reel.save(function(err) {
 										if (err) { return next(err); }
 									});
-									updateUserStats(req.user._id, reel.assignedProgram._id, reel.assignedProgram.goalCount);
+									qplib.updateUserStats(req.user._id, reel.assignedProgram._id, reel.assignedProgram.goalToHit);
 									res.redirect(303, '/scan');
 								} else { // if cStatus = 0
 									var qpMessage = 'QPoint ' + code.rCode + ' Status ' 
@@ -203,7 +148,7 @@ module.exports = {
 
 	myPoints: function(req, res, next){
 		CUsers.findById(req.user._id)
-			.populate('particiPrograms.program', 'nr programName programStatus goalCount customer')
+			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
 			.exec(function(err, user){
 				if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
 					var context = {
@@ -221,7 +166,7 @@ module.exports = {
 								programName: partiProgram.program.programName,
 								programStatus: partiProgram.program.programStatus,
 								programCustomer: partiProgram.program.customer,
-								goalCount: partiProgram.program.goalCount,
+								goalToHit: partiProgram.program.goalToHit,
 								count: partiProgram.count
 							}
 						}), // map programs
@@ -241,7 +186,7 @@ module.exports = {
 
 	toRedeem: function(req, res, next){
 		CUsers.findById(req.user._id)
-				.populate('hitGoalPrograms.program', 'nr programName programStatus goalCount customer')
+				.populate('hitGoalPrograms.program', 'nr programName programStatus goalToHit customer')
 				.exec(function(err, user){
 			var context ={
 				layout: 'app',
@@ -251,7 +196,7 @@ module.exports = {
 						programName: hitGoalProgram.program.programName,
 						programStatus: hitGoalProgram.program.programStatus,
 						programCustomer: hitGoalProgram.program.customer,
-						goalCount: hitGoalProgram.program.goalCount,
+						goalToHit: hitGoalProgram.program.goalToHit,
 						hitGoalCount: hitGoalProgram.hitGoalCount
 					}
 				}), // map programs
@@ -292,7 +237,7 @@ module.exports = {
 				nr: program.nr,
 				programStatus: program.programStatus,
 				programName: program.programName,
-				goalCount: program.goalCount,
+				goalToHit: program.goalToHit,
 				startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
 				deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
 				// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
