@@ -20,6 +20,7 @@
 		<tr>
 			<td>Barcode</td>
 			<td>Eingelöst durch</td>
+			<td>Status</td>
 			<td>Datum</td>
 		</tr>
 	</thead>
@@ -28,6 +29,7 @@
 		<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
 			<td>{{rCode}}</td>
 			<td>{{#if cStatus}}{{consumer.firstName}}{{/if}}</td>
+			<td>{{#if cStatus}}{{cStatus}}{{/if}}</td>
 			<td>{{#if cStatus}}{{updated}}{{/if}}</td>
 		{{/codes}}
 	</tbody>	
