@@ -220,7 +220,6 @@ function updateUserStats(programId, codesArray, req, res){
     var correctUser = false;
     var didRun = false;
     CUsers.findById(res.locals.apiuser, 'hitGoalPrograms redeemPrograms', function(err, cUser){
-        console.log(cUser);
         // Update HitGoalStats of User (decrease)
         cUser.hitGoalPrograms.forEach(function(progHitGoal){
             if (JSON.stringify(progHitGoal.program)==JSON.stringify(programId)){
@@ -247,7 +246,6 @@ function updateUserStats(programId, codesArray, req, res){
             if (err) { return next(err);}
         }); // save updated User Stats
         if (correctUser) {
-            console.log(cUser);
             if (didRun==false){updateProgramStats(codesArray, req, res);}
             didRun=true;
         }
