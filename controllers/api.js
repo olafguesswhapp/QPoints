@@ -3,6 +3,7 @@ var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
 var qplib = require('../lib/qpointlib.js');
+var moment = require('moment');
 
 function publish(context, statusCode, req, res){
     console.log(context);
@@ -39,7 +40,68 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.post('/apicodecheck', checkUser, this.processApiCodeScan);
         app.post('/apicoderedeem', checkUser, this.processApiCodeRedeem);
+        app.post('/apicreateaccount', this.processApiCreateAccount);
+        app.post('/apicheckuser', this.processApiCheckUserAccount);
 	},
+
+    processApiCheckUserAccount: function(req, res, next) {
+        console.log('API check Account startet hier');
+        console.log(req.body);
+        // User identifizieren
+        CUsers.findOne({'username' : req.body.userEmail}, '_id', function(err, user){
+            if(err) {
+                context = {
+                    success: false,
+                    message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
+                };
+                statusCode = 400;
+                publish(context, statusCode, req, res);
+            } else if (!user) {
+                context = {
+                    success: false,
+                    message: "Wir konnten Sie als User nicht finden. Bitte verwenden Sie Ihre Email als User oder melden Sie sich neu an",
+                };
+                statusCode = 400;
+                publish(context, statusCode, req, res);
+            } else {
+                context = {
+                    success: true,
+                    message : "User-Email und Passwort sind verifiziert. Willkommen",
+                }; // context
+                statusCode = 200;
+                publish(context, statusCode, req, res)
+                console.log('erfolgreich angemeldet');
+            }
+        }); // CUsers findOne
+    }, // processApiCheckUserAccount
+
+    processApiCreateAccount: function(req, res, next) {
+        var user = new CUsers ({
+            username: req.body.userEmail,
+            password: req.body.password,
+            created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+            role: 'consumer',
+        }); // 
+        user.save(function(err, newUser){
+            console.log(newUser);
+            if(err) {
+                context = {
+                    success: false,
+                    message: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+                };
+                statusCode = 400;
+                publish(context, statusCode, req, res);
+            } else {
+                context = {
+                    success: true,
+                    message : "Willkommen bei QPoints - vielen Dank für das Einrichten eines neuen Kontos",
+                }; // context
+                statusCode = 200;
+                publish(context, statusCode, req, res)
+                console.log('erfolgreich angelegt');
+            }
+        });
+    },
 
 	processApiCodeScan: function(req, res, next) {
 		APIUser = res.locals.apiuser;
@@ -172,7 +234,8 @@ module.exports = {
             } // if Program ist doch vorhanden (kein err in Programs find)
         }); // Programs find
     }, // Function processApiCodeRedeem
-};
+
+}; // module Exports
 
 function checkCodesInReels (programId, req, res){
     var codesArray = [];
