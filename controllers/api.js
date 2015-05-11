@@ -35,6 +35,69 @@ function checkUser(req, res, next) {
     }); // CUsers findOne
 };
 
+function builResponseArray1(user, req, res){
+    user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
+        user.particiPrograms.forEach(function(particiProgram, indexP){
+            if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
+                console.log('YEAH');
+                user.particiPrograms[indexP].programsHit = hitGProgram.hitGoalCount;
+            } else if (hitGProgram.hitGoalCount>0 && indexP == user.particiPrograms.length - 1) {
+                user.particiPrograms(user.particiPrograms.length) = {
+                    program: hitGProgram.program,
+                    programsHit: hitGProgram.hitGoalCount
+                };
+            }
+            console.log(indexH + ' von ' + user.hitGoalPrograms.length-1);
+            if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
+                console.log('fertig buildResponseArray1');
+                builResponseArray2(user, req, res);
+            }
+        });//user.particiProgram.forEach
+    });//user.hitGoalProgram.forEach
+}; // buildResponseArray1
+
+function builResponseArray2 (user, req, res){
+        var programData=[];
+        var context = {};
+        console.log(user.particiPrograms.length);
+        user.particiPrograms.forEach(function(particiProgram, index){
+            console.log('zu suchen ' + particiProgram.program);
+            collectProgramData (particiProgram.program, particiProgram.count, particiProgram.programsHit, user.particiPrograms.length, index, programData, req, res);
+        });// user.hitGoalPrograms.forEach
+        return programData;
+    }; // function builResponseArray2
+
+function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, req, res){
+    Programs.findById(programId)
+            .populate('customer')
+            .exec(function(err, usersProgram){
+        context = {
+        programNr: usersProgram.nr,
+        programName: usersProgram.programName,
+        programCompany: usersProgram.customer.company,
+        companyCity: usersProgram.customer.city,
+        programGoal: usersProgram.goalToHit, 
+        myCount: programCount,
+        ProgramsFinished: programHit,
+        programStatus: usersProgram.programStatus,
+        programStartDate: usersProgram.startDate,
+        programEndDate: usersProgram.deadlineSubmit,
+        programKey: usersProgram.programKey,
+        };
+        programData.push(context);
+        if (index == nrOfParticiPrograms -1 ){
+            context = {
+                success: true,
+                message : "User-Email und Passwort sind verifiziert. Willkommen",
+                programData: programData,
+            }; // context
+            statusCode = 200;
+            publish(context, statusCode, req, res)
+            console.log('erfolgreich angemeldet');
+        }// if last forEach
+    }); // Programs.FindById
+}; // collectProgramData
+
 module.exports = {
 
 	registerRoutes: function(app) {
@@ -48,7 +111,11 @@ module.exports = {
         console.log('API check Account startet hier');
         console.log(req.body);
         // User identifizieren
-        CUsers.findOne({'username' : req.body.userEmail}, '_id', function(err, user){
+        CUsers.findOne({'username' : req.body.userEmail})
+                .populate('particiPrograms', 'hitGoalPrograms')
+                .select('particiPrograms hitGoalPrograms')
+                .lean()
+                .exec(function(err, user){
             if(err) {
                 context = {
                     success: false,
@@ -64,13 +131,8 @@ module.exports = {
                 statusCode = 400;
                 publish(context, statusCode, req, res);
             } else {
-                context = {
-                    success: true,
-                    message : "User-Email und Passwort sind verifiziert. Willkommen",
-                }; // context
-                statusCode = 200;
-                publish(context, statusCode, req, res)
-                console.log('erfolgreich angemeldet');
+                builResponseArray1(user, req, res);
+                return;
             }
         }); // CUsers findOne
     }, // processApiCheckUserAccount
