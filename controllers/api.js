@@ -130,6 +130,15 @@ module.exports = {
                 };
                 statusCode = 400;
                 publish(context, statusCode, req, res);
+            } else if (user.hitGoalPrograms.length==0 && user.particiPrograms.length == 0) {
+                context = {
+                    success: true,
+                    message : "User-Email und Passwort sind verifiziert. Willkommen",
+                }; // context
+                statusCode = 200;
+                publish(context, statusCode, req, res)
+                console.log('erfolgreich angemeldet - noch keine Programm-Daten vorhanden');
+                return;
             } else {
                 builResponseArray1(user, req, res);
                 return;
