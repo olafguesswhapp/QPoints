@@ -109,7 +109,63 @@ module.exports = {
 	},
 
     processApiUpdateUser: function(req, res, next) {
-        CUsers.findOne({'username' : req.body.userEmail})
+        CUsers.findOne({'username' : req.body.userEmail}, function (err, userToFind){
+            if(err) {
+                context = {
+                    success: false,
+                    message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
+                };
+                statusCode = 400;
+                publish(context, statusCode, req, res);
+            } else if (!userToFind) {// if err
+                context = {
+                    success: false,
+                    message: "Wir konnten Sie als User nicht finden. Bitte verwenden Sie Ihre Email als User oder melden Sie sich neu an",
+                };
+                statusCode = 400;
+                publish(context, statusCode, req, res);
+            } else { // if no user
+                userToFind.comparePassword(req.body.passwordOld, function(err, isMatch) {
+                    if (err) {
+                        console.log('Passwort stimmt nicht überein ' + err);
+                        return;
+                    } else if (!isMatch) {
+                        context = {
+                            success: false,
+                            message: "Wir können das Profil aufgrund des falschen Passwortes nicht ändern",
+                        };
+                        statusCode = 400;
+                        publish(context, statusCode, req, res);
+                        return;
+                    } else if (isMatch) {
+                        userToFind.username = req.body.userEmail;
+                        userToFind.password = req.body.passwordNew;
+                        userToFind.gender = req.body.gender;
+                        userToFind.save(function(err, newUser){
+                            if(err) {
+                                console.log('leider UserSave fehler');
+                                console.log(err);
+                                context = {
+                                    success: false,
+                                    message: 'Der User konnte nicht upgedated werden',
+                                };
+                                statusCode = 400;
+                                publish(context, statusCode, req, res);
+                            } else {
+                                context = {
+                                    success: true,
+                                    message : "Danke, das User Profil wurde upgedated",
+                                }; // context
+                                statusCode = 200;
+                                publish(context, statusCode, req, res)
+                                console.log('User nach Update:');
+                                console.log(newUser);
+                            } // if save err
+                        }); // user save
+                    } // if isMatch
+                }); // callback from user.comparePassword
+            } // if user was found
+        }); // CUsers.fineOne
     }, // processApiUpdateUser
 
     processApiCheckUserAccount: function(req, res, next) {
