@@ -18,6 +18,7 @@ var cUsersSchema = new Schema({
 	lastName: String,
 	role: String,
 	created: Date,
+	gender: Number,
 });
 
 // make sure username (email) is unique

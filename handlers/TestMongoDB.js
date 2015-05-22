@@ -129,7 +129,7 @@ exports.apiShow = function(req, res) {
 // Delete a user
 exports.deleteUser = function(req, res) {
     console.log('wir löschen');
-    CUsers.findOne({username: req.body.userName}, function(err, user) {
+    CUsers.findOne({username: req.body.userEmail}, function(err, user) {
         if(!err && user) {
             var userId = user._id;
             Customers.findById(user.customer, function(err, customer){

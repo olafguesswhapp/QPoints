@@ -13,7 +13,7 @@ function publish(context, statusCode, req, res){
 function checkUser(req, res, next) {
 	console.log(req.body);
     // User identifizieren
-    CUsers.findOne({'username' : req.body.user}, '_id', function(err, user){
+    CUsers.findOne({'username' : req.body.userEmail}, '_id', function(err, user){
         if(err) {
             context = {
                 success: false,
@@ -105,7 +105,12 @@ module.exports = {
         app.post('/apicoderedeem', checkUser, this.processApiCodeRedeem);
         app.post('/apicreateaccount', this.processApiCreateAccount);
         app.post('/apicheckuser', this.processApiCheckUserAccount);
+        app.post('/apiupdateuser', checkUser, this.processApiUpdateUser);
 	},
+
+    processApiUpdateUser: function(req, res, next) {
+        CUsers.findOne({'username' : req.body.userEmail})
+    }, // processApiUpdateUser
 
     processApiCheckUserAccount: function(req, res, next) {
         console.log('API check Account startet hier');
