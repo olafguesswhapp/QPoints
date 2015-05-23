@@ -35,7 +35,7 @@ function checkUser(req, res, next) {
     }); // CUsers findOne
 };
 
-function builResponseArray1(user, req, res){
+function buildResponseArray(user, req, res){
     user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
         user.particiPrograms.forEach(function(particiProgram, indexP){
             if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
@@ -50,13 +50,13 @@ function builResponseArray1(user, req, res){
             console.log(indexH + ' von ' + user.hitGoalPrograms.length-1);
             if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
                 console.log('fertig buildResponseArray1');
-                builResponseArray2(user, req, res);
+                buildResponseArray2(user, req, res);
             }
         });//user.particiProgram.forEach
     });//user.hitGoalProgram.forEach
 }; // buildResponseArray1
 
-function builResponseArray2 (user, req, res){
+function buildResponseArray2 (user, req, res){
         var programData=[];
         var context = {};
         console.log(user.particiPrograms.length);
@@ -65,7 +65,7 @@ function builResponseArray2 (user, req, res){
             collectProgramData (particiProgram.program, particiProgram.count, particiProgram.programsHit, user.particiPrograms.length, index, programData, req, res);
         });// user.hitGoalPrograms.forEach
         return programData;
-    }; // function builResponseArray2
+    }; // function buildResponseArray2
 
 function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, req, res){
     Programs.findById(programId)
@@ -174,9 +174,9 @@ module.exports = {
         // User identifizieren
         CUsers.findOne({'username' : req.body.userEmail})
                 .populate('particiPrograms', 'hitGoalPrograms')
-                .select('particiPrograms hitGoalPrograms')
-                .lean()
-                .exec(function(err, user){
+                .select('password particiPrograms hitGoalPrograms')
+                //.lean()
+                .exec(function(err, checkUser){
             if(err) {
                 context = {
                     success: false,
@@ -184,25 +184,48 @@ module.exports = {
                 };
                 statusCode = 400;
                 publish(context, statusCode, req, res);
-            } else if (!user) {
+            } else if (!checkUser) {
                 context = {
                     success: false,
                     message: "Wir konnten Sie als User nicht finden. Bitte verwenden Sie Ihre Email als User oder melden Sie sich neu an",
                 };
                 statusCode = 400;
                 publish(context, statusCode, req, res);
-            } else if (user.hitGoalPrograms.length==0 && user.particiPrograms.length == 0) {
-                context = {
-                    success: true,
-                    message : "User-Email und Passwort sind verifiziert. Willkommen",
-                }; // context
-                statusCode = 200;
-                publish(context, statusCode, req, res)
-                console.log('erfolgreich angemeldet - noch keine Programm-Daten vorhanden');
-                return;
             } else {
-                builResponseArray1(user, req, res);
-                return;
+                checkUser.comparePassword(req.body.password, function(err, isMatch){
+                    if (err) {
+                        console.log(err);
+                        context = {
+                            success: false,
+                            message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
+                        };
+                        statusCode = 400;
+                        publish(context, statusCode, req, res);
+                        return;
+                    } else if (!isMatch) {
+                        context = {
+                            success: false,
+                            message : "Das übermittelte Passwort stimmt nicht"
+                        };
+                        statusCode = 400;
+                        publish(context, statusCode, req, res);
+                        return;
+                    } else {
+                        if (checkUser.hitGoalPrograms.length==0 && user.particiPrograms.length == 0) {
+                            context = {
+                                success: true,
+                                message : "User-Email und Passwort sind verifiziert. Willkommen",
+                            }; // context
+                            statusCode = 200;
+                            publish(context, statusCode, req, res)
+                            console.log('erfolgreich angemeldet - noch keine Programm-Daten vorhanden');
+                            return;
+                        } else {
+                            buildResponseArray(checkUser, req, res);
+                            return;
+                        }
+                    }
+                }); // checkUser.comparePassword
             }
         }); // CUsers findOne
     }, // processApiCheckUserAccount
