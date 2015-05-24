@@ -39,7 +39,6 @@ function buildResponseArray(user, req, res){
     user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
         user.particiPrograms.forEach(function(particiProgram, indexP){
             if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
-                console.log('YEAH');
                 user.particiPrograms[indexP].programsHit = hitGProgram.hitGoalCount;
             } else if (hitGProgram.hitGoalCount>0 && indexP == user.particiPrograms.length - 1) {
                 user.particiPrograms(user.particiPrograms.length) = {
@@ -47,9 +46,7 @@ function buildResponseArray(user, req, res){
                     programsHit: hitGProgram.hitGoalCount
                 };
             }
-            console.log(indexH + ' von ' + user.hitGoalPrograms.length-1);
             if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
-                console.log('fertig buildResponseArray1');
                 buildResponseArray2(user, req, res);
             }
         });//user.particiProgram.forEach
@@ -59,15 +56,13 @@ function buildResponseArray(user, req, res){
 function buildResponseArray2 (user, req, res){
         var programData=[];
         var context = {};
-        console.log(user.particiPrograms.length);
         user.particiPrograms.forEach(function(particiProgram, index){
-            console.log('zu suchen ' + particiProgram.program);
-            collectProgramData (particiProgram.program, particiProgram.count, particiProgram.programsHit, user.particiPrograms.length, index, programData, req, res);
+            collectProgramData (particiProgram.program, particiProgram.count, particiProgram.programsHit, user.particiPrograms.length, index, programData, user.gender, req, res);
         });// user.hitGoalPrograms.forEach
         return programData;
     }; // function buildResponseArray2
 
-function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, req, res){
+function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, gender, req, res){
     Programs.findById(programId)
             .populate('customer')
             .exec(function(err, usersProgram){
@@ -89,6 +84,7 @@ function collectProgramData (programId, programCount, programHit, nrOfParticiPro
             context = {
                 success: true,
                 message : "User-Email und Passwort sind verifiziert. Willkommen",
+                gender: gender,
                 programData: programData,
             }; // context
             statusCode = 200;
@@ -174,7 +170,7 @@ module.exports = {
         // User identifizieren
         CUsers.findOne({'username' : req.body.userEmail})
                 .populate('particiPrograms', 'hitGoalPrograms')
-                .select('password particiPrograms hitGoalPrograms')
+                .select('password particiPrograms hitGoalPrograms gender')
                 //.lean()
                 .exec(function(err, checkUser){
             if(err) {
@@ -211,11 +207,15 @@ module.exports = {
                         publish(context, statusCode, req, res);
                         return;
                     } else {
-                        if (checkUser.hitGoalPrograms.length==0 && user.particiPrograms.length == 0) {
+                        if (checkUser.hitGoalPrograms.length==0 && checkUser.particiPrograms.length == 0) {
                             context = {
                                 success: true,
                                 message : "User-Email und Passwort sind verifiziert. Willkommen",
+                                gender: checkUser.gender,
                             }; // context
+                            if (!context.gender) {
+                                context.gender = 0;
+                            }
                             statusCode = 200;
                             publish(context, statusCode, req, res)
                             console.log('erfolgreich angemeldet - noch keine Programm-Daten vorhanden');
