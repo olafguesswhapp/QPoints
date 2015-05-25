@@ -3,6 +3,7 @@ var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
 var Orders = require('../models/orders.js');
+var newsFeed = require('../models/newsfeed.js');
 
 module.exports = {
 
@@ -13,13 +14,16 @@ module.exports = {
 	reset: function(req, res, next) {
 		console.log('are you sure you want to reset?')
 		Programs.remove({}, function(err) { 
-			console.log('Programs removed')
+			console.log('Programs removed');
 		});
 		Reels.remove({}, function(err) { 
-			console.log('Reels removed')
+			console.log('Reels removed');
 		});
 		Orders.remove({}, function(err) { 
-			console.log('Orders removed')
+			console.log('Orders removed');
+		});
+		newsFeed.remove({}, function(err) {
+			console.log('newsFeed removed');
 		});
 
 		var helpAA = {}, helpBB = {}, helpCC = {};

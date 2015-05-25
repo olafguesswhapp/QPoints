@@ -1,4 +1,5 @@
-var newsFeed = require('../models/newsfeed.js');
+var NewsFeed = require('../models/newsfeed.js');
+var NewsHistory = require('../models/newshistory.js');
 var Programs = require('../models/programs.js');
 var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
@@ -49,6 +50,7 @@ module.exports = {
 				.populate('hitGoalPrograms.program', 'programStatus')
                 .select('password particiPrograms.program particiPrograms.programStatus hitGoalPrograms.program hitGoalPrograms.programStatus')
                 .exec(function(err, checkUser){
+            console.log(checkUser);
         	if (!checkUser) {
                 context = {
                     success: false,
@@ -81,33 +83,70 @@ module.exports = {
                     	for (var i=0; i<checkUser.hitGoalPrograms.length; i++) {
 					    	if (checkUser.hitGoalPrograms[i].program.programStatus=='aktiviert') {
 					    		programData.push(checkUser.hitGoalPrograms[i].program._id);
-					    	}
-					    }
+					    	} // i
+					    } // for i
 					    for (var i=0; i<checkUser.particiPrograms.length; i++) {
 					    	if (checkUser.particiPrograms[i].program.programStatus=='aktiviert') {
 					    		programData.push(checkUser.particiPrograms[i].program._id);
-					    	}
-					    }
+					    	} // if
+					    } // for i
 					    // sort programData by programID
                     	programData.sort(function(a,b) {
                     		if(a < b){return -1} else {return 1}
-                    	});
+                    	}); // programData.sort
                     	// delete "doubles"
                     	for (var i=0; i<programData.length;i++) {
                     		if (programData[i + 1]) {
                     			if (JSON.stringify(programData[i]) == JSON.stringify(programData[i +1])) {
 	                    			programData.splice(i,1);
-	                    		}
-                    		}
-                    	}
-                    	console.log(programData);
-
-                    	context = {
-                    		success: true,
-                    		message: 'hat geklappt',
-                    	};
-                    	statusCode = 200;
-                    	publish(context, statusCode, req, res);
+	                    		} // if
+                    		} // if
+                    	} // for i
+                    	// find applicable News
+                        NewsFeed.find({'assignedProgram': { $in: programData}})
+                                .where('newsStatus').equals('erstellt')
+                                .where('newsDeadline').gt(new Date()) // Change to "new Date (2016,1,1)" to test
+                                .populate('customer', 'company')
+                                .populate('assignedProgram', 'programName')
+                                .exec(function(err, newsFeed){
+                            var newsData = [];
+                            var help = {};
+                            if (err || newsFeed.length == 0) {
+                                context = {
+                                    success: false,
+                                    message: 'Es liegen keine Nachrichten vor',
+                                };
+                                statusCode = 400;
+                                publish(context, statusCode, req, res);
+                            } else {// if
+                                //Check if News was already sent
+                                newsFeed.forEach(function(newsfeed, indexN){
+                                    NewsHistory.findById(newsfeed._id)
+                                                .where('receivedBy').equals(res.locals.apiuser)
+                                                .select('receivedBy')
+                                                .exec(function(err, newshistory){
+                                        if (newshistory == null) {// has not been send
+                                            help = {
+                                                newsTitle: newsfeed.newsTitle,
+                                                newsMessage: newsfeed.newsMessage,
+                                                programName: newsfeed.assignedProgram.programName,
+                                                company: newsfeed.customer.company,
+                                            };
+                                            newsData.push(help);
+                                        } // if 
+                                        if (indexN == newsFeed.length - 1) {
+                                            context = {
+                                                success: true,
+                                                message: 'hat geklappt',
+                                                newsFeed: newsData,
+                                            };
+                                            statusCode = 200;
+                                            publish(context, statusCode, req, res);
+                                        } // if
+                                    }); // NewsHistory.findById
+                                }); // newsFeed.forEach
+                            } 
+                        }); // NewsFeed.Find
                     }
                 }); // checkUser.comparePassword
             } // else if checkUser
@@ -132,7 +171,6 @@ module.exports = {
                     dateDefault : moment(new Date()).format('YYYY-MM-DD HH:mm'),
                     dateDefaultDeadline: moment(program.deadlineSubmit).format('YYYY-MM-DD HH:mm'),
                 }; // context
-                console.log(context);
                 res.render('newsFeed/create', context);
                     }); // Programs.findOne
         }); // CUsers.findById
@@ -140,7 +178,7 @@ module.exports = {
 
     processCreateNewsFeed: function(req, res, next) {
         console.log(req.body);
-        var newNews = new newsFeed({
+        var newNews = new NewsFeed({
             customer: req.body.customerId,
             assignedProgram: req.body.programId,
             newsTitle: req.body.newsTitle,

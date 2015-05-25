@@ -36,21 +36,32 @@ function checkUser(req, res, next) {
 };
 
 function buildResponseArray(user, req, res){
-    user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
+    console.log(user);
+    if (user.hitGoalPrograms.length == 0) {
+        console.log('noch kein Program vervollständigt');
         user.particiPrograms.forEach(function(particiProgram, indexP){
-            if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
-                user.particiPrograms[indexP].programsHit = hitGProgram.hitGoalCount;
-            } else if (hitGProgram.hitGoalCount>0 && indexP == user.particiPrograms.length - 1) {
-                user.particiPrograms(user.particiPrograms.length) = {
-                    program: hitGProgram.program,
-                    programsHit: hitGProgram.hitGoalCount
-                };
-            }
-            if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
+            user.particiPrograms[indexP].programsHit = 0;
+            if (indexP == user.particiPrograms.length-1){
                 buildResponseArray2(user, req, res);
             }
         });//user.particiProgram.forEach
-    });//user.hitGoalProgram.forEach
+    } else {
+        user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
+            user.particiPrograms.forEach(function(particiProgram, indexP){
+                if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
+                    user.particiPrograms[indexP].programsHit = hitGProgram.hitGoalCount;
+                } else if (hitGProgram.hitGoalCount>0 && indexP == user.particiPrograms.length - 1) {
+                    user.particiPrograms(user.particiPrograms.length) = {
+                        program: hitGProgram.program,
+                        programsHit: hitGProgram.hitGoalCount
+                    };
+                }
+                if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
+                    buildResponseArray2(user, req, res);
+                }
+            });//user.particiProgram.forEach
+        });//user.hitGoalProgram.forEach
+    }
 }; // buildResponseArray1
 
 function buildResponseArray2 (user, req, res){

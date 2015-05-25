@@ -12,6 +12,7 @@ var newsFeedSchema = new Schema({
 	newsStartDate: Date,
 	newsDeadline: Date,
 	newsDeliveryLimit: Number,
+	newsDeliveryCount: Number,
 	createdBy: { type: Schema.Types.ObjectId, ref: 'CUsers'},
 	newsStatus: String,
 });
