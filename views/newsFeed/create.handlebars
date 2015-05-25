@@ -1,0 +1,60 @@
+<h3>Neue {{customerCompany}} Nachricht an Teilnehmer von Program "{{programName}}" erstellen</h3>
+
+<br>
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/news/anlegen/{{programNr}}" method="POST">
+    	
+    	<input type="hidden" name="customerId" value="{{customerId}}">
+    	<input type="hidden" name="programId" value="{{programId}}">
+        <input type="hidden" name="userId" value="{{userId}}">
+
+    	<div class="form-group">
+            <label for="fieldNewsTitle" class="col-sm-2 control-label">Nachrichten-Titel:</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" required id="fieldNewsTitle" 
+                name="newsTitle">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="fieldNewsMessage" class="col-sm-2 control-label">Nachricht:</label>
+            <div class="col-sm-4">
+                <textarea name="newsMessage" rows="5" class="form-control" required id="fieldNewsMessage" >
+                </textarea>
+                {{!-- <input type="text" class="form-control" required id="fieldNewsMessage" 
+                name="newsMessage"> --}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="fieldNewsDeliveryLimit" class="col-sm-2 control-label">Auslieferungs-Limit</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control" required id="fieldNewsDeliveryLimit" 
+                name="newsDeliveryLimit">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="fieldNewsStartDate" class="col-sm-2 control-label">Gültig ab</label>
+            <div class="col-sm-4">
+				<input type="datetime-local" value= "{{dateDefault}}" class="form-control" id="fieldNewsStartDate" name="newsStartDate"><br>
+            </div><br>
+        </div>
+
+        <div class="form-group">
+            <label for="fieldNewsDeadline" class="col-sm-2 control-label">Gültig bis</label>
+            <div class="col-sm-4">
+				<input type="datetime-local" value= "{{dateDefaultDeadline}}" class="form-control" id="fieldNewsDeadline" name="newsDeadline"><br>
+            </div><br>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Speichern und Senden</button>
+            </div>
+        </div>
+
+    </form>
+    <script type="text/javascript">document.getElementById('fieldNewsTitle').focus();</script>
+	
+</div>

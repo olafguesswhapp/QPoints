@@ -12,6 +12,7 @@ var cartController = require('./controllers/cart.js');
 var orderController = require('./controllers/order.js');
 var transactionController = require('./controllers/transaction.js');
 var resetController = require('./controllers/reset.js');
+var newsFeedController = require('./Controllers/newsfeed.js');
 
 module.exports = function(app) {
 
@@ -23,6 +24,10 @@ module.exports = function(app) {
 
 	// api Controller
 	apiController.registerRoutes(app);
+
+	// news Feed Controller
+	newsFeedController.registerRoutes(app);
+
 
 	// test MongoDB
 	app.get('/waehlen/:wahl', TestMongoDB.wahl);

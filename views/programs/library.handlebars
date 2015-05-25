@@ -12,6 +12,7 @@
 			{{!-- <td>Lesbar bis</td> --}}
 			<td>Einlösbar bis</td>
 			<td>Rollen</td>
+			<td>Senden</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -26,6 +27,7 @@
 			<td>{{deadlineSubmit}}</td>
 			<td>{{#allocatedReels}}
 				{{#if @index}}, {{/if}}<a href="/rollen/{{nr}}">{{nr}}</a>{{/allocatedReels}}</td>
+			<td><a href="/news/anlegen/{{nr}}"><img src="{{static '/images/new-message-icon.png'}}"></a></td>
 		</tr>
 		{{/programs}}
 	</tbody>
