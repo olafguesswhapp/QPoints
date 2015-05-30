@@ -2,6 +2,7 @@ var Orders = require('../models/orders.js');
 var Products = require('../models/products.js');
 var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
+var NewsFeed = require('../models/newsfeed.js');
 var moment = require('moment');
 
 
@@ -29,6 +30,7 @@ module.exports = {
 	confirmed: function(req, res, next){
 		// internal transaction execution
 		// 1st check: where does user come from
+		console.log('Kommt von ' + req.header('Referer'));
 		if (req.header('Referer').indexOf('/warenkorb/checkout')<0) {
 			req.session.flash = {
 				type: 'Warnung',
@@ -68,35 +70,73 @@ module.exports = {
 				paymentStatus: 'offen',
 				deliveryStatus: 'offen',
 			}); // new Order
-			// check if Reels where ordered
+			
+			// check which Products where ordered
 			var RequiReels = 0;
-			for(var i=0; i < o.items.length; i++){
+			var RequiNews = 0;
+			var ordersToProcess = o.items.length;
+			for(var i=0; i < ordersToProcess; i++){
 				if(o.items[i].prodNr =='R10001'){
 					RequiReels = o.items[i].prodQuantity;
-					break;}
-			}
-			
-			// allocate Reels
-			Reels.find({ 'reelStatus': 'erfasst'}, function(err,reels){
-				if (RequiReels>0 && reels.length >= RequiReels) { // enoght unused reels to allocate
-					reels.forEach(function(reel, index){
-						if(index<RequiReels){
-							o.allocatedReels.push(reels[index]);
-							o.orderStatus = 'Rolle/n zugeordnet';
-							o.deliveryStatus = 'versendbar';
-							reel.customer = o.customer;
-							reel.reelStatus = 'zugeordnet';
-							reel.save();
-						} // if for still reel product unallocated
-					}); // ForEach 
-				} else { }// enough unused reels?
-				// ToDo Payment process !!!
+				} // if prodNr = Reel
+				else if (o.items[i].prodNr == 'N50001') {
+					RequiNews = o.items[i].prodQuantity;
+				} // if prodNr = News
+			} // for every ordered Item
+
+			console.log('orders to process ' + ordersToProcess);
+			console.log(o);
+
+			// Process Reel Order
+			if (RequiReels>0) {
+				// allocate Reels
+				Reels.find({ 'reelStatus': 'erfasst'}, function(err,reels){
+					if (reels.length >= RequiReels) { // enoght unused reels to allocate
+						reels.forEach(function(reel, index){
+							if(index<RequiReels){
+								o.allocatedReels.push(reels[index]);
+								o.orderStatus = 'Rolle/n zugeordnet';
+								o.deliveryStatus = 'versendbar';
+								reel.customer = o.customer;
+								reel.reelStatus = 'zugeordnet';
+								reel.save();
+							} // if for still reel product unallocated
+						}); // ForEach 
+					} else { }// enough unused reels?
+					// ToDo Payment process !!!
+					ordersToProcess -=1;
+				}); // Reels
+			} // if Reels were ordered
+			console.log('orders to process ' + ordersToProcess);
+
+			// Process News Order
+			if (RequiNews>0) {
+				var newNews = new NewsFeed({
+		            customer: user.customer,
+		            // assignedProgram: null,
+		            // newsTitle: null,
+		            // newsMessage: req.body.newsMessage,
+		            // newsStartDate: req.body.newsStartDate,
+		            // newsDeadline: req.body.newsDeadline,
+		            newsDeliveryLimit: 5,
+		            newsDeliveryCount: 0,
+		            createdBy: req.user._id,
+		            newsStatus: "zugeordnet",
+		        }); // newNews
+		        newNews.save(function(err, newNewsFeed) {
+		            if(err) return next(err);
+		        });
+		        ordersToProcess -=1;
+			} // if News were ordered
+
+			console.log('orders to process ' + ordersToProcess);
+			if (ordersToProcess==0) {
 				o.save(function(err, savedOrder){
 					if(err) return next(err);
 					req.session.cart = { items: [], total: 0}; //REQ.SESSION.LÖSCHEN!!!
 					res.redirect(303, '/bestellungen');
 				}); // Save new Ordner in DB
-			}); // Reels
+			} // if ordersToProcess == 0
 
 		}); // Orders
 		}); // Users
