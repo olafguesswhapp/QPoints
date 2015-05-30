@@ -6,6 +6,18 @@ var CUsers = require('../models/cusers.js');
 var qplib = require('../lib/qpointlib.js');
 var moment = require('moment');
 
+function LoggedInUserOnly(req, res, next) {
+    if (!req.user) {
+        req.session.flash = {
+            type: 'Warnung',
+            intro: 'Sie müssen bitte als User eingelogged sein.',
+            message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
+        };
+        req.session.lastPage = req.path;
+        return res.redirect(303, '/login');
+    } else { return next();}
+};
+
 function publish(context, statusCode, req, res){
     console.log(context);
     res.status(statusCode).json(context);
@@ -42,6 +54,7 @@ module.exports = {
 		app.post('/apinewsfeed', checkUser, this.processNewsFeedRequest);
         app.get('/news/anlegen/:nr', this.createNewsFeed);
         app.post('/news/anlegen/:nr', this.processCreateNewsFeed);
+        app.get('/news', LoggedInUserOnly, this.newsLibrary);
 	},
 
 	processNewsFeedRequest : function(req, res, next){
@@ -50,7 +63,6 @@ module.exports = {
 				.populate('hitGoalPrograms.program', 'programStatus')
                 .select('password particiPrograms.program particiPrograms.programStatus hitGoalPrograms.program hitGoalPrograms.programStatus')
                 .exec(function(err, checkUser){
-            console.log(checkUser);
         	if (!checkUser) {
                 context = {
                     success: false,
@@ -105,10 +117,13 @@ module.exports = {
                     	// find applicable News
                         NewsFeed.find({'assignedProgram': { $in: programData}})
                                 .where('newsStatus').equals('erstellt')
+                                .$where('this.newsDeliveryLimit > this.newsDeliveryCount')
                                 .where('newsDeadline').gt(new Date()) // Change to "new Date (2016,1,1)" to test
                                 .populate('customer', 'company')
                                 .populate('assignedProgram', 'programName')
                                 .exec(function(err, newsFeed){
+                            console.log('test');
+                            console.log(newsFeed);
                             var newsData = [];
                             var help = {};
                             if (err || newsFeed.length == 0) {
@@ -121,11 +136,13 @@ module.exports = {
                             } else {// if
                                 //Check if News was already sent
                                 newsFeed.forEach(function(newsfeed, indexN){
-                                    NewsHistory.findById(newsfeed._id)
-                                                .where('receivedBy').equals(res.locals.apiuser)
-                                                .select('receivedBy')
+                                    console.log(newsfeed._id);
+                                    NewsHistory.find({'newsFeed' : newsfeed._id})
+                                                .where({'receivedBy' : res.locals.apiuser })
+                                                .select('_id')
                                                 .exec(function(err, newshistory){
-                                        if (newshistory == null) {// has not been send
+                                        if (newshistory.length == 0) {// has not been send
+                                            // collect News Data to send to User
                                             help = {
                                                 newsTitle: newsfeed.newsTitle,
                                                 newsMessage: newsfeed.newsMessage,
@@ -133,21 +150,45 @@ module.exports = {
                                                 company: newsfeed.customer.company,
                                             };
                                             newsData.push(help);
-                                        } // if 
+                                            // register news Push to newsHistory data feed
+                                            newHistory = new NewsHistory ({
+                                                newsFeed: newsfeed._id,
+                                                receivedBy: res.locals.apiuser,
+                                                customer: newsfeed.customer._id,
+                                                assignedProgram: newsfeed.assignedProgram._id,
+                                                sendDate: new Date(),
+                                            });
+                                            newHistory.save(function(err, newhistory) {
+                                                if(err) return next(err);
+                                            });
+                                            qplib.updateNewsFeedStats(newsfeed._id);
+                                        } // if
+                                        // if last forEach.loop than finish API with response
                                         if (indexN == newsFeed.length - 1) {
-                                            context = {
-                                                success: true,
-                                                message: 'hat geklappt',
-                                                newsFeed: newsData,
-                                            };
-                                            statusCode = 200;
-                                            publish(context, statusCode, req, res);
+                                            console.log('letzte prüfung');
+                                            console.log(newsData);
+                                            if (newsData.length == 0) {
+                                                context = {
+                                                    success: false,
+                                                    message: 'Es liegen keine Nachrichten vor',
+                                                };
+                                                statusCode = 400;
+                                                publish(context, statusCode, req, res);
+                                            } else {
+                                                context = {
+                                                    success: true,
+                                                    message: 'hat geklappt',
+                                                    newsFeed: newsData,
+                                                };
+                                                statusCode = 200;
+                                                publish(context, statusCode, req, res);
+                                            } // newsData is not empty
                                         } // if
                                     }); // NewsHistory.findById
                                 }); // newsFeed.forEach
-                            } 
+                            } // else
                         }); // NewsFeed.Find
-                    }
+                    } // else
                 }); // checkUser.comparePassword
             } // else if checkUser
         }); // CUsers.findById
@@ -168,8 +209,8 @@ module.exports = {
                     programId: program._id,
                     programNr: req.params.nr,
                     programName: program.programName,
-                    dateDefault : moment(new Date()).format('YYYY-MM-DD HH:mm'),
-                    dateDefaultDeadline: moment(program.deadlineSubmit).format('YYYY-MM-DD HH:mm'),
+                    dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'), 
+                    dateDefaultDeadline: moment(program.deadlineSubmit).format('YYYY-MM-DDTHH:mm'),
                 }; // context
                 res.render('newsFeed/create', context);
                     }); // Programs.findOne
@@ -186,6 +227,7 @@ module.exports = {
             newsStartDate: req.body.newsStartDate,
             newsDeadline: req.body.newsDeadline,
             newsDeliveryLimit: req.body.newsDeliveryLimit,
+            newsDeliveryCount: 0,
             createdBy: req.body.userId,
             newsStatus: "erstellt",
         });
@@ -194,4 +236,58 @@ module.exports = {
             res.redirect(303, '/programm');
         });
     }, // processCreateNewsFeed
+
+    // Übersicht aller angelegten Programme
+    newsLibrary: function(req,res, next){
+        var context = {};
+        CUsers.findById(req.user._id)
+            .populate('customer', 'id company')
+            .exec(function(err, user) {         
+            Programs.find({customer: user.customer._id})
+                    .select('nr programName programStatus')
+                    .exec(function(err, program){
+                if (err || !program) {
+                    context = {
+                        customerCompany: user.customer.company,
+                        news: {
+                            programName: 'Sie haben noch keine News verfasst',
+                        }, // news
+                    }; // context
+                    res.render('newsFeed/library', context);
+                    return;
+                } else { // if error or !program found
+                    context = {
+                        customerCompany: user.customer.company,
+                        programs: [],
+                    };
+                    program.forEach(function(programWithNews, indexP){
+                        console.log(programWithNews.programName);
+                        NewsFeed.find({assignedProgram: programWithNews._id})
+                                .exec(function(err, newsFeed) {
+                            var help = {
+                                nr: programWithNews.nr,
+                                programStatus: programWithNews.programStatus,
+                                programName: programWithNews.programName,
+                                programNews: newsFeed.map(function(foundNews){
+                                    return {
+                                        newsTitle: foundNews.newsTitle,
+                                        newsMessage: foundNews.newsMessage,
+                                        newsDeliveryLimit: foundNews.newsDeliveryLimit,
+                                        newsDeliveryCount: foundNews.newsDeliveryCount,
+                                        newsStatus: foundNews.newsStatus,
+                                        newsDeadline: moment(foundNews.newsDeadline).format('YYYY-MM-DD HH:mm'),
+                                    } // return
+                                }) // newsFeed.map
+                            }; // assignedPrograms
+                            context.programs[indexP] = help;
+                            if (indexP == program.length - 1) {
+                                console.log(context);
+                                res.render('newsFeed/library', context);
+                            } // if
+                        }); // NewsFeed.find
+                    }); // program.forEach
+                } // else - program for customer was found
+            }); // Programs.find
+        }); // CUsers.findById
+    }, // 
 };

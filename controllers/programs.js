@@ -41,11 +41,11 @@ module.exports = {
 					}
 					var context = {
 						// die letzte Programm-Nr filetieren (string und nr) und um 1 erhöhen [A]
-						neueNr : newProgramNr,
+						neueNr: newProgramNr,
 						// in Start- und Deadline-Datums das heutige Datum setzen
-						dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+						dateDefault: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 						// Kunde welchem das Programm zugeordnet ist
-						customerId : user.customer._id,
+						customerId: user.customer._id,
 						customerCompany : user.customer.company,
 						// Liste der noch nicht zugeordneten Rollen erstellen [B]
 						reels: reels.map(function(reel){

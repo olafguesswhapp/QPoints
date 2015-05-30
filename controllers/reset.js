@@ -3,7 +3,8 @@ var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
 var Orders = require('../models/orders.js');
-var newsFeed = require('../models/newsfeed.js');
+var NewsFeed = require('../models/newsfeed.js');
+var NewsHistory = require('../models/newshistory.js');
 
 module.exports = {
 
@@ -22,8 +23,11 @@ module.exports = {
 		Orders.remove({}, function(err) { 
 			console.log('Orders removed');
 		});
-		newsFeed.remove({}, function(err) {
-			console.log('newsFeed removed');
+		NewsFeed.remove({}, function(err) {
+			console.log('NewsFeed removed');
+		});
+		NewsHistory.remove({}, function(err) {
+			console.log('NewsHistory removed');
 		});
 
 		var helpAA = {}, helpBB = {}, helpCC = {};
