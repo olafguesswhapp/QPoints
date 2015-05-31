@@ -55,6 +55,7 @@ module.exports = {
         app.get('/news/anlegen/:nr', this.createNewsFeed);
         app.post('/news/anlegen/:nr', this.processCreateNewsFeed);
         app.get('/news', LoggedInUserOnly, this.newsLibrary);
+        app.get('/news/:id', LoggedInUserOnly, this.newsDetail);
 	},
 
 	processNewsFeedRequest : function(req, res, next){
@@ -276,6 +277,7 @@ module.exports = {
                                 programName: programWithNews.programName,
                                 programNews: newsFeed.map(function(foundNews){
                                     return {
+                                        newsFeedId: foundNews._id,
                                         newsTitle: foundNews.newsTitle,
                                         newsMessage: foundNews.newsMessage,
                                         newsDeliveryLimit: foundNews.newsDeliveryLimit,
@@ -295,5 +297,31 @@ module.exports = {
                 } // else - program for customer was found
             }); // Programs.find
         }); // CUsers.findById
-    }, // 
+    }, // newsLibrary
+
+    newsDetail: function (req, res, next) {
+        NewsFeed.findById(req.params.id)
+                .populate('assignedProgram', 'programName programStatus')
+                .populate('customer', 'company')
+                .populate('createdBy', 'firstName')
+                .exec(function(err, newsfeed){
+            if (err || newsfeed.length == 0) {
+
+            } // no News found
+            var context = {
+                customerCompany: newsfeed.customer.company,
+                programName: newsfeed.assignedProgram.programName,
+                programStatus: newsfeed.assignedProgram.programStatus,
+                firstName: newsfeed.createdBy.firstName,
+                newsTitle: newsfeed.newsTitle,
+                newsMessage: newsfeed.newsMessage,
+                newsStartDate: moment(newsfeed.newsStartDate).format('YYYY-MM-DD HH:mm'),
+                newsDeadline: moment(newsfeed.newsDeadline).format('YYYY-MM-DD HH:mm'),
+                newsDeliveryCount: newsfeed.newsDeliveryCount,
+                newsDeliveryLimit: newsfeed.newsDeliveryLimit,
+                newsStatus: newsfeed.newsStatus,
+            }; // context
+            res.render('newsFeed/detail', context);
+        }); // NewsFeed.findById
+    }, // newsDetail
 };
