@@ -202,39 +202,45 @@ module.exports = {
             Programs.findOne({'nr' : req.params.nr})
                     .select('_id programName deadlineSubmit')
                     .exec(function(err, program){
-                context = {
-                    userId: user._id,
-                    customerId: user.customer._id,
-                    customerCompany: user.customer.company,
-                    programId: program._id,
-                    programNr: req.params.nr,
-                    programName: program.programName,
-                    dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'), 
-                    dateDefaultDeadline: moment(program.deadlineSubmit).format('YYYY-MM-DDTHH:mm'),
-                }; // context
-                res.render('newsFeed/create', context);
-                    }); // Programs.findOne
+                NewsFeed.find({'newsStatus' : 'zugeordnet', 'customer' : user.customer._id})
+                        .select('_id newsDeliveryLimit')
+                        .exec(function(err, newsFeed){
+                    context = {
+                        newsFeedId: newsFeed[0]._id,
+                        newsDeliveryLimit: newsFeed[0].newsDeliveryLimit,
+                        userId: user._id,
+                        customerId: user.customer._id,
+                        customerCompany: user.customer.company,
+                        programId: program._id,
+                        programNr: req.params.nr,
+                        programName: program.programName,
+                        dateDefault : moment(new Date()).format('YYYY-MM-DDTHH:mm'), 
+                        dateDefaultDeadline: moment(program.deadlineSubmit).format('YYYY-MM-DDTHH:mm'),
+                    }; // context
+                    console.log(context);
+                    res.render('newsFeed/create', context);
+                }); // NewsFeed.find
+            }); // Programs.findOne
         }); // CUsers.findById
     }, // createNewsFeed
 
     processCreateNewsFeed: function(req, res, next) {
         console.log(req.body);
-        var newNews = new NewsFeed({
-            customer: req.body.customerId,
-            assignedProgram: req.body.programId,
-            newsTitle: req.body.newsTitle,
-            newsMessage: req.body.newsMessage,
-            newsStartDate: req.body.newsStartDate,
-            newsDeadline: req.body.newsDeadline,
-            newsDeliveryLimit: req.body.newsDeliveryLimit,
-            newsDeliveryCount: 0,
-            createdBy: req.body.userId,
-            newsStatus: "erstellt",
-        });
-        newNews.save(function(err, newNewsFeed) {
-            if(err) return next(err);
-            res.redirect(303, '/programm');
-        });
+        NewsFeed.findById(req.body.newsFeedId, function(err, newsfeed){
+            newsfeed.assignedProgram = req.body.programId;
+            newsfeed.newsTitle = req.body.newsTitle;
+            newsfeed.newsMessage = req.body.newsMessage;
+            newsfeed.newsStartDate = req.body.newsStartDate;
+            newsfeed.newsDeadline = req.body.newsDeadline;
+            newsfeed.newsDeliveryLimit = req.body.newsDeliveryLimit;
+            newsfeed.createdBy = req.body.userId;
+            newsfeed.newsStatus = 'erstellt';
+
+            newsfeed.save(function(err, newNewsFeed) {
+                if(err) return next(err);
+                res.redirect(303, '/programm');
+            });
+        }); // NewsFeed.FindById
     }, // processCreateNewsFeed
 
     // Übersicht aller angelegten Programme

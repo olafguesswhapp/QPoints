@@ -2,6 +2,7 @@ var Programs = require('../models/programs.js');
 var Reels = require('../models/reels.js');
 var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
+var NewsFeed = require('../models/newsfeed.js');
 var moment = require('moment');
 
 function LoggedInUserOnly(req, res, next) {
@@ -103,37 +104,48 @@ module.exports = {
 			Programs.find({customer: user.customer._id})
 				.populate('allocatedReels', 'nr')
 				.exec(function(err, programs) {
+					var context;
 					if (programs) {
-						var context = {
-							customerCompany: user.customer.company,
-							programs: programs.map(function(program){
-								return {
-									nr: program.nr,
-									programStatus: program.programStatus,
-									programName: program.programName,
-									goalToHit: program.goalToHit,
-									startDate: moment(program.startDate).format("DD.MM.YY"),
-									deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY"),
-									// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
-									allocatedReels: program.allocatedReels.map(function(reel){
-										return {nr: reel.nr}
-									}),
-									customer: program.customer,
-								}
-							})
-						};
-					} else {
-						var context = {
+						NewsFeed.find({'newsStatus' : 'zugeordnet', 'customer' : user.customer._id})
+								.select('newsStatus customer')
+								.exec(function(err, newsFeed){
+							var hasNews = false;
+							if (newsFeed.length >0) {
+								hasNews=true;
+							}
+							context = {
+								customerCompany: user.customer.company,
+								programs: programs.map(function(program){
+									return {
+										nr: program.nr,
+										programStatus: program.programStatus,
+										programName: program.programName,
+										goalToHit: program.goalToHit,
+										startDate: moment(program.startDate).format("DD.MM.YY"),
+										deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY"),
+										// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
+										allocatedReels: program.allocatedReels.map(function(reel){
+											return {nr: reel.nr}
+										}), // allocatedReels.map
+										customer: program.customer,
+										hasNews: hasNews,
+									} // return for programs map
+								}) // programs map
+							}; // context
+							console.log(context);
+							res.render('programs/library', context);
+						}); // NewsFeed.find
+					} else { // else if no programs
+						context = {
 							customerCompany: user.customer.company,
 							programs: {
 								programName: 'Sie haben noch kein Programm angelegt',
-							}
-						};
-					}
-				res.render('programs/library', context);		
-			});
-		});
-	},
+							} // programs
+						}; // context
+					} // else - no program
+			}); // Programs.find
+		}); // CUSers.findById
+	}, // Librars
 
 	// Programm Detail-Ansicht
 	programDetail: function(req,res, next){

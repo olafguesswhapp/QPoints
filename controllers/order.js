@@ -18,6 +18,45 @@ function LoggedInUserOnly(req, res, next) {
 	} else { return next();}
 };
 
+function processReelOrder (req, requiReels, o) {
+	Reels.find({ 'reelStatus': 'erfasst'})
+			.select('_id customer reelStatus')
+			.limit(requiReels)
+			.exec(function(err,reels){
+		console.log('requiReels: ' + requiReels);
+		console.log(reels);
+		reels.forEach(function(reel, indexR){
+			o.allocatedReels.push(reel._id);
+			reel.customer = o.customer;
+			reel.reelStatus = 'zugeordnet';
+			reel.save();
+			if (indexR == reels.length - 1) {
+				console.log('order to be saved');
+				console.log(o);
+				o.orderStatus = 'Rolle/n zugeordnet';
+				o.deliveryStatus = 'versendbar';
+				o.save();
+			} // If last reels.forEach
+		}); // ForEach 
+		// ToDo  Payment process !!!
+	}); // Reels
+}; // processReelOrder
+
+function processNewsOrder (req, requiNews, customerId) {
+	for(indexRN = 0; indexRN<requiNews; indexRN++) {
+		var newNews = new NewsFeed({
+            customer: customerId,
+            newsDeliveryLimit: 5,
+            newsDeliveryCount: 0,
+            createdBy: req.user._id,
+            newsStatus: "zugeordnet",
+        }); // newNews
+        newNews.save(function(err, newNewsFeed) {
+            if(err) return next(err);
+        }); // newNews.Save
+	} // RequiNews.ForEach
+}; // processNewsOrder
+
 module.exports = {
 
 	// order routes
@@ -45,100 +84,63 @@ module.exports = {
 			Orders.findOne({}, {}, {sort: {'nr' : -1}})
 				.populate('items.prodId', 'nr')
 				.exec(function(err, order){
-			if (!order) {
-				var orderNr = 'B1000001';
-			} else {
-				var orderNr = order.nr.match(/\D+/)[0] + (parseInt(order.nr.match(/\d+/))+1);
-			}
-			// neue Order speichern
-			var o = new Orders ({
-				nr: orderNr,
-				orderStatus: 'erfasst',
-				items: req.session.cart.items.map(function(item){
-					return {
-					prodId: item._id,
-					prodNr: item.nr,
-					prodQuantity: item.quantity,
-					prodPrice: item.price,
-					prodSum: item.itemSum,
+				
+				if (!order) {
+					var orderNr = 'B1000001';
+				} else {
+					var orderNr = order.nr.match(/\D+/)[0] + (parseInt(order.nr.match(/\d+/))+1);
+				}
+				// neue Order speichern
+				var o = new Orders ({
+					nr: orderNr,
+					orderStatus: 'erfasst',
+					items: req.session.cart.items.map(function(item){
+						return {
+						prodId: item._id,
+						prodNr: item.nr,
+						prodQuantity: item.quantity,
+						prodPrice: item.price,
+						prodSum: item.itemSum,
+						}
+					}),
+					total: req.session.cart.total,
+					customer: user.customer,
+					approved: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+					approvedBy: user._id,
+					paymentStatus: 'offen',
+					deliveryStatus: 'offen',
+				}); // new Order
+				
+				// check which Products where ordered
+				var requiReels = 0;
+				var requiNews = 0;
+				for(var i=0; i < o.items.length; i++){
+					if(o.items[i].prodNr =='R10001'){
+						requiReels = o.items[i].prodQuantity;
+					} // if prodNr = Reel
+					else if (o.items[i].prodNr == 'N50001') {
+						requiNews = o.items[i].prodQuantity;
+					} // if prodNr = News
+				} // for every ordered Item
+
+				// Process Reel Order
+				if (requiReels>0) {
+					processReelOrder(req, requiReels, o);
+				}
+				// Process News Order
+				if (requiNews>0){ // if Reels were ordered
+					processNewsOrder (req, requiNews, user.customer);
+					if (requiReels == 0) {
+						o.orderStatus = 'News zugeordnet';
+						o.save();
 					}
-				}),
-				total: req.session.cart.total,
-				customer: user.customer,
-				approved: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-				approvedBy: user._id,
-				paymentStatus: 'offen',
-				deliveryStatus: 'offen',
-			}); // new Order
-			
-			// check which Products where ordered
-			var RequiReels = 0;
-			var RequiNews = 0;
-			var ordersToProcess = o.items.length;
-			for(var i=0; i < ordersToProcess; i++){
-				if(o.items[i].prodNr =='R10001'){
-					RequiReels = o.items[i].prodQuantity;
-				} // if prodNr = Reel
-				else if (o.items[i].prodNr == 'N50001') {
-					RequiNews = o.items[i].prodQuantity;
-				} // if prodNr = News
-			} // for every ordered Item
+				}
 
-			console.log('orders to process ' + ordersToProcess);
-			console.log(o);
+				// Orders have been processed therefore go to checkout and render Site
+				req.session.cart = { items: [], total: 0}; //REQ.SESSION.LÖSCHEN!!!
+				res.redirect(303, '/bestellungen');
 
-			// Process Reel Order
-			if (RequiReels>0) {
-				// allocate Reels
-				Reels.find({ 'reelStatus': 'erfasst'}, function(err,reels){
-					if (reels.length >= RequiReels) { // enoght unused reels to allocate
-						reels.forEach(function(reel, index){
-							if(index<RequiReels){
-								o.allocatedReels.push(reels[index]);
-								o.orderStatus = 'Rolle/n zugeordnet';
-								o.deliveryStatus = 'versendbar';
-								reel.customer = o.customer;
-								reel.reelStatus = 'zugeordnet';
-								reel.save();
-							} // if for still reel product unallocated
-						}); // ForEach 
-					} else { }// enough unused reels?
-					// ToDo Payment process !!!
-					ordersToProcess -=1;
-				}); // Reels
-			} // if Reels were ordered
-			console.log('orders to process ' + ordersToProcess);
-
-			// Process News Order
-			if (RequiNews>0) {
-				var newNews = new NewsFeed({
-		            customer: user.customer,
-		            // assignedProgram: null,
-		            // newsTitle: null,
-		            // newsMessage: req.body.newsMessage,
-		            // newsStartDate: req.body.newsStartDate,
-		            // newsDeadline: req.body.newsDeadline,
-		            newsDeliveryLimit: 5,
-		            newsDeliveryCount: 0,
-		            createdBy: req.user._id,
-		            newsStatus: "zugeordnet",
-		        }); // newNews
-		        newNews.save(function(err, newNewsFeed) {
-		            if(err) return next(err);
-		        });
-		        ordersToProcess -=1;
-			} // if News were ordered
-
-			console.log('orders to process ' + ordersToProcess);
-			if (ordersToProcess==0) {
-				o.save(function(err, savedOrder){
-					if(err) return next(err);
-					req.session.cart = { items: [], total: 0}; //REQ.SESSION.LÖSCHEN!!!
-					res.redirect(303, '/bestellungen');
-				}); // Save new Ordner in DB
-			} // if ordersToProcess == 0
-
-		}); // Orders
+			}); // Orders
 		}); // Users
 	},
 
