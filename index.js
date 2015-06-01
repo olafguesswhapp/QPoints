@@ -48,6 +48,13 @@ var handlebars = require('express3-handlebars')
         itemSumOld: function(items){
             return items.price * items.quantity;
         },
+        newsLimitCheck: function(value1, value2, options) {
+            if (value1 < value2) {
+                return options.fn(this);
+            } else {
+                return options.inverse(this);
+            }
+        },
     }
 });	
 app.engine('handlebars', handlebars.engine);

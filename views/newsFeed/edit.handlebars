@@ -1,0 +1,73 @@
+<h3>{{customerCompany}} Botschaft an Teilnehmer von Program "{{programName}}"</h3>
+<p>Status vom Programm: {{programStatus}}</p>
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/news/edit/{{newsFeedId}}" method="POST">
+    	
+        <input type="hidden" name="newsFeedId" value="{{newsFeedId}}">
+        
+		<div class="form-group">
+            <label for="fieldNewsTitle" class="col-sm-2 control-label">Nachrichten-Titel:</label>
+            <div class="col-sm-4">
+                <input type="text" value="{{newsTitle}}" class="form-control" required id="fieldNewsTitle" 
+                name="newsTitle">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldNewsMessage" class="col-sm-2 control-label">Nachricht:</label>
+            <div class="col-sm-4">
+                <textarea name="newsMessage" rows="5" class="form-control" required id="fieldNewsMessage" >{{newsMessage}}</textarea>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldCreatedBy" class="col-sm-2 control-label">Erstellt von:</label>
+            <div class="col-sm-4">
+                <input type="text" value="{{firstName}}" class="form-control" required id="fieldCreatedBy" 
+                name="firstName" disabled>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsStartDate" class="col-sm-2 control-label">Gültig ab</label>
+            <div class="col-sm-4">
+				<input type="datetime-local" value= "{{newsStartDate}}" class="form-control" id="fieldNewsStartDate" name="newsStartDate" disabled>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsDeadline" class="col-sm-2 control-label">Gültig bis</label>
+            <div class="col-sm-4">
+				<input type="datetime-local" value= "{{newsDeadline}}" class="form-control" id="fieldNewsDeadline" name="newsDeadline">
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsStatus" class="col-sm-2 control-label">Status:</label>
+            <div class="col-sm-4">
+                <input type="text" value="{{newsStatus}}" class="form-control" required id="fieldNewsStatus" 
+                name="newsStatus" disabled>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsDeliveryCount" class="col-sm-2 control-label">Bisher ausgeliefert:</label>
+            <div class="col-sm-4">
+                <input type="number" value="{{newsDeliveryCount}}"class="form-control" required id="fieldNewsDeliveryCount" name="newsDeliveryCount" disabled>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsDeliveryLimit" class="col-sm-2 control-label">Auslieferungs-Limit</label>
+            <div class="col-sm-4">
+                <input type="number" value="{{newsDeliveryLimit}}" min="{{newsDeliveryCount}}" max="{{newsBudget}}" class="form-control" required id="fieldNewsDeliveryLimit" name="newsDeliveryLimit" {{#newsLimitCheck newsDeliveryLimit newsBudget}}{{else}}disabled{{/newsLimitCheck}}>
+            </div>
+        </div>
+		<div class="form-group">
+            <label for="fieldNewsBudget" class="col-sm-2 control-label">Gekauft:</label>
+            <div class="col-sm-4">
+                <input type="number" value="{{newsBudget}}"class="form-control" required id="fieldNewsBudget" name="newsBudget" disabled>
+            </div>
+        </div>
+		<div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Aktualisieren</button>
+            </div>
+        </div>
+	</form>
+	<script type="text/javascript">document.getElementById('newsTitle').focus();</script>
+</div>

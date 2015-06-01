@@ -56,6 +56,8 @@ module.exports = {
         app.post('/news/anlegen/:nr', this.processCreateNewsFeed);
         app.get('/news', LoggedInUserOnly, this.newsLibrary);
         app.get('/news/:id', LoggedInUserOnly, this.newsDetail);
+        app.get('/news/edit/:id', LoggedInUserOnly, this.newsEdit);
+        app.post('/news/edit/:id', LoggedInUserOnly, this.processNewsEdit);
 	},
 
 	processNewsFeedRequest : function(req, res, next){
@@ -209,6 +211,7 @@ module.exports = {
                     context = {
                         newsFeedId: newsFeed[0]._id,
                         newsDeliveryLimit: newsFeed[0].newsDeliveryLimit,
+                        newsBudget: newsFeed[0].newsBudget,
                         userId: user._id,
                         customerId: user.customer._id,
                         customerCompany: user.customer.company,
@@ -280,6 +283,7 @@ module.exports = {
                                         newsFeedId: foundNews._id,
                                         newsTitle: foundNews.newsTitle,
                                         newsMessage: foundNews.newsMessage,
+                                        newsBudget: foundNews.newsBudget,
                                         newsDeliveryLimit: foundNews.newsDeliveryLimit,
                                         newsDeliveryCount: foundNews.newsDeliveryCount,
                                         newsStatus: foundNews.newsStatus,
@@ -309,6 +313,7 @@ module.exports = {
 
             } // no News found
             var context = {
+                newsId: req.params.id,
                 customerCompany: newsfeed.customer.company,
                 programName: newsfeed.assignedProgram.programName,
                 programStatus: newsfeed.assignedProgram.programStatus,
@@ -317,6 +322,7 @@ module.exports = {
                 newsMessage: newsfeed.newsMessage,
                 newsStartDate: moment(newsfeed.newsStartDate).format('YYYY-MM-DD HH:mm'),
                 newsDeadline: moment(newsfeed.newsDeadline).format('YYYY-MM-DD HH:mm'),
+                newsBudget: newsfeed.newsBudget,
                 newsDeliveryCount: newsfeed.newsDeliveryCount,
                 newsDeliveryLimit: newsfeed.newsDeliveryLimit,
                 newsStatus: newsfeed.newsStatus,
@@ -324,4 +330,48 @@ module.exports = {
             res.render('newsFeed/detail', context);
         }); // NewsFeed.findById
     }, // newsDetail
+
+    newsEdit: function (req, res, next) {
+        NewsFeed.findById(req.params.id)
+                .populate('assignedProgram', 'programName programStatus')
+                .populate('customer', 'company')
+                .populate('createdBy', 'firstName')
+                .exec(function(err, newsfeed){
+            if (err || newsfeed.length == 0) {
+
+            } // no News found
+            var context = {
+                newsFeedId: req.params.id,
+                customerCompany: newsfeed.customer.company,
+                programName: newsfeed.assignedProgram.programName,
+                programStatus: newsfeed.assignedProgram.programStatus,
+                firstName: newsfeed.createdBy.firstName,
+                newsTitle: newsfeed.newsTitle,
+                newsMessage: newsfeed.newsMessage,
+                newsStartDate: moment(newsfeed.newsStartDate).format('YYYY-MM-DD HH:mm'),
+                newsDeadline: moment(newsfeed.newsDeadline).format('YYYY-MM-DD HH:mm'),
+                newsBudget: newsfeed.newsBudget,
+                newsDeliveryCount: newsfeed.newsDeliveryCount,
+                newsDeliveryLimit: newsfeed.newsDeliveryLimit,
+                newsStatus: newsfeed.newsStatus,
+            }; // context
+            res.render('newsFeed/edit', context);
+        }); // NewsFeed.findById
+    }, // newsEdit
+
+    processNewsEdit: function (req, res, next) {
+        console.log('back home');
+        console.log(req.body);
+        NewsFeed.findById(req.body.newsFeedId, function(err, newsfeed){
+            newsfeed.newsTitle = req.body.newsTitle;
+            newsfeed.newsMessage = req.body.newsMessage;
+            newsfeed.newsDeadline = req.body.newsDeadline;
+            newsfeed.newsDeliveryLimit = req.body.newsDeliveryLimit;
+
+            newsfeed.save(function(err, newNewsFeed) {
+                if(err) return next(err);
+                res.redirect(303, '/news');
+            });
+        }); // NewsFeed.FindById
+    }, // processNewsEdit
 };

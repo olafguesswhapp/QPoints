@@ -46,6 +46,7 @@ function processNewsOrder (req, requiNews, customerId) {
 	for(indexRN = 0; indexRN<requiNews; indexRN++) {
 		var newNews = new NewsFeed({
             customer: customerId,
+            newsBudget: 5,
             newsDeliveryLimit: 5,
             newsDeliveryCount: 0,
             createdBy: req.user._id,

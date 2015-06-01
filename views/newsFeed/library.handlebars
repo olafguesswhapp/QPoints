@@ -8,6 +8,7 @@
 			<td>Status</td>
 			<td>Gültig bis</td>
 			<td>Ausgeliefert</td>
+			<td>Gekauft</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -18,6 +19,7 @@
 			<td>{{programStatus}}</td>
 			<td></td>
 			<td></td>
+			<td></td>
 		</tr>
 		{{#programNews}}
 		<tr class='warning' onclick="window.document.location='/news/{{newsFeedId}}';"> 
@@ -26,6 +28,7 @@
 			<td>{{newsStatus}}</td>
 			<td>{{newsDeadline}}</td>
 			<td>{{newsDeliveryCount}} von {{newsDeliveryLimit}}</td>
+			<td>{{newsBudget}}</td>
 		</tr>
 		{{/programNews}}
 		{{/programs}}

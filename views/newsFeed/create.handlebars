@@ -22,15 +22,13 @@
             <div class="col-sm-4">
                 <textarea name="newsMessage" rows="5" class="form-control" required id="fieldNewsMessage" >
                 </textarea>
-                {{!-- <input type="text" class="form-control" required id="fieldNewsMessage" 
-                name="newsMessage"> --}}
             </div>
         </div>
 
         <div class="form-group">
             <label for="fieldNewsDeliveryLimit" class="col-sm-2 control-label">Auslieferungs-Limit</label>
             <div class="col-sm-4">
-                <input type="number" value="{{newsDeliveryLimit}}" max="{{newsDeliveryLimit}}" class="form-control" required id="fieldNewsDeliveryLimit" 
+                <input type="number" value="{{newsDeliveryLimit}}" max="{{newsBudget}}" class="form-control" required id="fieldNewsDeliveryLimit" 
                 name="newsDeliveryLimit">
             </div>
         </div>
