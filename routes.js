@@ -12,7 +12,7 @@ var cartController = require('./controllers/cart.js');
 var orderController = require('./controllers/order.js');
 var transactionController = require('./controllers/transaction.js');
 var resetController = require('./controllers/reset.js');
-var newsFeedController = require('./Controllers/newsfeed.js');
+var newsFeedController = require('./controllers/newsfeed.js');
 
 module.exports = function(app) {
 

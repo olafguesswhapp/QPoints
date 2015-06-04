@@ -5,6 +5,7 @@ var CUsers = require('../models/cusers.js');
 var Orders = require('../models/orders.js');
 var NewsFeed = require('../models/newsfeed.js');
 var NewsHistory = require('../models/newshistory.js');
+var RealReelCode = require('../help/RealReelCodes.json');
 
 module.exports = {
 
@@ -13,6 +14,7 @@ module.exports = {
 	}, // registerRoutes
 
 	reset: function(req, res, next) {
+
 		console.log('are you sure you want to reset?')
 		Programs.remove({}, function(err) { 
 			console.log('Programs removed');
@@ -30,8 +32,8 @@ module.exports = {
 			console.log('NewsHistory removed');
 		});
 
-		var helpAA = {}, helpBB = {}, helpCC = {};
-		var contextAA = [], contextBB = [], contextCC = [];
+		var helpAA = {}, helpBB = {}, helpCC = {}, helpDD = {};
+		var contextAA = [], contextBB = [], contextCC = [], contextDD = [];
 		for (i=1; i<501; i++) {
 			helpAA = {
 				rCode: 'AA' + i,
@@ -48,6 +50,11 @@ module.exports = {
 				cStatus: 0,
 			};
 			contextCC.push(helpCC);
+			helpDD = {
+				rCode: RealReelCode[i -1],
+				cStatus: 0,
+			};
+			contextDD.push(helpDD);
 		}
 
 		CUsers.findById(req.user._id, function(err, user){
@@ -55,7 +62,7 @@ module.exports = {
 				{
 					nr: 'R1000001',
 					reelStatus: 'erfasst',
-					quantityCodes: 20,
+					quantityCodes: contextAA.length,
 					activatedCodes: 0,
 					created: new Date(),
 					createdBy: user._id,
@@ -70,7 +77,7 @@ module.exports = {
 				{
 					nr: 'R1000002',
 					reelStatus: 'erfasst',
-					quantityCodes: 20,
+					quantityCodes: contextBB.length,
 					activatedCodes: 0,
 					created: new Date(),
 					createdBy: user._id,
@@ -78,14 +85,14 @@ module.exports = {
 				} // new Reels array
 			); // var reels
 			reels.save(function (err) {
-				if (err) {console.log('fehler' + err);}// ...
+			if (err) {console.log('fehler' + err);}// ...
 				console.log('created Reels');
 			}); // reels save
-					var reels = new Reels(
+			var reels = new Reels(
 				{
 					nr: 'R1000003',
 					reelStatus: 'erfasst',
-					quantityCodes: 20,
+					quantityCodes: contextCC.length,
 					activatedCodes: 0,
 					created: new Date(),
 					createdBy: user._id,
@@ -94,7 +101,22 @@ module.exports = {
 			); // var reels
 			reels.save(function (err) {
 				if (err) {console.log('fehler' + err);}// ...
-				console.log('created Reels');
+			console.log('created Reels');
+			}); // reels save
+			var reels = new Reels(
+				{
+					nr: 'R1000004',
+					reelStatus: 'erfasst',
+					quantityCodes: contextCC.length,
+					activatedCodes: 0,
+					created: new Date(),
+					createdBy: user._id,
+					codes: contextDD,
+				} // new Reels array
+			); // var reels
+			reels.save(function (err) {
+				if (err) {console.log('fehler' + err);}// ...
+			console.log('created Reels');
 			}); // reels save
 		}); // CUsers find
 		CUsers.find({}, function(err, user){
