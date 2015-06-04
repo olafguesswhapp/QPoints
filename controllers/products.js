@@ -3,21 +3,33 @@ var Products = require('../models/products.js');
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/produkte/create', this.create);
-		app.post('/produkte/create', this.productCreation);
+		app.get('/produkte/anlegen', this.create);
+		app.post('/produkte/anlegen', this.processCreation);
 		app.get('/produkte', this.productsCatalog);
 		app.get('/produkte/:nr', this.productDetail);
 	},
 
 	create: function(req, res, next) {
-		res.render('products/create');
+		var context;
+		Products.findOne({})
+				.sort({'nr': -1})
+				.select('nr')
+				.exec(function(err, product){
+			if (!product) {
+				context = {productNr : 'PR1001'};
+			} else {
+				context = {productNr : product.nr.match(/\D+/)[0] + (parseInt(product.nr.match(/\d+/))+1)};
+			}
+			res.render('products/create', context);
+		}); // Products.findOne
 	},
 
-	productCreation: function(req, res, next) {
+	processCreation: function(req, res, next) {
 		// TODO: back-end validation (safety)
+		console.log(req.body);
 		var c = new Products({
 			productName: req.body.productName,
-			nr: req.body.nr,
+			nr: req.body.productNr,
 			price: req.body.price,
 		});
 		c.save(function(err) {

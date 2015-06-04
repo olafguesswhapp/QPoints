@@ -127,9 +127,9 @@ module.exports = {
 				quantityCodes: reel.quantityCodes,
 				activatedCodes: reel.activatedCodes,
 				assignedProgram: reel.assignedProgram,
-				codes: reel.codes.map(function(code){
+				codes: reel.codes.map(function(code, indexCode){
 					return {
-						rCode: code.rCode,
+						rCode: indexCode + 1,
 						cStatus: code.cStatus,
 						consumer: code.consumer,
 						updated: moment(code.updated).format('DD.MM.YYYY   HH:mm'),

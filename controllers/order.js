@@ -116,10 +116,10 @@ module.exports = {
 				var requiReels = 0;
 				var requiNews = 0;
 				for(var i=0; i < o.items.length; i++){
-					if(o.items[i].prodNr =='R10001'){
+					if(o.items[i].prodNr =='PR1001'){
 						requiReels = o.items[i].prodQuantity;
 					} // if prodNr = Reel
-					else if (o.items[i].prodNr == 'N50001') {
+					else if (o.items[i].prodNr == 'PR1002') {
 						requiNews = o.items[i].prodQuantity;
 					} // if prodNr = News
 				} // for every ordered Item
