@@ -1,9 +1,10 @@
 var Products = require('../models/products.js');
+var qplib = require('../lib/qpointlib.js');
 
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/produkte/anlegen', this.create);
+		app.get('/produkte/anlegen', qplib.adminOnly, this.create);
 		app.post('/produkte/anlegen', this.processCreation);
 		app.get('/produkte', this.productsCatalog);
 		app.get('/produkte/:nr', this.productDetail);
