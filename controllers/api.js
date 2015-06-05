@@ -242,31 +242,43 @@ module.exports = {
     }, // processApiCheckUserAccount
 
     processApiCreateAccount: function(req, res, next) {
-        var user = new CUsers ({
-            username: req.body.userEmail,
-            password: req.body.password,
-            created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-            role: 'consumer',
-        }); // 
-        user.save(function(err, newUser){
-            console.log(newUser);
-            if(err) {
+        CUsers.findOne({'username' : req.body.userEmail}, function(err, user){
+            if (!user) {
+                console.log("User wurde bisher nicht verwendet");
+                var user = new CUsers ({
+                    username: req.body.userEmail,
+                    password: req.body.password,
+                    created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+                    role: 'consumer',
+                }); // 
+                user.save(function(err, newUser){
+                    console.log(newUser);
+                    if(err) {
+                        context = {
+                            success: false,
+                            message: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+                        };
+                        statusCode = 400;
+                        publish(context, statusCode, req, res);
+                    } else {
+                        context = {
+                            success: true,
+                            message : "Willkommen bei QPoints - vielen Dank für das Einrichten eines neuen Kontos",
+                        }; // context
+                        statusCode = 200;
+                        publish(context, statusCode, req, res)
+                        console.log('erfolgreich angelegt');
+                    }
+                });
+            } else {// if user nocht found in CUsers
                 context = {
                     success: false,
-                    message: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
+                    message: 'Der Username "' + user.username + '" wird bereits verwendet.',
                 };
                 statusCode = 400;
                 publish(context, statusCode, req, res);
-            } else {
-                context = {
-                    success: true,
-                    message : "Willkommen bei QPoints - vielen Dank für das Einrichten eines neuen Kontos",
-                }; // context
-                statusCode = 200;
-                publish(context, statusCode, req, res)
-                console.log('erfolgreich angelegt');
             }
-        });
+        }); // CUsers.findOne
     },
 
 	processApiCodeScan: function(req, res, next) {
