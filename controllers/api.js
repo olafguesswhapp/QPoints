@@ -325,14 +325,14 @@ module.exports = {
                                         zip: reel.customer.zip,
                                         country: reel.customer.country,
                                         phone: reel.customer.phone,
-                                        message: "Der QPoint " + code.rCode  + "gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
+                                        message: "Wohl verdient. Der QPoint gehört zum Program " + reel.assignedProgram.programName + " (Rolle " + reel.nr + ") ",
                                         key: reel.assignedProgram.programKey, // Beispiel Code = 2T@
                                     };
                                     statusCode = 200;
                                 } else { // if cStatus != 0
                                     context = {
                                         success: false,
-                                        message: "Der QPoint " + code.rCode + " der Rolle " + reel.nr + " wurde bereits verwendet.",
+                                        message: "Der QPoint der Rolle " + reel.nr + " wurde bereits verwendet.",
                                     };
                                     statusCode = 200;
                                 } // if cStatus != 0
