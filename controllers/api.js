@@ -352,20 +352,21 @@ module.exports = {
                             } // if qpInput
                         }); // reel.codes forEach   
                     } else { // if Date is not valid
-                        code.cStatus = 9;
-                        code.consumer = APIUser;
-                        code.updated = new Date();
-                        reel.activatedCodes++; 
-                        if (reel.activatedCodes==reel.quantityCodes){
-                            reel.reelStatus='erfüllt';
-                            qplib.checkProgramsReels(reel.assignedProgram._id);
-                        } // if activatedCodes = quantityCodes
-                        reel.save(function(err) {
-                            if (err) { return next(err); }
-                        });
+                        // WICHTIG! code ist hier noch nicht definiert - da noch nicht danach gesucht wurde
+                        // code.cStatus = 9;
+                        // code.consumer = APIUser;
+                        // code.updated = new Date();
+                        // reel.activatedCodes++; 
+                        // if (reel.activatedCodes==reel.quantityCodes){
+                        //     reel.reelStatus='erfüllt';
+                        //     qplib.checkProgramsReels(reel.assignedProgram._id);
+                        // } // if activatedCodes = quantityCodes
+                        // reel.save(function(err) {
+                        //     if (err) { return next(err); }
+                        // });
                         context = {
                             success: false,
-                            message : "Das Programm ist bereits abgelaufen. Die Rolle ist damit nicht mehr gültig"
+                            message : "Das Programm ist bereits abgelaufen. Der QPoint ist damit nicht mehr gültig"
                         };
                         statusCode = 400;
                         publish(context, statusCode, req, res);

@@ -125,8 +125,6 @@ module.exports = {
                                 .populate('customer', 'company')
                                 .populate('assignedProgram', 'programName')
                                 .exec(function(err, newsFeed){
-                            console.log('test');
-                            console.log(newsFeed);
                             var newsData = [];
                             var help = {};
                             if (err || newsFeed.length == 0) {
@@ -151,6 +149,7 @@ module.exports = {
                                                 newsMessage: newsfeed.newsMessage,
                                                 programName: newsfeed.assignedProgram.programName,
                                                 company: newsfeed.customer.company,
+                                                newsDate: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
                                             };
                                             newsData.push(help);
                                             // register news Push to newsHistory data feed
