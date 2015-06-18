@@ -11,6 +11,7 @@ npm-debug.log
 public/icons/
 public/images/
 help/
+ssl/
 
 # Backupfiles
 *~

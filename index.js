@@ -1,6 +1,8 @@
 var express = require('express');
+var https = require('https');
 var app = express();
 var bodyParser = require('body-parser');
+var fs = require('fs');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var methodOverride = require('method-override');
@@ -9,6 +11,10 @@ var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',
     failureRedirect: 'unauthorized',
 });
+var sslOptions = {
+    key: fs.readFileSync('./ssl/localhost.key'),
+    cert: fs.readFileSync('./ssl/localhost.key.crt')
+};
 //Mongoose Schema and Model
 var TestDB = require('./models/testDB.js');
 
@@ -127,7 +133,11 @@ app.use(function(err, req, res, next){
 	res.render('500');
 });
 
-app.listen(app.get('port'), function(){
-  console.log( 'Express started on http://localhost:' + 
-    app.get('port') + '; press Ctrl-C to terminate.' );
+https.createServer(sslOptions, app).listen(app.get('port'), function(){
+    console.log('Express HTTPS started in ' + app.get('env') + ' mode on port ' + app.get('port') + '.');
 });
+
+// app.listen(app.get('port'), function(){
+//   console.log( 'Express started on http://localhost:' + 
+//     app.get('port') + '; press Ctrl-C to terminate.' );
+// });
