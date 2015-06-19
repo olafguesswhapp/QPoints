@@ -1,0 +1,95 @@
+<h3>{{customerCompany}} Treuepunkte-Programn verändern:</h3>
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form" action="/programm/edit/{{programNr}}" method="POST">
+        <input type="hidden" name="customerId" value="{{customerId}}">
+        <input type="hidden" name="programId" value="{{programId}}">
+        <input type="hidden" name="programNr" value="{{programNr}}">
+        <input type="hidden" name="createdById" value="{{createdById}}">
+
+        <div class="form-group">
+            <label for="fieldNr" class="col-sm-2 control-label">Nr</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{programNr}}" required id="fieldNr" 
+                name="programNr" disabled>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldProgramName" class="col-sm-2 control-label">Treueprogramm:</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{programName}}" required id="fieldProgramName" 
+                name="programName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldProgramStatus" class="col-sm-2 control-label">Programm-Status</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="programStatus">
+                    <option value="erstellt" >erstellt</option>
+                    <option value="aktiviert" {{#contentCheck programStatus 'aktiviert'}}selected{{/contentCheck}}>aktiviert</option>
+                    <option value="inaktiv" {{#contentCheck programStatus 'inaktiv'}}selected{{/contentCheck}}>inaktiv</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldGoalCount" class="col-sm-2 control-label">Notwendige Punkte</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control" value="{{goalToHit}}" required id="fieldGoalCount" 
+                name="goalToHit">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldStartDate" class="col-sm-2 control-label">Gültig ab</label>
+            <div class="col-sm-4">
+        <input type="datetime-local" value="{{startDate}}" class="form-control" id="fieldstartDate" name="startDate">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldDeadlineSubmit" class="col-sm-2 control-label">Einlösbar bis</label>
+            <div class="col-sm-4">
+                <input type="datetime-local" value={{deadlineSubmit}} class="form-control" required 
+                id="fieldDeadlineSubmit" name="deadlineSubmit">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldAllocatedReels" class="col-sm-2 control-label">Zugeordnete Rollen</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="newReelId">
+                    <option value="">später zuordnen</option>
+                    {{#each reels}}<option value="{{reelId}}">{{reelNr}}</option>{{/each}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Speichern</button>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript">document.getElementById('fieldProgramName').focus();</script>
+</div>
+
+<h4>Zugeordnete Rollen:</h4>
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <td>Rolle Nr</td>
+      <td>Punkte</td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>
+    {{#allocatedReels}}
+    <tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';"> 
+      <td>{{nr}}</td>
+      <td>{{activatedCodes}} von {{quantityCodes}}</td>
+      <td>{{#contentCheck activatedCodes '0'}}
+        <form id="my_form" action="/rolletrennen" method="POST">
+          <input type="hidden" name="programId" value="{{../../programId}}">
+          <input type="hidden" name="programNr" value="{{../../programNr}}">
+          <input type="hidden" name="reelNr" value="{{nr}}">
+          <button type="submit" style="border:none; background-color:transparent;"><img src="{{static '/images/delete-icon.png'}}"></button></form>{{/contentCheck}}</td>
+    </tr>  
+    {{/allocatedReels}}
+  </tbody>
+</table>

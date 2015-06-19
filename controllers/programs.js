@@ -17,6 +17,51 @@ function LoggedInUserOnly(req, res, next) {
 	} else { return next();}
 };
 
+function allocateReeltoProgram(req, res, next){
+	Reels
+		.findById(req.body.newReelId)
+		.populate('assignedPrograms')
+		.exec(function(err, reel){
+		reel.assignedProgram = req.body.programId;
+		reel.reelStatus = 'aktiviert';
+		reel.save();
+	});
+	Programs.findOne({ _id : req.body.programId }, function(err, program){
+		program.allocatedReels.push(req.body.newReelId);
+		program.programStatus = 'aktiviert';
+		program.save();
+		});
+	console.log(req.body);
+	res.redirect(303, '/programm/' + req.body.programNr);
+}; // allocateReeltoProgram
+
+function detachReelfromProgram(req, res, next){
+	Reels
+		.findOne({ 'nr' : req.body.reelNr })
+		.populate('assignedPrograms')
+		.exec(function(err, reel){
+		reel.reelStatus = 'zugeordnet';
+		reel.save();
+	});
+	Programs
+		.findById(req.body.programId)
+		.populate('allocatedReels', 'nr') 
+		.select('allocatedReels')
+		.exec(function(err, program) {
+		var executed = false;
+		program.allocatedReels.forEach(function(reel, indexR){
+			if (reel.nr == req.body.reelNr){
+				console.log(indexR + ' at ' +  reel);
+				program.allocatedReels.splice(indexR, 1);
+				executed = true;
+			} // if
+			if (executed == true) {
+			program.save();
+			} // if
+		}); // program.allocatedReels.forEach
+	});	
+}; // allocateReeltoProgram
+
 module.exports = {
 
 	registerRoutes: function(app) {
@@ -25,6 +70,9 @@ module.exports = {
 		app.get('/programm', LoggedInUserOnly, this.library);
 		app.get('/programm/:nr', LoggedInUserOnly, this.programDetail);
 		app.post('/programm/:nr', LoggedInUserOnly, this.programDetailProcess);
+		app.get('/programm/edit/:nr', LoggedInUserOnly, this.programEdit);
+        app.post('/programm/edit/:nr', LoggedInUserOnly, this.processProgramEdit);
+        app.post('/rolletrennen', LoggedInUserOnly, this.processDetachReel);
 	},
 
 	// Ein neues Programm anlegen
@@ -152,7 +200,7 @@ module.exports = {
 		CUsers.findById(req.user._id, function(err, user){
 			Programs.findOne({ nr : req.params.nr })
 					.populate('allocatedReels')
-					.populate('createdBy')
+					.populate('createdBy', 'firstName lastName')
 					.exec(function(err, program) {
 				Reels.find({ 'reelStatus': 'zugeordnet' , 'customer' : user.customer})
 					.exec(function(err,reels){
@@ -168,7 +216,7 @@ module.exports = {
 						// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 						created: moment(program.created).format("DD.MM.YY HH:mm"),
 						createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
-						customer: program.customer,
+						customerCompany: program.customer.company,
 						usersNearGoal: program.usersNearGoal(function(err, consumers){
 
 						}),
@@ -185,7 +233,6 @@ module.exports = {
 							reelId: reel._id,
 							reelNr: reel.nr,}
 					});
-
 					res.render('programs/detail', context);
 				});
 			}); // Programs find
@@ -194,20 +241,82 @@ module.exports = {
 
 	// Programm eine neue Rolle zuordnen
 	programDetailProcess: function(req,res, next){
-		Reels.findOne({ _id : req.body.newReelId })
-			.populate('assignedPrograms')
-			.exec(function(err, reel){
-			reel.assignedProgram = req.body.programId;
-			reel.reelStatus = 'aktiviert';
-			reel.save();
-		});
-		Programs.findOne({ _id : req.body.programId }, function(err, program){
-			program.allocatedReels.push(req.body.newReelId);
-			program.programStatus = 'aktiviert';
-			program.save();
-			});	
-		res.redirect(303, '/programm');
-	},	
+		allocateReeltoProgram(req, res, next);
+	},
+
+	programEdit: function(req, res, next) {
+		Programs
+			.findOne({ nr : req.params.nr })
+			.populate('allocatedReels', 'nr quantityCodes activatedCodes')
+			.populate('createdBy', '_id firstName lastName')
+			.populate('customer', '_id company')
+			.exec(function(err, program){
+			Reels
+				.find({ 'reelStatus': 'zugeordnet' , 'customer' : program.customer._id})
+				.select('reelId nr')
+				.exec(function(err,reels) {
+				console.log(reels);
+				if(!program) return next(); // pass this on to 404 handler
+				var context = {
+					programId: program._id,
+					programNr: program.nr,
+					programName: program.programName,
+					programStatus: program.programStatus,
+					goalToHit: program.goalToHit,
+					startDate: moment(program.startDate).format('YYYY-MM-DDTHH:mm'),
+					deadlineSubmit: moment(program.deadlineSubmit).format('YYYY-MM-DDTHH:mm'),
+					// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
+					created: moment(program.created).format("DD.MM.YY HH:mm"),
+					createdById: program.createdBy._id,
+					createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
+					customerId: program.customer._id,
+					customerCompany: program.customer.company,
+					allocatedReels: program.allocatedReels.map(function(reel){
+							return {
+								nr: reel.nr,
+								quantityCodes: reel.quantityCodes,
+								activatedCodes: reel.activatedCodes,
+							} // return map
+						}), // program.allocatedReels.map
+				}; // context
+				context.reels = reels.map(function(reel){
+					return {
+						reelId: reel._id,
+						reelNr: reel.nr,}
+				}); // context.reels
+				console.log(context);
+				res.render('programs/edit', context);
+			}); // Reels.find
+		}); // Programs.FindOne
+	}, // programEdit
+
+	processProgramEdit: function(req, res, next){
+		console.log(req.body);
+		Programs
+			.findById(req.body.programId)
+			.exec(function(err, program){
+			program.programName = req.body.programName;
+			program.programStatus = req.body.programStatus;
+			program.goalToHit = req.body.goalToHit;
+			program.startDate = req.body.startDate;
+			program.deadlineSubmit = req.body.deadlineSubmit;
+			program.save(function(err, updatedProgram) {
+                if(err) return next(err);
+                if (req.body.newReelId.length > 0) {
+            	allocateReeltoProgram(req, res, next);
+            } else {
+            	res.redirect(303, '/programm');
+            }
+            });
+		}); // Programs.findById
+	}, // processProgramEdit
+
+	processDetachReel: function(req, res, next){
+		console.log('jetzt Rolle abtrennen');
+		console.log(req.body);
+		detachReelfromProgram(req, res, next);
+		res.redirect(303, '/programm/' + req.body.programNr );
+	}, // processDetachreel
 
 };
 

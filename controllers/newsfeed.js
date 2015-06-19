@@ -359,8 +359,6 @@ module.exports = {
     }, // newsEdit
 
     processNewsEdit: function (req, res, next) {
-        console.log('back home');
-        console.log(req.body);
         NewsFeed.findById(req.body.newsFeedId, function(err, newsfeed){
             newsfeed.newsTitle = req.body.newsTitle;
             newsfeed.newsMessage = req.body.newsMessage;

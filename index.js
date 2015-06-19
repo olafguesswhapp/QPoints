@@ -61,6 +61,13 @@ var handlebars = require('express3-handlebars')
                 return options.inverse(this);
             }
         },
+        contentCheck: function(value1, value2, options) {
+            if (value1 == value2) {
+                return options.fn(this);
+            } else {
+                return options.inverse(this);
+            }
+        },
     }
 });	
 app.engine('handlebars', handlebars.engine);
@@ -137,6 +144,7 @@ https.createServer(sslOptions, app).listen(app.get('port'), function(){
     console.log('Express HTTPS started in ' + app.get('env') + ' mode on port ' + app.get('port') + '.');
 });
 
+// IN ORDER TO RUN ON HTTP instead of https
 // app.listen(app.get('port'), function(){
 //   console.log( 'Express started on http://localhost:' + 
 //     app.get('port') + '; press Ctrl-C to terminate.' );
