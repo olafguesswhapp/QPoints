@@ -307,7 +307,7 @@ module.exports = {
             } else {
             	res.redirect(303, '/programm');
             }
-            });
+            }); // program.save
 		}); // Programs.findById
 	}, // processProgramEdit
 

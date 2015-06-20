@@ -109,7 +109,7 @@ app.use(function(req, res, next) {
     res.locals.cartItems = cart && cart.items ? cart.items.length : 0;
     if (!req.user) return next();
     res.locals.loggedInUser = req.user.firstName;
-    // res.locals.loggedInUser = req.user.username.split('@')[0];
+    res.locals.loggedInUsername = req.user.username;
     next();
 });
 

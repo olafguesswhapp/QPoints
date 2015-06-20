@@ -1,4 +1,5 @@
-<h4>{{customerNr}} {{customerCompany}} User</h4></br>
+<h4>{{customerNr}} {{customerCompany}} User &nbsp;&nbsp;<a href="/kunden/{{customerNr}}" title="Firmen/Kunden-Daten aktualisieren"><img src="{{static '/images/new-message-icon.png'}}"></a></h4>
+</br>
 <a href="/user/anlegen" class="btn btn-default">Weiteren User anlegen</a>
 
 <table class="table table-striped table-hover">
@@ -6,15 +7,19 @@
 		<tr>
 			<td>Name</td>
 			<td>Username</td>
+			<td>W/M</td>
 			<td>Rolle</td>
 			<td>Seit</td>
 		</tr>
 	</thead>
 	<tbody>
 		{{#users}}
-		<tr class='clickableRow'> <!-- onclick="window.document.location='/programm/{{nr}}';" --> 
+		<tr class='clickableRow' onclick="window.document.location='/user/{{username}}';"> <!--  --> 
 			<td>{{firstName}} {{lastName}}</td>
 			<td>{{username}}</td>
+			<td>{{#contentCheck gender '0'}}Nicht angegeben{{/contentCheck}}
+			{{#contentCheck gender '1'}}Weiblich{{/contentCheck}}
+			{{#contentCheck gender '2'}}Männlich{{/contentCheck}}</td>
 			<td>{{role}}</td>
 			<td>{{created}}</td>
 		</tr>

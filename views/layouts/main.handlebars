@@ -36,7 +36,7 @@
 			    	<li><a href="/meinepunkte">test App</a></li>
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
-			    	<li>{{#if loggedInUser}}<a href="#">{{loggedInUser}}</a></li><!-- login/logout -->
+			    	<li>{{#if loggedInUser}}<a href="/user/{{loggedInUsername}}">{{loggedInUser}}</a></li><!-- login/logout -->
 			    	<li><a href="/logout">Log Out</a></li>
 			    	{{else}}<a href="/login">Anmelden</a></li>{{/if}}
 		  			<li> <!-- CART -->

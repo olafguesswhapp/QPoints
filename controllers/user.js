@@ -6,20 +6,67 @@ var moment = require('moment');
 
 function customerOnly(req, res, next) {
 	if (Object.keys(req.session.passport).length > 0) {
-		CUsers.findById(req.session.passport.user, function(err, user){
-			if(user.role==='customer' || user.role==='admin') return next();
+		CUsers
+			.findById(req.session.passport.user)
+			.select('role')
+			.exec(function(err, user){
+			if(user.role==='customer' || user.role==='admin') {
+				return next();
+			} else {
+				req.session.flash = {
+                    type: 'Warnung',
+                    intro: 'Sie haben nicht das Recht User anzulegen .',
+                    message: 'Bitte wenden Sie sich an unsere Administration.'
+                };
+                res.redirect('/user');
+			}
 		});
 	} else { res.redirect('/login'); }
 };
+
+function checkUserRole (req, res, next) {
+	if (Object.keys(req.session.passport).length > 0) {
+		CUsers
+			.findById(req.user._id)
+			.select('username role')
+			.exec(function(err, user){
+				if(user.role==='customer' || user.role==='admin') {
+					return next();
+				} else if (user.role == 'user' || user.role == 'consumer') {
+					if (req.params.username == user.username) {
+						return next();
+					} else {
+						req.session.flash = {
+				            type: 'Warnung',
+				            intro: 'Sie dürfe nur auf Ihre eigenen User Daten zugreifen.',
+				            message: ''
+				        };
+				        res.redirect('/user/' + user.username);
+					} // else
+				} else { // else if 
+					console.log('hm irgendwas stimmt nicht CHECK CHECK CHECK');
+					res.redirect('/user');
+				} // else if 
+			}); // CUsers.findById
+	} else {
+		req.session.flash = {
+            type: 'Warnung',
+            intro: 'Sie müssen bitte als User eingelogged sein.',
+            message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.'
+        };
+        res.redirect('/login');
+    }
+}; // checkUserRole
 
 module.exports = {
 
 	registerRoutes: function(app) {
 		app.get('/user/anlegen', customerOnly, this.userRegister);
 		app.post('/user/anlegen', customerOnly, this.processUserRegister);
-
-		app.get('/user', customerOnly, this.userLibrary);
-
+		app.get('/user/:username', checkUserRole, this.userDetail);
+		app.get('/user/edit/:username', checkUserRole, this.userEdit);
+		app.post('/user/edit/:username', checkUserRole, this.processUserEdit);
+		app.get('/user', checkUserRole, this.userLibrary);
 		app.get('/login', this.login);
 		app.post('/login', this.processLogin);
 		app.get('/logout', this.logout);
@@ -48,6 +95,7 @@ module.exports = {
 			created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
+			gender: req.body.gender,
 			role: 'user',
 		});
 		u.save(function(err, newUser){
@@ -77,11 +125,12 @@ module.exports = {
 						firstName: user.firstName,
 						lastName: user.lastName,
 						username: user.username,
+						gender: user.gender,
 						role: user.role,
 						created: moment(user.created).format("DD.MM.YY"),
-					}
-				})
-			};
+					} // return
+				}) // users
+			}; // context
 			Customers.findById(req.user.customer, function(err, customer){
 				context.customerNr = customer.nr;
 				context.customerCompany = customer.company;
@@ -134,5 +183,67 @@ module.exports = {
 		req.logout();
 		res.redirect('/');
 	},
+
+	userDetail: function (req, res, next) {
+		CUsers
+			.findOne({ 'username' : req.params.username})
+			.populate('customer', 'company') 
+			.exec(function(err, user) {
+			if (err || !user) {
+				console.log('Could not find a user with that username - meaning user email');
+				return next (err);		
+			} else { // error or no user found
+				context = {
+					username: user.username,
+					customer: user.customer.company,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					role: user.role,
+					gender: user.gender
+				}; // context
+				res.render('user/detail', context);
+			} // error or no user found
+		}); // CUSers.findOne
+	}, // userDetail
+
+	userEdit: function (req, res, next) {
+		CUsers
+			.findOne({ 'username' : req.params.username})
+			.populate('customer', 'company') 
+			.exec(function(err, user) {
+			if (err || !user) {
+				console.log('Could not find a user with that username - meaning user email');
+				return next (err);		
+			} else { // error or no user found
+				context = {
+					userId: user._id,
+					username: user.username,
+					customer: user.customer.company,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					role: user.role,
+					gender: user.gender
+				}; // context
+				res.render('user/edit', context);
+			} // error or no user found
+		}); // CUSers.findOne
+	}, // userEdit
+
+	processUserEdit: function (req, res, next) {
+		CUsers.findById(req.body.userId, function(err, user) {
+			if (err || !user) {
+				console.log('Irgendwas stimmt hier bei processUserEdit nicht');
+				return res.redirect('/user');
+			} else {
+				user.firstName = req.body.firstName;
+				user.lastName = req.body.lastName;
+				user.gender = req.body.gender
+				user.save(function(err, updatedUser) {
+	                if(err) return next(err);
+		            res.redirect(303, '/user/' + req.body.username);
+	            }); // customer.save
+			} // else			
+		}); // CUsers.findById
+	}, // processUserEdit
 
 };
