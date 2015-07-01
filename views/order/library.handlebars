@@ -51,4 +51,5 @@
 		{{/orders}}
 	</tbody>	
 </table>
-<p id="infoOrderItems">Auf die Bestellung drücken um mehr Details zu sehen</p>
+{{#if orders}}<p id="infoOrderItems">Auf die Bestellung drücken um mehr Details zu sehen</p>{{else}}
+<p id="infoOrderItems">Es wurden noch keine Bestellungen getätigt</p>{{/if}}

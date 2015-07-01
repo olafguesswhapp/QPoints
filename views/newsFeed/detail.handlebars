@@ -1,26 +1,66 @@
-<h3>{{customerCompany}} Botschaft an Teilnehmer von Program "{{programName}}"</h3>
-<p>Status vom Programm: {{programStatus}}</p>
+<h3>{{customerCompany}} "{{programName}}" Botschaft&nbsp;&nbsp;<a href="/news/edit/{{newsId}}" title="Botschaft bearbeiten">
+  <img src="{{static '/images/new-message-icon.png'}}"></a></h3><br>
 
-<dl class="dl-horizontal">
-	<dt>Titel</dt>
-	<dd>{{newsTitle}}</dd>
-	<dt>Botschaft</dt>
-	<dd>{{newsMessage}}</dd>
-	<dt>Erstellt von</dt>
-	<dd>{{firstName}}</dd>
-	<dt>Gültig ab</dt>
-	<dd>{{newsStartDate}}</dd>
-	<dt>bis</dt>
-	<dd>{{newsDeadline}}</dd>
-	<dt>Status</dt>
-	<dd>{{newsStatus}}</dd>
-	<dt>Bisher ausgeliefert</dt>
-	<dd>{{newsDeliveryCount}}</dd>
-	<dt>Ausliergungslimit</dt>
-	<dd>{{newsDeliveryLimit}}</dd>
-	<dt>Gekauft</dt>
-	<dd>{{newsBudget}}</dd>
-</dl>
-<br>
-<br>
-<a href="/news/edit/{{newsId}}" class="btn btn-default">Botschaft bearbeiten</a></br></br>
+<div class="formContainer">
+    <form class="form-horizontal productsForm" role="form" action="" method="">
+
+    	<div class="form-group">
+    		<label for="fieldNewsTitle" class="col-sm-2 control-label">Titel</label>
+	        <div class="col-sm-4">
+	        	<input type="text" class="form-control" value="{{newsTitle}}" id="fieldNewsTitle" name="newsTitle" disabled>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	        <label for="fieldNewsMessage" class="col-sm-2 control-label">Botschaft</label>
+	        <div class="col-sm-4">
+	        	<textarea type="text" rows="4" class="form-control" id="fieldNewsMessage" name="newsMessage" disabled>{{newsMessage}}</textarea>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	        <label for="fieldFirstName" class="col-sm-2 control-label">Erstellt von</label>
+	        <div class="col-sm-4">
+	        	<input type="text" class="form-control" value="{{firstName}}" id="fieldFirstName" name="firstName" disabled>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	    	<label for="fieldNewsStartDate" class="col-sm-2 control-label">Gültig ab</label>
+	    	<div class="col-sm-4">
+	    		<input type="datetime-local" value={{newsStartDate}} class="form-control" required 
+            id="fieldStartDate" name="newsStartDate" disabled>
+        	</div>
+        </div>
+        <div class="form-group">
+	    	<label for="fieldNewsDeadline" class="col-sm-2 control-label">Gültig bis</label>
+	    	<div class="col-sm-4">
+	    		<input type="datetime-local" value={{newsDeadline}} class="form-control" required 
+            id="fieldNewsDeadline" name="newsDeadline" disabled>
+        	</div>
+        </div>
+        <div class="form-group">
+	        <label for="fieldNewsStatus" class="col-sm-2 control-label">Status Botschaft</label>
+	        <div class="col-sm-4">
+	        	<input type="text" class="form-control" value="{{newsStatus}}" id="fieldNewsStatus" name="newsStatus" disabled>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	        <label for="fieldProgramStatus" class="col-sm-2 control-label">Status Program</label>
+	        <div class="col-sm-4">
+	        	<input type="text" class="form-control" value="{{programStatus}}" id="fieldProgramStatus" name="programStatus" disabled>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	    	<label for="fieldNewsDeliveryCount" class="col-sm-2 control-label">Bisher ausgeliefert</label>
+	    	<div class="col-sm-4">
+	    		<input type="number" class="form-control" value="{{newsDeliveryCount}}" id="fieldNewsDeliveryCount" name="newsDeliveryCount" disabled>
+	    	</div>
+	    </div>
+	    <div class="form-group">
+	    	<label for="fieldNewsDeliveryLimit" class="col-sm-2 control-label">Auslieferungslimit</label>
+	    	<div class="col-sm-4">
+	    		<input type="text" class="form-control" value="{{newsDeliveryLimit}} von {{newsBudget}}" id="fieldNewsDeliveryLimit" name="newsDeliveryLimit" disabled>
+	    	</div>
+	    </div>
+
+
+    </form>
+</div>

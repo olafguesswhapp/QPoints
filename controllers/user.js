@@ -149,8 +149,18 @@ module.exports = {
 
 	processLogin: function(req, res, next) {
 		passport.authenticate('local', function(err, user, info) {
+			console.log(err);
+			console.log(info);
 			if (err) { return next(err) }
-			if (!user) {
+			if (!user && info.message == 'Invalid password'){
+				console.log('falsche Passwort');
+				req.session.flash = {
+					type: 'Warnung',
+					intro: 'Hinweis: ',
+					message: 'Das Passwort für Username ' + req.body.username + ' stimmt nicht - Bitte versuchen Sie es erneut.',
+					};
+				return res.redirect('/login');
+			} else if (!user) {
 				req.session.flash = {
 					type: 'Warnung',
 					intro: 'Hinweis: ',

@@ -50,9 +50,8 @@ function LoggedInUserOnly(req, res, next) {
 module.exports = {
 
 	registerRoutes: function(app){
-		app.get('/scan', LoggedInUserOnly, this.scan);
-		app.post('/scan', this.processScan);
-
+		app.get('/meinepunkte/scan', LoggedInUserOnly, this.scan);
+		app.post('/meinepunkte/scan', this.processScan);
 		app.get('/meinepunkte', LoggedInUserOnly, this.myPoints);
 		app.get('/einzuloesen', this.toRedeem);
 		app.get('/firma/:nr', this.customerDetail);
@@ -62,7 +61,6 @@ module.exports = {
 	scan: function(req, res, next){
 		CUsers.findById(req.user._id, function(err, user){
 			var context = { 
-				layout: "app",
 				name: user.firstName + ' ' + user.lastName
 			};
 			res.render('transaction/scan', context);
@@ -79,7 +77,7 @@ module.exports = {
 					intro: 'Leider ist ein Fehler aufgetreten.',
 					message: err,
 				};
-				res.redirect(303, '/scan');
+				res.redirect(303, '/meinepunkte/scan');
 			} // if err
 			if (!reel) {
 				req.session.flash = {
@@ -87,7 +85,7 @@ module.exports = {
 					intro: 'Dieser QPoint ist nicht vorhanden',
 					message: req.qpInput,
 				};
-				res.redirect(303, '/scan');
+				res.redirect(303, '/meinepunkte/scan');
 			} else {// if !reel
 				// gefunden
 				if (reel.reelStatus == "aktiviert"){
@@ -113,7 +111,7 @@ module.exports = {
 										if (err) { return next(err); }
 									});
 									qplib.updateUserStats(req.user._id, reel.assignedProgram._id, reel.assignedProgram.goalToHit);
-									res.redirect(303, '/scan');
+									res.redirect(303, '/meinepunkte/scan');
 								} else { // if cStatus = 0
 									var qpMessage = 'QPoint ' + code.rCode + ' Status ' 
 										+ code.cStatus + ' Rolle ' + reel.nr;	
@@ -122,7 +120,7 @@ module.exports = {
 										intro: 'Der QPoint wurde bereits verwendet',
 										message: qpMessage,
 									};
-									res.redirect(303, '/scan');
+									res.redirect(303, '/meinepunkte/scan');
 								} // if cStatus not 0
 							} // if qpInput
 						}); // reel.codes forEach	
@@ -132,7 +130,7 @@ module.exports = {
 						intro: 'Das Programm ist bereits abgelaufen',
 						message: 'Die Rolle ist damit nicht mehr gültig',
 					};
-					res.redirect(303, '/scan');
+					res.redirect(303, '/meinepunkte/scan');
 				} // else if Dates
 				} else {// if reel = aktiviert
 				req.session.flash = {
@@ -140,83 +138,92 @@ module.exports = {
 					intro: 'Der QPoint wurde noch nicht einem Programm zugeordnet',
 					message: 'Bitte wenden Sie sich an den Ladeninhaber',
 				};
-				res.redirect(303, '/scan');
+				res.redirect(303, '/meinepunkte/scan');
 				} // if else reels nicht aktiviert
 			} // if else = reels gefunden
 		}); // Reels find
 	}, // processCodeRequest
 
 	myPoints: function(req, res, next){
-		CUsers.findById(req.user._id)
+		CUsers
+			.findById(req.user._id)
 			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
 			.exec(function(err, user){
-				if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
-					var context = {
-						layout: 'app',
-						// programs: {
-						// 	programName: 'Bisher wurde noch kein Treuepunkt erfasst',
-						// },
-					};
-				} else { // user already has collected one or more codes
-					var context ={
-						layout: 'app',
-						programs: user.particiPrograms.map(function(partiProgram){
-							return {
-								nr: partiProgram.program.nr,
-								programName: partiProgram.program.programName,
-								programStatus: partiProgram.program.programStatus,
-								programCustomer: partiProgram.program.customer,
-								goalToHit: partiProgram.program.goalToHit,
-								count: partiProgram.count
-							}
-						}), // map programs
-					}; // define context
-					context.programs.forEach(function(program){
-						Customers.findById(program.programCustomer)
-							.select('nr company')
-							.exec(function(err, cust){
-								program.company = cust.company;
-								program.companyNr = cust.nr;
-							}); // Customers find
-					}); // forEach context.programs
-				} // check whether user has already collected a code
-				res.render('transaction/mypoints', context);
-			}); // CUSers FindById
+			if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
+				var context = {
+					programs: {},
+				};
+			} else { // user already has collected one or more codes
+				var context ={
+					programs: user.particiPrograms.map(function(partiProgram){
+						return {
+							nr: partiProgram.program.nr,
+							programName: partiProgram.program.programName,
+							programStatus: partiProgram.program.programStatus,
+							programCustomer: partiProgram.program.customer,
+							goalToHit: partiProgram.program.goalToHit,
+							countPoints: partiProgram.countPoints,
+							countToRedeem: partiProgram.countToRedeem,
+						}
+					}), // map programs
+				}; // define context
+				context.programs.forEach(function(program){
+					Customers.findById(program.programCustomer)
+						.select('nr company')
+						.exec(function(err, cust){
+							program.company = cust.company;
+							program.companyNr = cust.nr;
+						}); // Customers find
+				}); // forEach context.programs
+			} // else check whether user has already collected a code
+			console.log(context);
+			res.render('transaction/mypoints', context);
+		}); // CUSers FindById
 	}, // myPoints
 
 	toRedeem: function(req, res, next){
-		CUsers.findById(req.user._id)
-				.populate('hitGoalPrograms.program', 'nr programName programStatus goalToHit customer')
-				.exec(function(err, user){
+		CUsers
+			.findById(req.user._id)
+			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
+			.exec(function(err, user){
 			var context ={
-				layout: 'app',
-				programs: user.hitGoalPrograms.map(function(hitGoalProgram){
-					return {
-						nr: hitGoalProgram.program.nr,
-						programName: hitGoalProgram.program.programName,
-						programStatus: hitGoalProgram.program.programStatus,
-						programCustomer: hitGoalProgram.program.customer,
-						goalToHit: hitGoalProgram.program.goalToHit,
-						hitGoalCount: hitGoalProgram.hitGoalCount
-					}
-				}), // map programs
+				programs: [{}]
 			}; // define context
-			context.programs.forEach(function(program){
-				Customers.findById(program.programCustomer)
+			var help;
+			var indexP = 0;
+			user.particiPrograms.forEach(function(program){
+				if (program.countToRedeem > 0) {
+					help = {
+						nr: program.program.nr,
+						programName: program.program.programName,
+						programStatus: program.program.programStatus,
+						programCustomer: program.program.customer,
+						goalToHit: program.program.goalToHit,
+						countToRedeem: program.countToRedeem
+					};
+					context.programs[indexP] = help;
+					indexP++;
+				}
+			}); // user.particiPrograms.forEach
+
+			context.programs.forEach(function(program, indexPP){
+				Customers
+					.findById(program.programCustomer)
 					.select('nr company')
 					.exec(function(err, cust){
 						program.company = cust.company;
 						program.companyNr = cust.nr
 					}); // Customers find
+				if (indexPP == context.programs.length - 1) {
+					res.render('transaction/toRedeem', context);
+				}
 			}); // forEach context.programs
-			res.render('transaction/toRedeem', context);
 		}); // CUSers FindById
 	}, // toRedeem
 
 	customerDetail: function(req, res, next){
 		Customers.findOne( {nr: req.params.nr}, function(err, customer){
 			var context = {
-				layout: 'app',
 				nr: customer.nr,
 				company: customer.company,
 				email: customer.email,
@@ -233,7 +240,6 @@ module.exports = {
 	programDetail: function(req, res, next){
 		Programs.findOne({ nr : req.params.nr }, function(err, program){
 			var context = {
-				layout: 'app',
 				nr: program.nr,
 				programStatus: program.programStatus,
 				programName: program.programName,

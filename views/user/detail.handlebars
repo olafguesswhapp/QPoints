@@ -1,12 +1,12 @@
-<h4>{{firstName}}'s Profil &nbsp;&nbsp;<a href="/user/edit/{{username}}" title="User-Daten aktualisieren">
-  <img src="{{static '/images/new-message-icon.png'}}"></a></h4><br>
+<h3>{{firstName}}'s Profil &nbsp;&nbsp;<a href="/user/edit/{{username}}" title="User-Daten aktualisieren">
+  <img src="{{static '/images/new-message-icon.png'}}"></a></h3><br>
 
 <div class="formContainer">
     <form class="form-horizontal productsForm" role="form" action="" method="">
 
         {{!-- <input type="hidden" name="customer" value='{{actualCustomerId}}'> --}}
         <div class="form-group">
-            <label for="fieldUserName" class="col-sm-2 control-label">Username (email):</label>
+            <label for="fieldUserName" class="col-sm-2 control-label">Username (email)</label>
             <div class="col-sm-4">
                 <input type="email" class="form-control" value="{{username}}" id="fieldUserName" name="username" disabled>
             </div>

@@ -121,23 +121,8 @@ module.exports = {
 		}); // CUsers find
 		CUsers.find({}, function(err, user){
 			user.forEach(function(User){
-				if (User.hitGoalPrograms){ 
-					User.update({$set: { hitGoalPrograms: [] }}, function(err, message){
-						console.log(message);
-					}); // User.update
-				} //if User.hitGoalPrograms
 				if (User.particiPrograms){
 					User.update({$set: { particiPrograms: [] }}, function(err, message){
-						console.log(message);
-					}); // User.update
-				} //if User.particiPrograms
-				if (User.redeemPrograms){
-					User.update({$set: { redeemPrograms: [] }}, function(err, message){
-						console.log(message);
-					}); // User.update
-				} //if User.particiPrograms
-				if (User.finishedPrograms){
-					User.update({$set: { finishedPrograms: [] }}, function(err, message){
 						console.log(message);
 					}); // User.update
 				} //if User.particiPrograms

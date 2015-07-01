@@ -17,6 +17,36 @@ function LoggedInUserOnly(req, res, next) {
 	} else { return next();}
 };
 
+function checkUserRoleP (req, res, next) {
+	if (Object.keys(req.session.passport).length > 0) {
+		CUsers
+			.findById(req.user._id)
+			.select('username role')
+			.exec(function(err, user){
+				if(user.role==='customer' || user.role==='admin') {
+					return next();
+				} else if (user.role == 'user' || user.role == 'consumer') {
+					req.session.flash = {
+			            type: 'Warnung',
+			            intro: 'Sie sind nicht als Firmen-User (Inhaber von Treuepunkte-Programmen) angelegt.',
+			            message: 'Sie dürfen QPoints erhalten und einreichen.'
+			        };
+			        res.redirect('/meinepunkte');
+				} else { // else if 
+					console.log('hm bei programs.js stimmt irgendwas nicht CHECK CHECK CHECK');
+					res.redirect('/meinepunkte');
+				} // else if 
+			}); // CUsers.findById
+	} else {
+		req.session.flash = {
+            type: 'Warnung',
+            intro: 'Sie müssen bitte als User eingelogged sein.',
+            message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.'
+        };
+        res.redirect('/login');
+    }
+}; // checkUserRole
+
 function allocateReeltoProgram(req, res, next){
 	Reels
 		.findById(req.body.newReelId)
@@ -67,7 +97,7 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.get('/programm/anlegen', LoggedInUserOnly, this.programRegister);
 		app.post('/programm/anlegen', LoggedInUserOnly, this.programRegistertProcess);
-		app.get('/programm', LoggedInUserOnly, this.library);
+		app.get('/programm', checkUserRoleP, this.library);
 		app.get('/programm/:nr', LoggedInUserOnly, this.programDetail);
 		app.post('/programm/:nr', LoggedInUserOnly, this.programDetailProcess);
 		app.get('/programm/edit/:nr', LoggedInUserOnly, this.programEdit);
@@ -200,7 +230,7 @@ module.exports = {
 		CUsers.findById(req.user._id, function(err, user){
 			Programs.findOne({ nr : req.params.nr })
 					.populate('allocatedReels')
-					.populate('createdBy', 'firstName lastName')
+					.populate('createdBy', 'firstName lastName username')
 					.exec(function(err, program) {
 				Reels.find({ 'reelStatus': 'zugeordnet' , 'customer' : user.customer})
 					.exec(function(err,reels){
@@ -211,14 +241,14 @@ module.exports = {
 						programStatus: program.programStatus,
 						programName: program.programName,
 						goalToHit: program.goalToHit,
-						startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
-						deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
+						startDate: moment(program.startDate).format("YYYY-MM-DDTHH:mm"),
+						deadlineSubmit: moment(program.deadlineSubmit).format("YYYY-MM-DDTHH:mm"),
 						// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
-						created: moment(program.created).format("DD.MM.YY HH:mm"),
+						created: moment(program.created).format("YYYY-MM-DDTHH:mm"),
 						createdByName: program.createdBy.firstName + ' ' + program.createdBy.lastName,
+						createdBy: program.createdBy.username,
 						customerCompany: program.customer.company,
 						usersNearGoal: program.usersNearGoal(function(err, consumers){
-
 						}),
 						allocatedReels: program.allocatedReels.map(function(reel){
 							return {

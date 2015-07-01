@@ -63,8 +63,7 @@ module.exports = {
 	processNewsFeedRequest : function(req, res, next){
 		CUsers.findById(res.locals.apiuser)
 				.populate('particiPrograms.program', 'programStatus')
-				.populate('hitGoalPrograms.program', 'programStatus')
-                .select('password particiPrograms.program particiPrograms.programStatus hitGoalPrograms.program hitGoalPrograms.programStatus')
+                .select('password particiPrograms.program particiPrograms.programStatus')
                 .exec(function(err, checkUser){
         	if (!checkUser) {
                 context = {
@@ -95,28 +94,29 @@ module.exports = {
                     } else {
                     	// concatenate particiPrograms and hitGoalPrograms
                     	var programData = [];
-                    	for (var i=0; i<checkUser.hitGoalPrograms.length; i++) {
-					    	if (checkUser.hitGoalPrograms[i].program.programStatus=='aktiviert') {
-					    		programData.push(checkUser.hitGoalPrograms[i].program._id);
-					    	} // i
-					    } // for i
+                        console.log(checkUser.particiPrograms);
+         //            	for (var i=0; i<checkUser.hitGoalPrograms.length; i++) {
+					    // 	if (checkUser.hitGoalPrograms[i].program.programStatus=='aktiviert') {
+					    // 		programData.push(checkUser.hitGoalPrograms[i].program._id);
+					    // 	} // i
+					    // } // for i
 					    for (var i=0; i<checkUser.particiPrograms.length; i++) {
 					    	if (checkUser.particiPrograms[i].program.programStatus=='aktiviert') {
 					    		programData.push(checkUser.particiPrograms[i].program._id);
 					    	} // if
 					    } // for i
 					    // sort programData by programID
-                    	programData.sort(function(a,b) {
-                    		if(a < b){return -1} else {return 1}
-                    	}); // programData.sort
+                    	// programData.sort(function(a,b) {
+                    	// 	if(a < b){return -1} else {return 1}
+                    	// }); // programData.sort
                     	// delete "doubles"
-                    	for (var i=0; i<programData.length;i++) {
-                    		if (programData[i + 1]) {
-                    			if (JSON.stringify(programData[i]) == JSON.stringify(programData[i +1])) {
-	                    			programData.splice(i,1);
-	                    		} // if
-                    		} // if
-                    	} // for i
+                    	// for (var i=0; i<programData.length;i++) {
+                    	// 	if (programData[i + 1]) {
+                    	// 		if (JSON.stringify(programData[i]) == JSON.stringify(programData[i +1])) {
+	                    // 			programData.splice(i,1);
+	                    // 		} // if
+                    	// 	} // if
+                    	// } // for i
                     	// find applicable News
                         NewsFeed.find({'assignedProgram': { $in: programData}})
                                 .where('newsStatus').equals('erstellt')
@@ -249,17 +249,20 @@ module.exports = {
     // Übersicht aller angelegten Programme
     newsLibrary: function(req,res, next){
         var context = {};
-        CUsers.findById(req.user._id)
+        CUsers
+            .findById(req.user._id)
             .populate('customer', 'id company')
-            .exec(function(err, user) {         
-            Programs.find({customer: user.customer._id})
-                    .select('nr programName programStatus')
-                    .exec(function(err, program){
-                if (err || !program) {
+            .exec(function(err, user) {     
+            Programs
+                .find({customer: user.customer._id})
+                .select('nr programName programStatus')
+                .exec(function(err, program){
+                if (err || !program || program.length<1) {
+                    console.log('Der User hat noch keine Programme');
                     context = {
                         customerCompany: user.customer.company,
-                        news: {
-                            programName: 'Sie haben noch keine News verfasst',
+                        programs: {
+                            programName: 'Sie haben noch kein Treuepunkte-Programm gestartet',
                         }, // news
                     }; // context
                     res.render('newsFeed/library', context);
@@ -319,8 +322,8 @@ module.exports = {
                 firstName: newsfeed.createdBy.firstName,
                 newsTitle: newsfeed.newsTitle,
                 newsMessage: newsfeed.newsMessage,
-                newsStartDate: moment(newsfeed.newsStartDate).format('YYYY-MM-DD HH:mm'),
-                newsDeadline: moment(newsfeed.newsDeadline).format('YYYY-MM-DD HH:mm'),
+                newsStartDate: moment(newsfeed.newsStartDate).format('YYYY-MM-DDTHH:mm'),
+                newsDeadline: moment(newsfeed.newsDeadline).format('YYYY-MM-DDTHH:mm'),
                 newsBudget: newsfeed.newsBudget,
                 newsDeliveryCount: newsfeed.newsDeliveryCount,
                 newsDeliveryLimit: newsfeed.newsDeliveryLimit,

@@ -1,5 +1,4 @@
-<h3>Meine QPoints Programme:</h3>
-
+<h3>Meine QPoints:</h3>
 {{#if programs}}
 <table class="table table-striped table-hover">
 	<thead>
@@ -8,6 +7,7 @@
 			<td>Firma</td>
 			<td>Status</td>
 			<td>Punkte</td>
+			<td>Einzulösen</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -16,7 +16,8 @@
 			<td><a href="/program/{{nr}}">{{programName}}</a></td>
 			<td><a href="/firma/{{companyNr}}">{{company}}</a></td>
 			<td>{{programStatus}}</td>
-			<td>{{count}} von {{goalToHit}}</td>
+			<td>{{countPoints}} von {{goalToHit}}</td>
+			<td>{{#times countToRedeem}}<img src="{{static '/images/checkmark-icon.png'}}"> {{/times}}</td>
 		{{/programs}}
 	</tbody>	
 </table>
@@ -24,3 +25,5 @@
 <p>Bisher wurde noch kein Treuepunkt erfasst.</p>
 <p>Sobald du Deine ersten Treuepunkte gesammelt hast erscheinen diese hier.</p>
 {{/if}}
+<br>
+<a href="/meinepunkte/scan" class="btn btn-default">QPoints manuell erfassen</a>

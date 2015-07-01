@@ -10,7 +10,8 @@ var reelsController = require('./controllers/reels.js');
 var programController = require('./controllers/programs.js');
 var cartController = require('./controllers/cart.js');
 var orderController = require('./controllers/order.js');
-var transactionController = require('./controllers/transaction.js');
+var myPointsController = require('./controllers/mypoints.js');
+// var transactionController = require('./controllers/transaction.js');
 var resetController = require('./controllers/reset.js');
 var newsFeedController = require('./controllers/newsfeed.js');
 
@@ -62,8 +63,11 @@ module.exports = function(app) {
 	// order routes
 	orderController.registerRoutes(app);
 
+	// mypoints routes
+	myPointsController.registerRoutes(app);
+
 	// transaction routes
-	transactionController.registerRoutes(app);
+	// transactionController.registerRoutes(app);
 
 	// reset route
 	resetController.registerRoutes(app);

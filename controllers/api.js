@@ -35,41 +35,13 @@ function checkUser(req, res, next) {
     }); // CUsers findOne
 };
 
-function buildResponseArray(user, req, res){
-    console.log(user);
-    if (user.hitGoalPrograms.length == 0) {
-        console.log('noch kein Program vervollständigt');
-        user.particiPrograms.forEach(function(particiProgram, indexP){
-            user.particiPrograms[indexP].programsHit = 0;
-            if (indexP == user.particiPrograms.length-1){
-                buildResponseArray2(user, req, res);
-            }
-        });//user.particiProgram.forEach
-    } else {
-        user.hitGoalPrograms.forEach(function(hitGProgram, indexH){
-            user.particiPrograms.forEach(function(particiProgram, indexP){
-                if (JSON.stringify(particiProgram.program) == JSON.stringify(hitGProgram.program) && hitGProgram.hitGoalCount>=0) {
-                    user.particiPrograms[indexP].programsHit = hitGProgram.hitGoalCount;
-                } else if (hitGProgram.hitGoalCount>0 && indexP == user.particiPrograms.length - 1) {
-                    user.particiPrograms(user.particiPrograms.length) = {
-                        program: hitGProgram.program,
-                        programsHit: hitGProgram.hitGoalCount
-                    };
-                }
-                if (indexH == user.hitGoalPrograms.length-1 && indexP == user.particiPrograms.length-1){
-                    buildResponseArray2(user, req, res);
-                }
-            });//user.particiProgram.forEach
-        });//user.hitGoalProgram.forEach
-    }
-}; // buildResponseArray1
-
-function buildResponseArray2 (user, req, res){
+function buildResponseArray (user, req, res){
+        console.log(user);
         var programData=[];
         var context = {};
         user.particiPrograms.forEach(function(particiProgram, index){
-            collectProgramData (particiProgram.program, particiProgram.count, particiProgram.programsHit, user.particiPrograms.length, index, programData, user.gender, req, res);
-        });// user.hitGoalPrograms.forEach
+            collectProgramData (particiProgram.program, particiProgram.countPoints, particiProgram.countToRedeem, user.particiPrograms.length, index, programData, user.gender, req, res);
+        });// user.particiPrograms.forEach
         return programData;
     }; // function buildResponseArray2
 
@@ -82,6 +54,11 @@ function collectProgramData (programId, programCount, programHit, nrOfParticiPro
         programName: usersProgram.programName,
         programCompany: usersProgram.customer.company,
         companyCity: usersProgram.customer.city,
+        address1: usersProgram.customer.address1,
+        address2: usersProgram.customer.address2,
+        zip: usersProgram.customer.zip,
+        city: usersProgram.customer.city,
+        phone: usersProgram.customer.phone,
         programGoal: usersProgram.goalToHit, 
         myCount: programCount,
         ProgramsFinished: programHit,
@@ -180,8 +157,8 @@ module.exports = {
         console.log(req.body);
         // User identifizieren
         CUsers.findOne({'username' : req.body.userEmail})
-                .populate('particiPrograms', 'hitGoalPrograms')
-                .select('password particiPrograms hitGoalPrograms gender')
+                .populate('particiPrograms')
+                .select('password particiPrograms gender')
                 //.lean()
                 .exec(function(err, checkUser){
             if(err) {
@@ -218,7 +195,7 @@ module.exports = {
                         publish(context, statusCode, req, res);
                         return;
                     } else {
-                        if (checkUser.hitGoalPrograms.length==0 && checkUser.particiPrograms.length == 0) {
+                        if (checkUser.particiPrograms.length == 0) {
                             context = {
                                 success: true,
                                 message : "User-Email und Passwort sind verifiziert. Willkommen",
@@ -421,9 +398,9 @@ function checkCodesInReels (programId, req, res){
     var counter =  req.body.programGoal;
     var helpIndex = 0;
     Reels
-            .find({'assignedProgram' : programId })
-            .select('_id codes.rCode codes.cStatus codes.consumer')
-            .exec(function(err, reels){
+        .find({'assignedProgram' : programId })
+        .select('_id codes.rCode codes.cStatus codes.consumer')
+        .exec(function(err, reels){
         reels.forEach(function(reel, index){
             var reelId = reel._id;
             reel.codes.forEach(function(reelcode){
@@ -461,31 +438,18 @@ function checkCodesInReels (programId, req, res){
 function updateUserStats(programId, codesArray, req, res){
     var correctUser = false;
     var didRun = false;
-    CUsers.findById(res.locals.apiuser, 'hitGoalPrograms redeemPrograms', function(err, cUser){
-        // Update HitGoalStats of User (decrease)
-        cUser.hitGoalPrograms.forEach(function(progHitGoal){
-            if (JSON.stringify(progHitGoal.program)==JSON.stringify(programId)){
+    CUsers.findById(res.locals.apiuser, 'particiPrograms', function(err, cUser){
+        // Update countToRedeem Stats of User (decrease)
+        cUser.particiPrograms.forEach(function(program){
+            if (JSON.stringify(program.program) == JSON.stringify(programId) ){
+                console.log('gefunden');
                 correctUser = true;
-                progHitGoal.hitGoalCount--; // HitGoal Stats decrease (since codes are beeing redeemed)
+                program.countToRedeem--; // countToRedeem Stats decrease (since codes are beeing redeemed)
+                program.countCashed++;
             } // found redeemed Program
-        }); // hitGoalProgram.forEach
-        // Update RedeemStats of User (Increase)
-        var firstTime = true; // marks if this User has redeemd this program for the 1st time
-        cUser.redeemPrograms.forEach(function(redeemProgram){
-            if(JSON.stringify(redeemProgram.program)==JSON.stringify(programId)){
-                redeemProgram.redeemCount++;
-                firstTime= false; // yes, User did already redeem this Program once before (only increase counter)
-            } // if User already has redeemd in the program
-        }); // forEach redeemProgram
-        if (firstTime==true){ // it is the 1st time
-            var programArray = {
-                program: programId,
-                redeemCount: 1
-            };
-            cUser.redeemPrograms.push(programArray);
-        } // it is the 1st time
+        }); // particiPrograms.forEach
         cUser.save(function(err){
-            if (err) { return next(err);}
+            if (err) { return err;}
         }); // save updated User Stats
         if (correctUser) {
             if (didRun==false){updateProgramStats(codesArray, req, res);}
@@ -497,8 +461,10 @@ function updateUserStats(programId, codesArray, req, res){
 
 function updateProgramStats(codesArray, req, res){
     Programs.findOne({'nr' : req.body.programNr}, function(err, updateProgram){
+        console.log(updateProgram);
         updateProgram.hitGoalsCount--;
         updateProgram.redeemCount++;
+        console.log(updateProgram);
         updateProgram.save(function(err){
             if (err) { return next(err);}
         }); // save updated User Stats

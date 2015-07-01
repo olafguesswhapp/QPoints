@@ -1,5 +1,4 @@
-<h3>{{customerCompany}} Botschaft an Teilnehmer von Program "{{programName}}"</h3>
-<p>Status vom Programm: {{programStatus}}</p>
+<h3>{{customerCompany}} "{{programName}}" Botschaft</h3><br>
 
 <div class="formContainer">
     <form class="form-horizontal newsletterForm" role="form" action="/news/edit/{{newsFeedId}}" method="POST">
@@ -7,20 +6,20 @@
         <input type="hidden" name="newsFeedId" value="{{newsFeedId}}">
         
 		<div class="form-group">
-            <label for="fieldNewsTitle" class="col-sm-2 control-label">Nachrichten-Titel:</label>
+            <label for="fieldNewsTitle" class="col-sm-2 control-label">Titel</label>
             <div class="col-sm-4">
                 <input type="text" value="{{newsTitle}}" class="form-control" required id="fieldNewsTitle" 
                 name="newsTitle">
             </div>
         </div>
         <div class="form-group">
-            <label for="fieldNewsMessage" class="col-sm-2 control-label">Nachricht:</label>
+            <label for="fieldNewsMessage" class="col-sm-2 control-label">Botschaft</label>
             <div class="col-sm-4">
-                <textarea name="newsMessage" rows="5" class="form-control" required id="fieldNewsMessage" >{{newsMessage}}</textarea>
+                <textarea name="newsMessage" rows="4" class="form-control" required id="fieldNewsMessage" >{{newsMessage}}</textarea>
             </div>
         </div>
 		<div class="form-group">
-            <label for="fieldCreatedBy" class="col-sm-2 control-label">Erstellt von:</label>
+            <label for="fieldCreatedBy" class="col-sm-2 control-label">Erstellt von</label>
             <div class="col-sm-4">
                 <input type="text" value="{{firstName}}" class="form-control" required id="fieldCreatedBy" 
                 name="firstName" disabled>
@@ -39,10 +38,16 @@
             </div>
         </div>
 		<div class="form-group">
-            <label for="fieldNewsStatus" class="col-sm-2 control-label">Status:</label>
+            <label for="fieldNewsStatus" class="col-sm-2 control-label">Status Botschaft</label>
             <div class="col-sm-4">
                 <input type="text" value="{{newsStatus}}" class="form-control" required id="fieldNewsStatus" 
                 name="newsStatus" disabled>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldProgramStatus" class="col-sm-2 control-label">Status Program</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{programStatus}}" id="fieldProgramStatus" name="programStatus" disabled>
             </div>
         </div>
 		<div class="form-group">
