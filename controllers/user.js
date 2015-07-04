@@ -58,6 +58,38 @@ function checkUserRole (req, res, next) {
     }
 }; // checkUserRole
 
+function detachUserfromCustomer(req, res, next){
+	CUsers
+		.findOne({ 'username' : req.body.username })
+		.select('_id customer role')
+		.exec(function(err, user){
+		if (!user || err) {
+			// HIER FLASH MESSAGE EINSETZEN
+			return next;
+		} else {
+			user.role = 'consumer';
+			user.customer = undefined;
+			user.save();
+			Customers
+				.findOne({ 'nr' : req.body.customerNr})
+				.select('user')
+				.exec(function(err, customer) {
+				var executed = false;
+				customer.user.forEach(function(customerUser, indexCU){
+					if (JSON.stringify(customerUser) == JSON.stringify(user._id)){
+						console.log(indexCU + ' at ' +  customerUser);
+						customer.user.splice(indexCU, 1);
+						executed = true;
+					} // if
+					if (executed == true) {
+					customer.save();
+					} // if
+				}); // customer.user.forEach
+			});	// Customers.findOne
+		}
+	});
+}; // detachUserToProgram
+
 module.exports = {
 
 	registerRoutes: function(app) {
@@ -70,6 +102,7 @@ module.exports = {
 		app.get('/login', this.login);
 		app.post('/login', this.processLogin);
 		app.get('/logout', this.logout);
+		app.post('/usertrennen', customerOnly, this.processDetachUser);
 	},
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
@@ -134,6 +167,7 @@ module.exports = {
 			Customers.findById(req.user.customer, function(err, customer){
 				context.customerNr = customer.nr;
 				context.customerCompany = customer.company;
+				context.currentUser = req.user.username;
 				res.render('user/library', context);
 			});
 		});
@@ -255,5 +289,12 @@ module.exports = {
 			} // else			
 		}); // CUsers.findById
 	}, // processUserEdit
+
+	processDetachUser: function(req, res, next){
+		console.log('jetzt User von Kunde trennen');
+		console.log(req.body);
+		detachUserfromCustomer(req, res, next);
+		res.redirect(303, '/user' );
+	}, // processDetachUser
 
 };

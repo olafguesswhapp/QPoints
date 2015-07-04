@@ -10,6 +10,7 @@
 			<td>W/M</td>
 			<td>Rolle</td>
 			<td>Seit</td>
+			<td></td>
 		</tr>
 	</thead>
 	<tbody>
@@ -22,6 +23,15 @@
 			{{#contentCheck gender '2'}}Männlich{{/contentCheck}}</td>
 			<td>{{role}}</td>
 			<td>{{created}}</td>
+			<td>{{#contentCheck username ../currentUser}}{{else}}
+				<form id="my_form" action="/usertrennen" method="POST">
+					<input type="hidden" name="customerNr" value="{{../../customerNr}}">
+					<input type="hidden" name="username" value="{{username}}">
+					<button type="submit" style="border:none; background-color:transparent;">
+						<img src="{{static '/images/delete-icon.png'}}">
+					</button>
+				</form>{{/contentCheck}}
+			</td>
 		</tr>
 		{{/users}}
 	</tbody>
