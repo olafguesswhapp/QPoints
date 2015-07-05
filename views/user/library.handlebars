@@ -24,7 +24,7 @@
 			<td>{{role}}</td>
 			<td>{{created}}</td>
 			<td>{{#contentCheck username ../currentUser}}{{else}}
-				<form id="my_form" action="/usertrennen" method="POST">
+				<form id="my_form" action="/user/trennen" method="POST">
 					<input type="hidden" name="customerNr" value="{{../../customerNr}}">
 					<input type="hidden" name="username" value="{{username}}">
 					<button type="submit" style="border:none; background-color:transparent;">
@@ -34,6 +34,18 @@
 			</td>
 		</tr>
 		{{/users}}
-	</tbody>
-	
+	</tbody>	
 </table>
+
+<form id="search_form" action="/user/verbinden" method="POST">
+		<input type="hidden" name="customerNr" value="{{customerNr}}">
+		<input type="hidden" name="username" value="{{currentUser}}">
+		<p>Einen User {{customerCompany}} zuordnen:</p>
+		<div class="form-group">
+            {{!-- <label type="email" for="fieldSearchUserName" class="col-sm-2 control-label">User verbinden</label> --}}
+            <div class="col-sm-4">
+            	<input type="email" class="form-control" required id="fieldSearchUserName" name="searchUsername" placeholder="Username (= email) eingeben">
+            </div>
+        </div>
+		<button type="submit" class="btn btn-default">Suchen & Verbinden</button>
+	</form>

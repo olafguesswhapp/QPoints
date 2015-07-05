@@ -102,7 +102,8 @@ module.exports = {
 		app.get('/login', this.login);
 		app.post('/login', this.processLogin);
 		app.get('/logout', this.logout);
-		app.post('/usertrennen', customerOnly, this.processDetachUser);
+		app.post('/user/trennen', customerOnly, this.processDetachUser);
+		app.post('/user/verbinden', customerOnly, this.processJoinUser);
 	},
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
@@ -297,4 +298,45 @@ module.exports = {
 		res.redirect(303, '/user' );
 	}, // processDetachUser
 
+
+	processJoinUser: function(req, res, next){
+		Customers
+			.findOne({nr : req.body.customerNr})
+			.select('_id user')
+			.exec(function(err, customer){
+			CUsers
+				.findOne({ username: req.body.searchUsername})
+				.select('_id username role customer')
+				.exec(function(err, user){
+				if(!user || err) {
+					req.session.flash = {
+	                    type: 'Warnung',
+	                    intro: 'Der eingegebene User konnte nicht gefunden werden.',
+	                    message: 'Bitte wiederholen Sie Ihre Eingabe mit einem anderen User.'
+                	};
+					res.redirect(303, '/user');
+					return;
+				} else { // if err
+					if (user.role != 'consumer') {
+						req.session.flash = {
+		                    type: 'Warnung',
+		                    intro: 'Der eingegebene User ist bereits zugeordnet.',
+		                    message: 'Bitte ordnen Sie einen anderen User zu oder trennen Sie diesen User von einem anderen Kunden.'
+	                	};
+	                	res.redirect(303, '/user');
+	                	return;
+					} else if (user.role == 'consumer') { // if user is customer or already allocated
+						console.log('zuordnung hat geklappt');
+						user.customer = customer._id;
+						user.role = 'user';
+						user.save();
+						customer.user.push(user._id);
+						customer.save();
+						res.redirect(303, '/user');
+						return;
+					} // customer allocation
+				} // is not err or user was found
+			}); // CUsers.findOne
+		}); // Customer.findOne
+	}, // processJoinUser
 };
