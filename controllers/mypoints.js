@@ -2,6 +2,8 @@ var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
 var Programs = require('../models/programs.js');
 var Customers = require('../models/customers.js');
+var NewsFeed = require('../models/newsfeed.js');
+var NewsHistory = require('../models/newshistory.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
 
@@ -53,6 +55,7 @@ module.exports = {
 		app.get('/meinepunkte/scan', LoggedInUserOnly, this.scan);
 		app.post('/meinepunkte/scan', this.processScan);
 		app.get('/meinepunkte', LoggedInUserOnly, this.myPoints);
+		app.get('/meinepunkte/news', LoggedInUserOnly, this.news);
 		app.get('/einzuloesen', this.toRedeem);
 		app.get('/firma/:nr', this.customerDetail);
 		app.get('/program/:nr', this.programDetail);
@@ -252,4 +255,108 @@ module.exports = {
 
 		}); // ProgramsFindOne
 	}, // programDetail
+
+	news: function(req, res, next){
+		var programData=[];
+		CUsers
+			.findById(req.user._id)
+			.populate({
+				path: 'particiPrograms.program',
+				match: { programStatus: 'aktiviert'},
+				select: '_id'
+				})
+			.select('particiPrograms.program')
+			.exec(function(err, checkUser){
+			console.log('checkUser1');
+			console.log(checkUser);
+			if (err || !checkUser || checkUser.particiPrograms.length == 0) {
+				console.log('keinen User gefunden');
+			} else {
+				console.log('else');
+				for (var i=0; i<checkUser.particiPrograms.length; i++) {
+					if (checkUser.particiPrograms[i].program) {
+						programData.push(checkUser.particiPrograms[i].program._id);
+					} // if
+				} // for i
+				console.log('programData');
+				console.log(programData);
+				NewsFeed
+					.find({'assignedProgram': { $in: programData}})
+		            .where('newsStatus').equals('erstellt')
+		            .$where('this.newsDeliveryLimit > this.newsDeliveryCount')
+		            .where('newsDeadline').gt(new Date()) // Change to "new Date (2016,1,1)" to test
+		            .populate('customer', 'company')
+		            .populate('assignedProgram', 'programName')
+		            .exec(function(err, newsFeed){
+			        var context = {
+			        	news: []
+			        };
+			        var help = {};
+			        if (err || newsFeed.length == 0) {
+			            context = {
+			                success: false,
+			                message: 'Es liegen keine Nachrichten vor',
+			            };
+			            statusCode = 400;
+			            console.log(context);
+			        } else {// if
+			            //Check if News was already sent
+			            newsFeed.forEach(function(newsfeed, indexN){
+			                console.log(newsfeed._id);
+			                NewsHistory.find({'newsFeed' : newsfeed._id})
+			                            .where({'receivedBy' : res.locals.apiuser })
+			                            .select('_id')
+			                            .exec(function(err, newshistory){
+			                    if (newshistory.length == 0) {// has not been send
+			                        // collect News Data to send to User
+			                        help = {
+			                            newsTitle: newsfeed.newsTitle,
+			                            newsMessage: newsfeed.newsMessage,
+			                            programName: newsfeed.assignedProgram.programName,
+			                            company: newsfeed.customer.company,
+			                            newsDate: moment(new Date()).format('YYYY-MM-DD'),
+			                        };
+			                        context.news.push(help);
+			                        // register news Push to newsHistory data feed
+			                        newHistory = new NewsHistory ({
+			                            newsFeed: newsfeed._id,
+			                            receivedBy: res.locals.apiuser,
+			                            customer: newsfeed.customer._id,
+			                            assignedProgram: newsfeed.assignedProgram._id,
+			                            sendDate: new Date(),
+			                        });
+			                        // newHistory.save(function(err, newhistory) {
+			                        //     if(err) return next(err);
+			                        // });
+			                        // qplib.updateNewsFeedStats(newsfeed._id);
+			                    } // if
+			                    // if last forEach.loop than finish API with response
+			                    if (indexN == newsFeed.length - 1) {
+			                        console.log(context);
+			                        if (context.length == 0) {
+			                            context = {
+			                                success: false,
+			                                message: 'Es liegen keine Nachrichten vor',
+			                            };
+			                            console.log(context);
+			                            res.render('transaction/news', context);
+			                        } else {
+			                            context = {
+			                                success: true,
+			                                message: 'hat geklappt',
+			                                news: context.news
+			                            };
+			                            console.log(context);
+			                            res.render('transaction/news', context);
+			                        } // context is not empty
+			                    } // if
+			                }); // NewsHistory.findById
+			            }); // newsFeed.forEach
+			        } // else
+			    }); // NewsFeed.Find
+
+			} // else checkUser has content
+		}); // CUsers.findById
+		// Find News relating to the Programs
+	}, // news
 };

@@ -1,29 +1,44 @@
-<h3>Meine QPoints:</h3>
-{{#if programs}}
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Program</td>
-			<td>Firma</td>
-			<td>Status</td>
-			<td>Punkte</td>
-			<td>Einzulösen</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#programs}}
-		<tr class='clickableRow'> <!-- onclick="window.document.location='/rollen/{{nr}}';" -->
-			<td><a href="/program/{{nr}}">{{programName}}</a></td>
-			<td><a href="/firma/{{companyNr}}">{{company}}</a></td>
-			<td>{{programStatus}}</td>
-			<td>{{countPoints}} von {{goalToHit}}</td>
-			<td>{{#times countToRedeem}}<img src="{{static '/images/checkmark-icon.png'}}"> {{/times}}</td>
-		{{/programs}}
-	</tbody>	
-</table>
-{{else}}
-<p>Bisher wurde noch kein Treuepunkt erfasst.</p>
-<p>Sobald du Deine ersten Treuepunkte gesammelt hast erscheinen diese hier.</p>
-{{/if}}
-<br>
-<a href="/meinepunkte/scan" class="btn btn-default">QPoints manuell erfassen</a>
+<div class="container-fluid">
+	<div class="row">
+
+		<div class="col-sm-3 col-md-2 sidebar">
+			<ul class="nav nav-pills nav-stacked">
+				<li class="active"><a href="/meinepunkte">Meine QPoints</a></li>
+				<li><a href="/meinepunkte/news">Botschaften</a></li>
+				<li><a href="/meinepunkte/scan">QPoint erfassen</a></li>
+			</ul>
+		</div>
+
+		<div role="main"  class="col-sm-9 col-md-10 main">
+			<h4>Folgende QPoints hast du bereits gesammelt:</h4><br>
+			{{#if programs}}
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Program</td>
+						<td>Firma</td>
+						<td>Status</td>
+						<td>Punkte</td>
+						<td>Einzulösen</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#programs}}
+					<tr class='clickableRow'> <!-- onclick="window.document.location='/rollen/{{nr}}';" -->
+						<td><a href="/program/{{nr}}">{{programName}}</a></td>
+						<td><a href="/firma/{{companyNr}}">{{company}}</a></td>
+						<td>{{programStatus}}</td>
+						<td>{{countPoints}} von {{goalToHit}}</td>
+						<td>{{#times countToRedeem}}<img src="{{static '/images/checkmark-icon.png'}}"> {{/times}}</td>
+					{{/programs}}
+				</tbody>	
+			</table>
+			{{else}}
+			<p>Bisher wurde noch kein Treuepunkt erfasst.</p>
+			<p>Sobald du Deine ersten Treuepunkte gesammelt hast erscheinen diese hier.</p>
+			{{/if}}
+			<br>
+		</div>
+
+	</div>
+</div>
