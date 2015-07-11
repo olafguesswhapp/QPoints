@@ -17,9 +17,15 @@ module.exports = {
 				.select('nr')
 				.exec(function(err, product){
 			if (!product) {
-				context = {productNr : 'PR1001'};
+				context = {
+					navProduct: 'class="active"',
+					productNr : 'PR1001'
+				};
 			} else {
-				context = {productNr : product.nr.match(/\D+/)[0] + (parseInt(product.nr.match(/\d+/))+1)};
+				context = {
+					navProduct: 'class="active"',
+					productNr : product.nr.match(/\D+/)[0] + (parseInt(product.nr.match(/\d+/))+1)
+				};
 			}
 			res.render('products/create', context);
 		}); // Products.findOne
@@ -45,6 +51,7 @@ module.exports = {
 			if(!product) return next(); 	// pass this on to 404 handler
 			console.log(product);
 			var context = {
+				navProduct: 'class="active"',
 				nr: product.nr,
 				productName: product.productName,
 				price: product.price.toFixed(2),
@@ -56,6 +63,7 @@ module.exports = {
 	productsCatalog: function (req, res, next) {
 		Products.find(function(err, products) {
 			var context = {
+				navProduct: 'class="active"',
 				products: products.map(function(product){
 					return {
 						nr: product.nr,
