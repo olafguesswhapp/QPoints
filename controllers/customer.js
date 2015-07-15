@@ -12,9 +12,9 @@ module.exports = {
 		app.post('/anmelden', this.processRegister);
 		app.get('/kunden', qplib.adminOnly, this.clientList);
 		app.get('/kunde', qplib.checkUserRole8above, this.clientPrep);
-		app.get('/kunden/:nr', this.detail);
-		app.get('/kunden/edit/:nr', this.editCustomer);
-		app.post('/kunden/edit/:nr', this.processEditCustomer);
+		app.get('/kunden/:nr', qplib.checkUserRole8above, this.detail);
+		app.get('/kunden/edit/:nr', qplib.checkUserRole8above, this.editCustomer);
+		app.post('/kunden/edit/:nr', qplib.checkUserRole8above, this.processEditCustomer);
 	},
 
 	register: function(req, res, next) {

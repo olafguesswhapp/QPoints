@@ -1,6 +1,7 @@
 var Products = require('../models/products.js');
 var CUsers = require('../models/cusers.js');
 var Q = require('q');
+var qplib = require('../lib/qpointlib.js');
 
 // in order to have quantities instead of many times the same product in cart
 function getIndexOfCartItem(cartItems, k, req){
@@ -44,7 +45,7 @@ function middleware(req, res, next){
 		.catch(function(err){
 			next(err);	
 		});
-};
+	};
 
 function addToCart(nr, req, res, next){
 	var cart = req.session.cart || (req.session.cart = { items: [] });
@@ -111,10 +112,10 @@ module.exports = {
 
 	// shopping cart routes
 	registerRoutes: function(app) {
-		app.get('/warenkorb', middleware, this.home);
-		app.get('/warenkorb/add', this.addProcessGet);
-		app.get('/warenkorb/sub', this.subProcessGet);
-		app.get('/warenkorb/checkout', this.checkout);
+		app.get('/warenkorb', middleware, qplib.checkUserRole6above, this.home);
+		app.get('/warenkorb/add', qplib.checkUserRole6above, this.addProcessGet);
+		app.get('/warenkorb/sub', qplib.checkUserRole6above, this.subProcessGet);
+		app.get('/warenkorb/checkout', qplib.checkUserRole6above, this.checkout);
 	},
 
 	addProcessGet : function(req, res, next){

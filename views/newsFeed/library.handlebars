@@ -4,7 +4,7 @@
 		{{> programNav  }}
 
 		<div role="main"  class="col-sm-9 col-md-10 main">
-			<h3>{{customerCompany}} Nachrichten</h3>
+			<a href="/warenkorb/add?nr=PR1002" class="btn btn-default">Paket von Botschaften in den Warenkorb legen</a></br></br>
 			<table class="table table-striped table-hover">
 				<thead>
 					<tr>
@@ -26,6 +26,7 @@
 						<td></td>
 						<td></td>
 					</tr>
+					{{#if programNews}}
 					{{#programNews}}
 					<tr class='warning' onclick="window.document.location='/news/{{newsFeedId}}';"> 
 						<td>Nachricht</td>
@@ -36,6 +37,12 @@
 						<td>{{newsBudget}}</td>
 					</tr>
 					{{/programNews}}
+					{{else}}
+					<tr class='warning'> 
+						<td>Für dieses Programn wurde noch keine Botschaft erstellt</td>
+						<td></td><td></td><td></td><td></td><td></td>
+					</tr>
+					{{/if}}
 					{{/programs}}
 				</tbody>
 			</table>
