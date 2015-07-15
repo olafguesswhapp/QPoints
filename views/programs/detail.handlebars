@@ -1,122 +1,131 @@
-<h3>Programm "{{programName}}"  &nbsp;&nbsp;<a href="/programm/edit/{{nr}}" title="Programm aktualisieren">
-  <img src="{{static '/images/update-icon2.png'}}"></a></h3><br>
+<div class="">
+  <div class="row">
 
-<div class="formContainer">
-    <form class="form-horizontal productsForm" role="form" action="" method="">
+    {{> programNav  }}
 
-      <div class="form-group">
-        <label for="fieldProgramNr" class="col-sm-2 control-label">Programm-Nr</label>
-        <div class="col-sm-4">
-          <input type="text" class="form-control" value="{{nr}}" id="fieldProgramNr" name="nr" disabled>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldProgramStatus" class="col-sm-2 control-label">Status</label>
-        <div class="col-sm-4">
-          <input type="text" class="form-control" value="{{programStatus}}" id="fieldProgramStatus" name="programStatus" disabled>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldProgramGoalToHit" class="col-sm-2 control-label">Notwendige Punkte</label>
-        <div class="col-sm-4">
-          <input type="number" class="form-control" value="{{goalToHit}}" id="fieldProgramGoalToHit" name="goalToHit" disabled>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldStartDate" class="col-sm-2 control-label">Gültig ab</label>
-        <div class="col-sm-4">
-            <input type="datetime-local" value={{startDate}} class="form-control" required 
-            id="fieldStartDate" name="startDate" disabled>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldDeadlineSubmit" class="col-sm-2 control-label">Einlösbar bis</label>
-        <div class="col-sm-4">
-            <input type="datetime-local" value={{deadlineSubmit}} class="form-control" required 
-            id="fieldDeadlineSubmit" name="deadlineSubmit" disabled>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldCreatedByName" class="col-sm-2 control-label">Erstellt von</label>
-        <div class="col-sm-4"><a href="/user/{{createdBy}}">
-          <input type="text" class="form-control" value="{{createdByName}}" id="fieldCreatedByName" name="createdByName" disabled></a>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="fieldCreated" class="col-sm-2 control-label">Erstellt am</label>
-        <div class="col-sm-4">
-            <input type="datetime-local" value={{created}} class="form-control" required 
-            id="fieldCreated" name="created" disabled>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label class="col-sm-2 control-label">Anzahl Kunden</label><br>
-      </div>
-      {{#each usersNearGoal}}
-      {{#if this}}
-      {{#if @index}}
-      <div class="form-group">
-        <label for="fieldUsersMissing{{@index}}Points" class="col-sm-2 control-label">{{@index}} Punkte vom Ziel</label>
-        <div class="col-sm-4">
-          <input type="number" class="form-control" value="{{this}}" id="fieldUsersMissing{{@index}}Points" name="usersMissing{{@index}}Points" disabled>
-        </div>
-      </div>
-      {{else}}
-      <div class="form-group">
-        <label for="fieldUsersReachedGoal" class="col-sm-2 control-label">am Ziel</label>
-        <div class="col-sm-4">
-          <input type="number" class="form-control" value="{{this}}" id="fieldUsersReachedGoal" name="usersReachedPoints" disabled>
-        </div>
-      </div>
-      {{/if}}
-      {{/if}}
-      {{/each}}
+    <div role="main"  class="col-sm-9 col-md-10 main">
+      <h4>Programm "{{programName}}"  &nbsp;&nbsp;<a href="/programm/edit/{{nr}}" title="Programm aktualisieren">
+        <img src="{{static '/images/update-icon2.png'}}"></a></h4><br>
 
-    </form>
+      <div class="formContainer">
+          <form class="form-horizontal productsForm" role="form" action="" method="">
+
+            <div class="form-group">
+              <label for="fieldProgramNr" class="col-sm-2 control-label">Programm-Nr</label>
+              <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{nr}}" id="fieldProgramNr" name="nr" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldProgramStatus" class="col-sm-2 control-label">Status</label>
+              <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{programStatus}}" id="fieldProgramStatus" name="programStatus" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldProgramGoalToHit" class="col-sm-2 control-label">Notwendige Punkte</label>
+              <div class="col-sm-4">
+                <input type="number" class="form-control" value="{{goalToHit}}" id="fieldProgramGoalToHit" name="goalToHit" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldStartDate" class="col-sm-2 control-label">Gültig ab</label>
+              <div class="col-sm-4">
+                  <input type="datetime-local" value={{startDate}} class="form-control" required 
+                  id="fieldStartDate" name="startDate" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldDeadlineSubmit" class="col-sm-2 control-label">Einlösbar bis</label>
+              <div class="col-sm-4">
+                  <input type="datetime-local" value={{deadlineSubmit}} class="form-control" required 
+                  id="fieldDeadlineSubmit" name="deadlineSubmit" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldCreatedByName" class="col-sm-2 control-label">Erstellt von</label>
+              <div class="col-sm-4"><a href="/user/{{createdBy}}">
+                <input type="text" class="form-control" value="{{createdByName}}" id="fieldCreatedByName" name="createdByName" disabled></a>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fieldCreated" class="col-sm-2 control-label">Erstellt am</label>
+              <div class="col-sm-4">
+                  <input type="datetime-local" value={{created}} class="form-control" required 
+                  id="fieldCreated" name="created" disabled>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="col-sm-2 control-label">Anzahl Kunden</label><br>
+            </div>
+            {{#each usersNearGoal}}
+            {{#if this}}
+            {{#if @index}}
+            <div class="form-group">
+              <label for="fieldUsersMissing{{@index}}Points" class="col-sm-2 control-label">{{@index}} Punkte vom Ziel</label>
+              <div class="col-sm-4">
+                <input type="number" class="form-control" value="{{this}}" id="fieldUsersMissing{{@index}}Points" name="usersMissing{{@index}}Points" disabled>
+              </div>
+            </div>
+            {{else}}
+            <div class="form-group">
+              <label for="fieldUsersReachedGoal" class="col-sm-2 control-label">am Ziel</label>
+              <div class="col-sm-4">
+                <input type="number" class="form-control" value="{{this}}" id="fieldUsersReachedGoal" name="usersReachedPoints" disabled>
+              </div>
+            </div>
+            {{/if}}
+            {{/if}}
+            {{/each}}
+
+          </form>
+      </div>
+
+      <br>
+      <h4>Zugeordnete Rollen:</h4>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <td>Rolle Nr</td>
+            <td>Punkte</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+          {{#allocatedReels}}
+          <tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';"> 
+            <td>{{nr}}</td>
+            <td>{{activatedCodes}} von {{quantityCodes}}</td>
+            <td>{{#contentCheck activatedCodes '0'}}
+              <form id="my_form" action="/rolletrennen" method="POST">
+                <input type="hidden" name="programId" value="{{../../id}}">
+                <input type="hidden" name="programNr" value="{{../../nr}}">
+                <input type="hidden" name="reelNr" value="{{nr}}">
+                <button type="submit" style="border:none; background-color:transparent;"><img src="{{static '/images/delete-icon.png'}}"></button></form>{{/contentCheck}}</td>
+          </tr>  
+          {{/allocatedReels}}
+        </tbody>
+      </table>
+
+      <form class="form-horizontal newsletterForm" role="form" action="/programm/:nr" method="POST">
+          <div class="form-group">
+          	<input type="hidden" name="programId" value="{{id}}">
+          	<input type="hidden" name="programNr" value="{{nr}}">
+              <div class="col-sm-4">
+                  <select class="form-control" name="newReelId">
+                      <option value="">Neue Rolle zuordnen</option>
+                      {{#each reels}}<option value="{{reelId}}">{{reelNr}}</option>{{/each}}
+                  </select>
+              </div>
+          </div>
+          <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-4">
+                  <button type="submit" class="btn btn-default">Speichern</button>
+              </div>
+          </div>
+      </form>
+    </div>
+
+  </div>
 </div>
-
-<br>
-<h4>Zugeordnete Rollen:</h4>
-<table class="table table-striped table-hover">
-  <thead>
-    <tr>
-      <td>Rolle Nr</td>
-      <td>Punkte</td>
-      <td></td>
-    </tr>
-  </thead>
-  <tbody>
-    {{#allocatedReels}}
-    <tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';"> 
-      <td>{{nr}}</td>
-      <td>{{activatedCodes}} von {{quantityCodes}}</td>
-      <td>{{#contentCheck activatedCodes '0'}}
-        <form id="my_form" action="/rolletrennen" method="POST">
-          <input type="hidden" name="programId" value="{{../../id}}">
-          <input type="hidden" name="programNr" value="{{../../nr}}">
-          <input type="hidden" name="reelNr" value="{{nr}}">
-          <button type="submit" style="border:none; background-color:transparent;"><img src="{{static '/images/delete-icon.png'}}"></button></form>{{/contentCheck}}</td>
-    </tr>  
-    {{/allocatedReels}}
-  </tbody>
-</table>
-
-
-<form class="form-horizontal newsletterForm" role="form" action="/programm/:nr" method="POST">
-    <div class="form-group">
-    	<input type="hidden" name="programId" value="{{id}}">
-    	<input type="hidden" name="programNr" value="{{nr}}">
-        <div class="col-sm-4">
-            <select class="form-control" name="newReelId">
-                <option value="">Neue Rolle zuordnen</option>
-                {{#each reels}}<option value="{{reelId}}">{{reelNr}}</option>{{/each}}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-4">
-            <button type="submit" class="btn btn-default">Speichern</button>
-        </div>
-    </div>
-</form>

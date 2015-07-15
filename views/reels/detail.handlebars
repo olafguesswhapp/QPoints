@@ -1,38 +1,48 @@
-<h1>Informationen zu Rolle {{nr}}</h1>
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Status</td>
-			<td>Verwendung</td>
-			<td>Zugeordnetes Programm</td>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>{{reelStatus}}</td>
-			<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
-			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
-	</tbody>	
-</table>
-<h3>Barcodes:</h3>
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Barcode</td>
-			<td>Eingelöst durch</td>
-			<td>Status</td>
-			<td>Datum</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#codes}}
-		<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
-			<td>{{rCode}}</td>
-			<td>{{#if cStatus}}{{consumer.firstName}}{{/if}}</td>
-			<td>{{#if cStatus}}{{cStatus}}{{/if}}</td>
-			<td>{{#if cStatus}}{{updated}}{{/if}}</td>
-		{{/codes}}
-	</tbody>	
-</table>
+<div class="">
+	<div class="row">
 
-{{!-- <a href="/cart/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default">Produkt zum Warenkorb hinzufügen</a></br> --}}
+		{{> programNav  }}
+
+		<div role="main"  class="col-sm-9 col-md-10 main">
+			<h4>Informationen zu Rolle {{nr}}</h4>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Status</td>
+						<td>Verwendung</td>
+						<td>Zugeordnetes Programm</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{reelStatus}}</td>
+						<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
+						<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
+				</tbody>	
+			</table>
+			<h4>Barcodes:</h4>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Barcode</td>
+						<td>Eingelöst durch</td>
+						<td>Status</td>
+						<td>Datum</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#codes}}
+					<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
+						<td>{{rCode}}</td>
+						<td>{{#if cStatus}}{{consumer.firstName}}{{/if}}</td>
+						<td>{{#if cStatus}}{{cStatus}}{{/if}}</td>
+						<td>{{#if cStatus}}{{updated}}{{/if}}</td>
+					{{/codes}}
+				</tbody>	
+			</table>
+
+			{{!-- <a href="/cart/add?nr={{nr}}" data-action="cart-add" data-nr="{{nr}}" class="btn btn-default">Produkt zum Warenkorb hinzufügen</a></br> --}}
+		</div>
+
+	</div>
+</div>

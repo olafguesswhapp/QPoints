@@ -6,11 +6,12 @@ var Orders = require('../models/orders.js');
 var NewsFeed = require('../models/newsfeed.js');
 var NewsHistory = require('../models/newshistory.js');
 var RealReelCode = require('../help/RealReelCodes.json');
+var qplib = require('../lib/qpointlib.js');
 
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/reset', this.reset);
+		app.get('/reset', qplib.adminOnly, this.reset);
 	}, // registerRoutes
 
 	reset: function(req, res, next) {

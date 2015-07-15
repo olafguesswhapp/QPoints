@@ -7,18 +7,6 @@ var NewsHistory = require('../models/newshistory.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
 
-function LoggedInUserOnly(req, res, next) {
-	if (!req.user) {
-		req.session.flash = {
-			type: 'Warnung',
-			intro: 'Sie müssen bitte als User eingelogged sein.',
-			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
-		};
-		req.session.lastPage = req.path;
-		return res.redirect(303, '/login');
-	} else { return next();}
-};
-
 // Check whether Program still does have reel with free codes
 checkProgramsReels = function(programId, cb){
 	var progReelStatus = true;
@@ -37,28 +25,16 @@ checkProgramsReels = function(programId, cb){
     }); // Users find
 }; // function checkProgramsReels
 
-function LoggedInUserOnly(req, res, next) {
-	if (!req.user) {
-		req.session.flash = {
-			type: 'Warnung',
-			intro: 'Sie müssen bitte als User eingelogged sein.',
-			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
-		};
-		req.session.lastPage = req.path;
-		return res.redirect(303, '/login');
-	} else { return next();}
-};
-
 module.exports = {
 
 	registerRoutes: function(app){
-		app.get('/meinepunkte/scan', LoggedInUserOnly, this.scan);
-		app.post('/meinepunkte/scan', this.processScan);
-		app.get('/meinepunkte', LoggedInUserOnly, this.myPoints);
-		app.get('/meinepunkte/news', LoggedInUserOnly, this.news);
-		app.get('/einzuloesen', this.toRedeem);
-		app.get('/firma/:nr', this.customerDetail);
-		app.get('/program/:nr', this.programDetail);
+		app.get('/meinepunkte/scan', qplib.checkUserRole3above, this.scan);
+		app.post('/meinepunkte/scan', qplib.checkUserRole3above, this.processScan);
+		app.get('/meinepunkte', qplib.checkUserRole3above, this.myPoints);
+		app.get('/meinepunkte/news', qplib.checkUserRole3above, this.news);
+		app.get('/einzuloesen', qplib.checkUserRole3above, this.toRedeem);
+		app.get('/firma/:nr', qplib.checkUserRole3above, this.customerDetail);
+		app.get('/program/:nr', qplib.checkUserRole3above, this.programDetail);
 	},
 
 	scan: function(req, res, next){
@@ -236,7 +212,7 @@ module.exports = {
 		Customers.findOne( {nr: req.params.nr}, function(err, customer){
 			var context = {
 				meinepunkte: 'class="active"',
-				current: 'customer',
+				current: 'mypoints',
 				nr: customer.nr,
 				company: customer.company,
 				email: customer.email,
@@ -254,7 +230,7 @@ module.exports = {
 		Programs.findOne({ nr : req.params.nr }, function(err, program){
 			var context = {
 				meinepunkte: 'class="active"',
-				current: 'program',
+				current: 'mypoints',
 				nr: program.nr,
 				programStatus: program.programStatus,
 				programName: program.programName,
@@ -282,7 +258,14 @@ module.exports = {
 			console.log('checkUser1');
 			console.log(checkUser);
 			if (err || !checkUser || checkUser.particiPrograms.length == 0) {
-				console.log('keinen User gefunden');
+				console.log('Diesen User nicht für offene News gefunden');
+				context = {
+	                meinepunkte: 'class="active"',
+	                current: 'news',
+	                message: 'Es liegen keine Nachrichten vor',
+	            };
+	            console.log(context);
+	            res.render('transaction/news', context);
 			} else {
 				console.log('else');
 				for (var i=0; i<checkUser.particiPrograms.length; i++) {
@@ -313,6 +296,7 @@ module.exports = {
 			                message: 'Es liegen keine Nachrichten vor',
 			            };
 			            console.log(context);
+			            res.render('transaction/news', context);
 			        } else {// if
 			            //Check if News was already sent
 			            newsFeed.forEach(function(newsfeed, indexN){

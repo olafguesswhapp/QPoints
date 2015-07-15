@@ -1,71 +1,80 @@
-<h4>Kunden-Daten aktualiseren:</h4>
-<br>
+<div class="">
+    <div class="row">
 
-<div class="formContainer">
-    <form class="form-horizontal newsletterForm" role="form" action="/kunden/edit/{{nr}}" method="POST">
-        <input type="hidden" name="customerId" value="{{customerId}}">
-        <input type="hidden" name="nr" value="{{nr}}">
-    	<div class="form-group">
-            <label for="fieldCustomerNr" class="col-sm-2 control-label">Kunden Nr</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{nr}}" required id="fieldCustomerNr" name="nr" disabled>
-            </div>
-        </div>
-    	<div class="form-group">
-            <label for="fieldCompany" class="col-sm-2 control-label">Firma</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{company}}" required id="fieldCompany" name="company">
-            </div>
-        </div>
-    	<div class="form-group">
-            <label for="fieldCustomerName" class="col-sm-2 control-label">Name</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{firstName}} {{lastName}}" required id="fieldCustomerName" name="customerName" disabled>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerEmail" class="col-sm-2 control-label">Email & Username</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{email}}" required id="fieldCustomerEmail" name="customerEmail" disabled>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerAddress" class="col-sm-2 control-label">Strasse</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{address1}}" required id="fieldCustomerAddress" name="address1" ><br>
-                <input type="text" class="form-control" value="{{address2}}"  id="" name="address2" >
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerZip" class="col-sm-2 control-label">Postleitzahl</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{zip}}" required id="fieldCustomerZip" name="zip">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerCity" class="col-sm-2 control-label">Stadt</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{city}}" required id="fieldCustomerCity" name="city">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerState" class="col-sm-2 control-label">Bundesland</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{state}}" required id="fieldCustomerState" name="state">
-            </div>
-        </div>
+        {{> accountNav  }}
 
-		<div class="form-group">
-		<label for="fieldCustomerPhone" class="col-sm-2 control-label">Telefon</label>
-			<div class="col-sm-4">
-				<input type="text" class="form-control" value="{{phone}}" required id="fieldCustomerPhone" name="phone">
-			</div>
-		</div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-4">
-                <button type="submit" class="btn btn-default">Speichern</button>
+        <div role="main"  class="col-sm-9 col-md-10 main">
+            <h4>Betriebsdaten aktualiseren:</h4>
+            <br>
+
+            <div class="formContainer">
+                <form class="form-horizontal newsletterForm" role="form" action="/kunden/edit/{{nr}}" method="POST">
+                    <input type="hidden" name="customerId" value="{{customerId}}">
+                    <input type="hidden" name="nr" value="{{nr}}">
+                	<div class="form-group">
+                        <label for="fieldCustomerNr" class="col-sm-2 control-label">Kunden Nr</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{nr}}" required id="fieldCustomerNr" name="nr" disabled>
+                        </div>
+                    </div>
+                	<div class="form-group">
+                        <label for="fieldCompany" class="col-sm-2 control-label">Firma</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{company}}" required id="fieldCompany" name="company">
+                        </div>
+                    </div>
+                	<div class="form-group">
+                        <label for="fieldCustomerName" class="col-sm-2 control-label">Name</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{firstName}} {{lastName}}" required id="fieldCustomerName" name="customerName" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerEmail" class="col-sm-2 control-label">Email & Username</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{email}}" required id="fieldCustomerEmail" name="customerEmail" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerAddress" class="col-sm-2 control-label">Strasse</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{address1}}" required id="fieldCustomerAddress" name="address1" ><br>
+                            <input type="text" class="form-control" value="{{address2}}"  id="" name="address2" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerZip" class="col-sm-2 control-label">Postleitzahl</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{zip}}" required id="fieldCustomerZip" name="zip">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerCity" class="col-sm-2 control-label">Stadt</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{city}}" required id="fieldCustomerCity" name="city">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerState" class="col-sm-2 control-label">Bundesland</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{state}}" required id="fieldCustomerState" name="state">
+                        </div>
+                    </div>
+
+            		<div class="form-group">
+            		<label for="fieldCustomerPhone" class="col-sm-2 control-label">Telefon</label>
+            			<div class="col-sm-4">
+            				<input type="text" class="form-control" value="{{phone}}" required id="fieldCustomerPhone" name="phone">
+            			</div>
+            		</div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-4">
+                            <button type="submit" class="btn btn-default">Speichern</button>
+                        </div>
+                    </div>
+                </form>
+                <script type="text/javascript">document.getElementById('fieldCompany').focus();</script>
             </div>
         </div>
-		</form>
-        <script type="text/javascript">document.getElementById('fieldCompany').focus();</script>
-	</div>
+    </div>
+</div>

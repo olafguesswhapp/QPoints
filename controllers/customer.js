@@ -2,6 +2,7 @@ var Customers = require('../models/customers.js');
 var customerViewModel = require('../viewModels/customer.js');
 var CUsers = require('../models/cusers.js');
 var moment = require('moment');
+var qplib = require('../lib/qpointlib.js');
 
 
 module.exports = {
@@ -9,7 +10,8 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.get('/anmelden', this.register);
 		app.post('/anmelden', this.processRegister);
-		app.get('/kunden', this.clientList);
+		app.get('/kunden', qplib.adminOnly, this.clientList);
+		app.get('/kunde', qplib.checkUserRole8above, this.clientPrep);
 		app.get('/kunden/:nr', this.detail);
 		app.get('/kunden/edit/:nr', this.editCustomer);
 		app.post('/kunden/edit/:nr', this.processEditCustomer);
@@ -91,6 +93,21 @@ module.exports = {
 		})
 	},
 
+	clientPrep: function(req, res, next){
+		CUsers
+			.findOne({username: res.locals.loggedInUsername})
+			.populate('customer', 'nr')
+			.select('customer')
+			.exec(function(err, user){
+				console.log(user);
+				if (err || !user){
+					res.redirect(303, '/user');
+				} else {
+					res.redirect(303, '/kunden/' + user.customer.nr);
+				}
+			}); // CUsers.FindOne
+	}, // clientPrep
+
 	detail: function(req, res, next) {
 		Customers.findOne({ nr : req.params.nr })
 				.populate('user')
@@ -99,6 +116,8 @@ module.exports = {
 			if(!customer) return next(); 	// pass this on to 404 handler
 			CUsers.find({}, function(err, users){
 				var context = {
+					navAccount: 'class="active"',
+					current: 'client',
 					nr: customer.nr,
 					company: customer.company,
 					firstName: customer.firstName,
@@ -131,6 +150,8 @@ module.exports = {
 			if(!customer) return next(); 	// pass this on to 404 handler
 			CUsers.find({}, function(err, users){
 				var context = {
+					navAccount: 'class="active"',
+					current: 'client',
 					customerId: customer._id,
 					nr: customer.nr,
 					company: customer.company,

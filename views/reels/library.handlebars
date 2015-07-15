@@ -1,23 +1,33 @@
-<h3>QPoints Rollen:</h3>
+<div class="">
+	<div class="row">
 
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Nr</td>
-			<td>Status</td>
-			<td>Zugeordnetes Programm</td>
-			<td>Verwendung</td>
-			<td>Erster Code</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#reels}}
-		<tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';">
-			<td>{{nr}}</td>
-			<td>{{reelStatus}}</td>
-			<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
-			<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
-			<td>{{ersterCode}}</td>
-		{{/reels}}
-	</tbody>	
-</table>
+		{{> programNav  }}
+
+		<div role="main"  class="col-sm-9 col-md-10 main">
+			<h3>QPoints Rollen:</h3>
+
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Nr</td>
+						<td>Status</td>
+						<td>Zugeordnetes Programm</td>
+						<td>Verwendung</td>
+						<td>Erster Code</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#reels}}
+					<tr class='clickableRow' onclick="window.document.location='/rollen/{{nr}}';">
+						<td>{{nr}}</td>
+						<td>{{reelStatus}}</td>
+						<td><a href="/programm/{{assignedProgram.nr}}">{{assignedProgram.programName}}</a></td>
+						<td>{{#if activatedCodes}}{{activatedCodes}}{{else}}0{{/if}} von {{quantityCodes}}</td>
+						<td>{{ersterCode}}</td>
+					{{/reels}}
+				</tbody>	
+			</table>
+		</div>
+
+	</div>
+</div>

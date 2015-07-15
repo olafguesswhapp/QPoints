@@ -1,38 +1,47 @@
-<h3>{{customerCompany}} Nachrichten</h3>
+<div class="">
+	<div class="row">
 
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Nr</td>
-			<td>Program / Nachricht</td>
-			<td>Status</td>
-			<td>Gültig bis</td>
-			<td>Ausgeliefert</td>
-			<td>Gekauft</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#programs}}
-		<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
-			<td>{{nr}}</td>
-			<td>{{programName}}</td>
-			<td>{{programStatus}}</td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		{{#programNews}}
-		<tr class='warning' onclick="window.document.location='/news/{{newsFeedId}}';"> 
-			<td>Nachricht</td>
-			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/news/{{newsFeedId}}" title="{{newsMessage}}">{{newsTitle}}</a></td>
-			<td>{{newsStatus}}</td>
-			<td>{{newsDeadline}}</td>
-			<td>{{newsDeliveryCount}} von {{newsDeliveryLimit}}</td>
-			<td>{{newsBudget}}</td>
-		</tr>
-		{{/programNews}}
-		{{/programs}}
-	</tbody>
-</table>
+		{{> programNav  }}
+
+		<div role="main"  class="col-sm-9 col-md-10 main">
+			<h3>{{customerCompany}} Nachrichten</h3>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Nr</td>
+						<td>Program / Nachricht</td>
+						<td>Status</td>
+						<td>Gültig bis</td>
+						<td>Ausgeliefert</td>
+						<td>Gekauft</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#programs}}
+					<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
+						<td>{{nr}}</td>
+						<td>{{programName}}</td>
+						<td>{{programStatus}}</td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					{{#programNews}}
+					<tr class='warning' onclick="window.document.location='/news/{{newsFeedId}}';"> 
+						<td>Nachricht</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/news/{{newsFeedId}}" title="{{newsMessage}}">{{newsTitle}}</a></td>
+						<td>{{newsStatus}}</td>
+						<td>{{newsDeadline}}</td>
+						<td>{{newsDeliveryCount}} von {{newsDeliveryLimit}}</td>
+						<td>{{newsBudget}}</td>
+					</tr>
+					{{/programNews}}
+					{{/programs}}
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+</div>
 
 

@@ -5,9 +5,9 @@ module.exports = {
 
 	registerRoutes: function(app) {
 		app.get('/produkte/anlegen', qplib.adminOnly, this.create);
-		app.post('/produkte/anlegen', this.processCreation);
-		app.get('/produkte', this.productsCatalog);
-		app.get('/produkte/:nr', this.productDetail);
+		app.post('/produkte/anlegen', qplib.adminOnly, this.processCreation);
+		app.get('/produkte', qplib.checkUserRole6above, this.productsCatalog);
+		app.get('/produkte/:nr', qplib.checkUserRole6above, this.productDetail);
 	},
 
 	create: function(req, res, next) {

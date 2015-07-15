@@ -1,42 +1,14 @@
 var Reels = require('../models/reels.js');
 var CUsers = require('../models/cusers.js');
 var moment = require('moment');
-
-function adminOnly(req, res, next) {
-	if (Object.keys(req.session.passport).length > 0) {
-		CUsers.findById(req.session.passport.user, function(err, user){
-			if(user.role==='admin') {return next();
-			} else {
-				req.session.flash = {
-					type: 'Warnung',
-					intro: 'Sie haben nicht das Recht Rollen anzulegen .',
-					message: 'Bitte wenden Sie sich an unserer Administration.'
-				};
-				res.redirect('/rollen');
-			}
-		});
-	} else { 
-		res.redirect('/login');
-		}
-};
-
-function ensureAuthenticated(req, res, next) {
-	if (req.isAuthenticated()) { return next(); }
-	req.session.lastPage = req.path;
-	req.session.flash = {
-		type: 'Warnung',
-		intro: 'Sie müssen bitte als User eingelogged sein.',
-		message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
-	};
-	res.redirect('/login');
-};
+var qplib = require('../lib/qpointlib.js');
 
 module.exports = {
 	registerRoutes: function(app) {
-		app.get('/rollen/edit', adminOnly, this.reelEdit);
-		app.post('/rollen/edit', adminOnly, this.reelEditProcess);
-		app.get('/rollen', ensureAuthenticated, this.library);
-		app.get('/rollen/:nr', ensureAuthenticated, this.reelDetail);
+		app.get('/rollen/edit', qplib.adminOnly, this.reelEdit);
+		app.post('/rollen/edit', qplib.adminOnly, this.reelEditProcess);
+		app.get('/rollen', qplib.checkUserRole6above, this.library);
+		app.get('/rollen/:nr', qplib.checkUserRole6above, this.reelDetail);
 	},
 
 	// Einzelne Reel erfassen
@@ -89,6 +61,8 @@ module.exports = {
 				.exec(function(err, reels) {
 				if (reels.length > 0) {
 					var context = {
+						navProgram: 'class="active"',
+						current: 'myReels',
 						reels: reels.map(function(reel){
 							return {
 								nr: reel.nr,
@@ -102,7 +76,8 @@ module.exports = {
 					}; // context				
 				} else { // if Reels length 
 					var context = {
-						// customerCompany: user.customer.company,
+						navProgram: 'class="active"',
+						current: 'myReels',
 						reels: {
 							reelStatus: 'Sie haben noch keine Rollen bestellt.',
 						} 
@@ -122,6 +97,8 @@ module.exports = {
 			if(err) return res.redirect(303, '/error');
 			// if(!reel) return next(); 	// pass this on to 404 handler
 			var context = {
+				navProgram: 'class="active"',
+				current: 'myReels',
 				nr: reel.nr,
 				reelStatus: reel.reelStatus,
 				quantityCodes: reel.quantityCodes,

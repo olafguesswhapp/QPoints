@@ -4,48 +4,7 @@ var Customers = require('../models/customers.js');
 var CUsers = require('../models/cusers.js');
 var NewsFeed = require('../models/newsfeed.js');
 var moment = require('moment');
-
-function LoggedInUserOnly(req, res, next) {
-	if (!req.user) {
-		req.session.flash = {
-			type: 'Warnung',
-			intro: 'Sie müssen bitte als User eingelogged sein.',
-			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
-		};
-		req.session.lastPage = req.path;
-		return res.redirect(303, '/login');
-	} else { return next();}
-};
-
-function checkUserRoleP (req, res, next) {
-	if (Object.keys(req.session.passport).length > 0) {
-		CUsers
-			.findById(req.user._id)
-			.select('username role')
-			.exec(function(err, user){
-				if(user.role==='customer' || user.role==='admin') {
-					return next();
-				} else if (user.role == 'user' || user.role == 'consumer') {
-					req.session.flash = {
-			            type: 'Warnung',
-			            intro: 'Sie sind nicht als Firmen-User (Inhaber von Treuepunkte-Programmen) angelegt.',
-			            message: 'Sie dürfen QPoints erhalten und einreichen.'
-			        };
-			        res.redirect('/meinepunkte');
-				} else { // else if 
-					console.log('hm bei programs.js stimmt irgendwas nicht CHECK CHECK CHECK');
-					res.redirect('/meinepunkte');
-				} // else if 
-			}); // CUsers.findById
-	} else {
-		req.session.flash = {
-            type: 'Warnung',
-            intro: 'Sie müssen bitte als User eingelogged sein.',
-            message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.'
-        };
-        res.redirect('/login');
-    }
-}; // checkUserRole
+var qplib = require('../lib/qpointlib.js');
 
 function allocateReeltoProgram(req, res, next){
 	Reels
@@ -95,14 +54,14 @@ function detachReelfromProgram(req, res, next){
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/programm/anlegen', LoggedInUserOnly, this.programRegister);
-		app.post('/programm/anlegen', LoggedInUserOnly, this.programRegistertProcess);
-		app.get('/programm', checkUserRoleP, this.library);
-		app.get('/programm/:nr', LoggedInUserOnly, this.programDetail);
-		app.post('/programm/:nr', LoggedInUserOnly, this.programDetailProcess);
-		app.get('/programm/edit/:nr', LoggedInUserOnly, this.programEdit);
-        app.post('/programm/edit/:nr', LoggedInUserOnly, this.processProgramEdit);
-        app.post('/rolletrennen', LoggedInUserOnly, this.processDetachReel);
+		app.get('/programm/anlegen', qplib.checkUserRole6above, this.programRegister);
+		app.post('/programm/anlegen', qplib.checkUserRole6above, this.programRegistertProcess);
+		app.get('/programm', qplib.checkUserRole6above, this.library);
+		app.get('/programm/:nr', qplib.checkUserRole6above, this.programDetail);
+		app.post('/programm/:nr', qplib.checkUserRole6above, this.programDetailProcess);
+		app.get('/programm/edit/:nr', qplib.checkUserRole6above, this.programEdit);
+        app.post('/programm/edit/:nr', qplib.checkUserRole6above, this.processProgramEdit);
+        app.post('/rolletrennen', qplib.checkUserRole6above, this.processDetachReel);
 	},
 
 	// Ein neues Programm anlegen
@@ -120,6 +79,7 @@ module.exports = {
 					}
 					var context = {
 						navProgram: 'class="active"',
+						current: 'myPrograms',
 						// die letzte Programm-Nr filetieren (string und nr) und um 1 erhöhen [A]
 						neueNr: newProgramNr,
 						// in Start- und Deadline-Datums das heutige Datum setzen
@@ -194,6 +154,7 @@ module.exports = {
 							}
 							context = {
 								navProgram: 'class="active"',
+								current: 'myPrograms',
 								customerCompany: user.customer.company,
 								programs: programs.map(function(program){
 									return {
@@ -218,6 +179,7 @@ module.exports = {
 					} else { // else if no programs
 						context = {
 							navProgram: 'class="active"',
+							current: 'myPrograms',
 							customerCompany: user.customer.company,
 							programs: {
 								programName: 'Sie haben noch kein Programm angelegt',
@@ -240,6 +202,7 @@ module.exports = {
 					if(!program) return next(); 	// pass this on to 404 handler
 					var context = {
 						navProgram: 'class="active"',
+						current: 'myPrograms',
 						id: program._id,
 						nr: program.nr,
 						programStatus: program.programStatus,
@@ -293,6 +256,7 @@ module.exports = {
 				if(!program) return next(); // pass this on to 404 handler
 				var context = {
 					navProgram: 'class="active"',
+					current: 'myPrograms',
 					programId: program._id,
 					programNr: program.nr,
 					programName: program.programName,

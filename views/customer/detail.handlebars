@@ -1,70 +1,58 @@
-<h4>Kunden-Daten: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn btn-default" href="/kunden/edit/{{nr}}" title="Firmen/Kunden-Daten aktualisieren">Kunden-Daten ändern</a></h4>
-<br>
+<div class="">
+    <div class="row">
 
+        {{> accountNav  }}
 
-<div class="formContainer">
-    <form class="form-horizontal newsletterForm" role="form" action="" method="">
+        <div role="main"  class="col-sm-9 col-md-10 main">
+            <a class="btn btn-default" href="/kunden/edit/{{nr}}" title="Firmen/Kunden-Daten aktualisieren">Betriebsdaten ändern</a><br><br>
+            <div class="formContainer">
+                <form class="form-horizontal newsletterForm" role="form" action="" method="">
 
-    	<div class="form-group">
-            <label for="fieldCustomerNr" class="col-sm-2 control-label">Kunden Nr</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{nr}}" required id="fieldCustomerNr" name="nr" disabled>
+                	<div class="form-group">
+                        <label for="fieldCustomerNr" class="col-sm-2 control-label">Kunden Nr</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{nr}}" required id="fieldCustomerNr" name="nr" disabled>
+                        </div>
+                    </div>
+                	<div class="form-group">
+                        <label for="fieldCompany" class="col-sm-2 control-label">Firma</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{company}}" required id="fieldCompany" name="company" disabled>
+                        </div>
+                    </div>
+                	<div class="form-group">
+                        <label for="fieldCustomerName" class="col-sm-2 control-label">Name</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{firstName}} {{lastName}}" required id="fieldCustomerName" name="customerName" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerEmail" class="col-sm-2 control-label">Email & Username</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{email}}" required id="fieldCustomerEmail" name="customerEmail" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldCustomerAddress" class="col-sm-2 control-label">Addresse</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" value="{{address1}}" required id="fieldCustomerAddress" name="address1" disabled><br>
+                            {{#if address2}}
+                            <input type="text" class="form-control" value="{{address2}}" required id="" name="address2" disabled><br>
+                            {{/if}}
+                            <input type="text" class="form-control" value="{{zip}} {{city}} {{state}}" required id="" name="zip" disabled>
+                            {{!-- <input type="text" class="form-control" value="{{city}}" required id="" name="city" disabled><br>
+                            <input type="text" class="form-control" value="{{state}}" required id="" name="state" disabled> --}}
+                        </div>
+                    </div>
+            		<div class="form-group">
+            		<label for="fieldCustomerPhone" class="col-sm-2 control-label">Telefon</label>
+            			<div class="col-sm-4">
+            				<input type="text" class="form-control" value="{{phone}}" required id="fieldCustomerPhone" name="phone" disabled>
+            			</div>
+            		</div>
+            	</form>
             </div>
         </div>
-    	<div class="form-group">
-            <label for="fieldCompany" class="col-sm-2 control-label">Firma</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{company}}" required id="fieldCompany" name="company" disabled>
-            </div>
-        </div>
-    	<div class="form-group">
-            <label for="fieldCustomerName" class="col-sm-2 control-label">Name</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{firstName}} {{lastName}}" required id="fieldCustomerName" name="customerName" disabled>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerEmail" class="col-sm-2 control-label">Email & Username</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{email}}" required id="fieldCustomerEmail" name="customerEmail" disabled>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="fieldCustomerAddress" class="col-sm-2 control-label">Addresse</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" value="{{address1}}" required id="fieldCustomerAddress" name="address1" disabled><br>
-                {{#if address2}}
-                <input type="text" class="form-control" value="{{address2}}" required id="" name="address2" disabled><br>
-                {{/if}}
-                <input type="text" class="form-control" value="{{zip}} {{city}} {{state}}" required id="" name="zip" disabled>
-                {{!-- <input type="text" class="form-control" value="{{city}}" required id="" name="city" disabled><br>
-                <input type="text" class="form-control" value="{{state}}" required id="" name="state" disabled> --}}
-            </div>
-        </div>
-		<div class="form-group">
-		<label for="fieldCustomerPhone" class="col-sm-2 control-label">Telefon</label>
-			<div class="col-sm-4">
-				<input type="text" class="form-control" value="{{phone}}" required id="fieldCustomerPhone" name="phone" disabled>
-			</div>
-		</div>
-		</form>
-	</div>
 
-<h4>Zugeordnete User:</h4>
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Name</td>
-			<td>Username</td>
-			<td>Rolle</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#user}}
-		<tr class='clickableRow'> <!-- onclick="window.document.location='/customer/{{nr}}';"-->
-			<td>{{firstName}} {{lastName}}</td>
-			<td>{{username}}</td>
-			<td>{{role}}</td>
-		{{/user}}
-	</tbody>	
-</table>
+    </div>
+</div>

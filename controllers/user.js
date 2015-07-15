@@ -2,61 +2,8 @@ var CUsers = require('../models/cusers.js');
 var Customers = require('../models/customers.js');
 var passport = require('passport');
 var moment = require('moment');
+var qplib = require('../lib/qpointlib.js');
 // var passport = require('passport');
-
-function customerOnly(req, res, next) {
-	if (Object.keys(req.session.passport).length > 0) {
-		CUsers
-			.findById(req.session.passport.user)
-			.select('role')
-			.exec(function(err, user){
-			if(user.role==='customer' || user.role==='admin') {
-				return next();
-			} else {
-				req.session.flash = {
-                    type: 'Warnung',
-                    intro: 'Sie haben nicht das Recht User anzulegen .',
-                    message: 'Bitte wenden Sie sich an unsere Administration.'
-                };
-                res.redirect('/user');
-			}
-		});
-	} else { res.redirect('/login'); }
-};
-
-function checkUserRole (req, res, next) {
-	if (Object.keys(req.session.passport).length > 0) {
-		CUsers
-			.findById(req.user._id)
-			.select('username role')
-			.exec(function(err, user){
-				if(user.role==='customer' || user.role==='admin') {
-					return next();
-				} else if (user.role == 'user' || user.role == 'consumer') {
-					if (req.params.username == user.username) {
-						return next();
-					} else {
-						req.session.flash = {
-				            type: 'Warnung',
-				            intro: 'Sie dürfe nur auf Ihre eigenen User Daten zugreifen.',
-				            message: ''
-				        };
-				        res.redirect('/user/' + user.username);
-					} // else
-				} else { // else if 
-					console.log('hm irgendwas stimmt nicht CHECK CHECK CHECK');
-					res.redirect('/user');
-				} // else if 
-			}); // CUsers.findById
-	} else {
-		req.session.flash = {
-            type: 'Warnung',
-            intro: 'Sie müssen bitte als User eingelogged sein.',
-            message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.'
-        };
-        res.redirect('/login');
-    }
-}; // checkUserRole
 
 function detachUserfromCustomer(req, res, next){
 	CUsers
@@ -93,17 +40,17 @@ function detachUserfromCustomer(req, res, next){
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.get('/user/anlegen', customerOnly, this.userRegister);
-		app.post('/user/anlegen', customerOnly, this.processUserRegister);
-		app.get('/user/:username', checkUserRole, this.userDetail);
-		app.get('/user/edit/:username', checkUserRole, this.userEdit);
-		app.post('/user/edit/:username', checkUserRole, this.processUserEdit);
-		app.get('/user', checkUserRole, this.userLibrary);
+		app.get('/user/anlegen', qplib.checkUserRole8above, this.userRegister);
+		app.post('/user/anlegen', qplib.checkUserRole8above, this.processUserRegister);
+		app.get('/user/:username', qplib.checkUserRole8above, this.userDetail);
+		app.get('/user/edit/:username', qplib.checkUserRole8above, this.userEdit);
+		app.post('/user/edit/:username', qplib.checkUserRole8above, this.processUserEdit);
+		app.get('/user', qplib.checkUserRole8above, this.userLibrary);
 		app.get('/login', this.login);
 		app.post('/login', this.processLogin);
 		app.get('/logout', this.logout);
-		app.post('/user/trennen', customerOnly, this.processDetachUser);
-		app.post('/user/verbinden', customerOnly, this.processJoinUser);
+		app.post('/user/trennen', qplib.checkUserRole8above, this.processDetachUser);
+		app.post('/user/verbinden', qplib.checkUserRole8above, this.processJoinUser);
 	},
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
@@ -112,6 +59,8 @@ module.exports = {
 		if (req.user.role != 'customer' && req.user.role != 'admin') return next();
 		Customers.findById(req.user.customer, function(err, customer){
 			var context = {
+				navAccount: 'class="active"',
+				current: 'user',
 				actualCustomerId: customer._id,
 				customerCompany: customer.company,
 				actualUserName: req.user.username,
@@ -151,9 +100,12 @@ module.exports = {
 	},
 
 	userLibrary: function(req, res, next){
+		console.log(res.locals);
 		if (!req.user) return next();
 		CUsers.find({ customer : req.user.customer}, function(err, users) {
 			var context = {
+				navAccount: 'class="active"',
+				current: 'user',
 				users: users.map(function(user){
 					return {
 						firstName: user.firstName,
@@ -175,6 +127,7 @@ module.exports = {
 	},
 
 	login: function(req, res){
+		console.log('letzte Seite war ' + req.session.lastPage);
 		if (req.session.lastPage==''){
 			req.session.lastPage = req.header('Referer').slice(3+req.headers.host.length + req.protocol.length);
 			if (req.session.lastPage=='/login'){req.session.lastPage='/';}
@@ -230,6 +183,7 @@ module.exports = {
 	},
 
 	userDetail: function (req, res, next) {
+		console.log(res.locals);
 		CUsers
 			.findOne({ 'username' : req.params.username})
 			.populate('customer', 'company') 
@@ -239,6 +193,8 @@ module.exports = {
 				return next (err);		
 			} else { // error or no user found
 				context = {
+					navAccount: 'class="active"',
+					current: 'user',
 					username: user.username,
 					customer: user.customer.company,
 					firstName: user.firstName,
@@ -261,6 +217,8 @@ module.exports = {
 				return next (err);		
 			} else { // error or no user found
 				context = {
+					navAccount: 'class="active"',
+					current: 'user',
 					userId: user._id,
 					username: user.username,
 					customer: user.customer.company,

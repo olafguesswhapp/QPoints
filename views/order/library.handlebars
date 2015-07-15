@@ -12,44 +12,53 @@
 		document.getElementById('infoOrderItems').style.display = "block";
 	};	
 </script>
-<h3>Ihre Bestellungen:</h3>
+<div class="">
+    <div class="row">
 
-<table id="orders" class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Nr</td>
-			<td>Status</td>
-			<td>von</td>
-			<td>am</td>
-			<td>Zahlung</td>
-			<td>Lieferung</td>
-			<td>Summe</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#orders}}
-		<tr class='active clickableRow' onclick='return displayItems();'>
-			<td>{{nr}}</td>
-			<td>{{orderStatus}}</td>
-			<td>{{approvedName}}</td>
-			<td>{{approved}}</td>
-			<td>{{paymentStatus}}</td>
-			<td>{{deliveryStatus}}</td>
-			<td>{{total}} €</td>
-		</tr>
-		{{#items}}
-		<tr class="orderItems warning" style="display: none;" onclick='dissapearItems();'>
-			<td class="text-right">{{nr.nr}}</td>
-			<td class="text-right">{{nr.productName}}</td>
-			<td class="text-right">Anzahl:</td>
-			<td>{{prodQuantity}}</td>
-			<td class="text-right">Einzelpreis</td>
-			<td>{{prodPrice}} €</td>
-			<td>{{prodSum}} €</td>
-		</tr>
-		{{/items}}
-		{{/orders}}
-	</tbody>	
-</table>
-{{#if orders}}<p id="infoOrderItems">Auf die Bestellung drücken um mehr Details zu sehen</p>{{else}}
-<p id="infoOrderItems">Es wurden noch keine Bestellungen getätigt</p>{{/if}}
+        {{> accountNav  }}
+
+        <div role="main"  class="col-sm-9 col-md-10 main">
+			<h4>Meine Bestellungen:</h4>
+			<table id="orders" class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Nr</td>
+						<td>Status</td>
+						<td>von</td>
+						<td>am</td>
+						<td>Zahlung</td>
+						<td>Lieferung</td>
+						<td>Summe</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#orders}}
+					<tr class='active clickableRow' onclick='return displayItems();'>
+						<td>{{nr}}</td>
+						<td>{{orderStatus}}</td>
+						<td>{{approvedName}}</td>
+						<td>{{approved}}</td>
+						<td>{{paymentStatus}}</td>
+						<td>{{deliveryStatus}}</td>
+						<td>{{total}} €</td>
+					</tr>
+					{{#items}}
+					<tr class="orderItems warning" style="display: none;" onclick='dissapearItems();'>
+						<td class="text-right">{{nr.nr}}</td>
+						<td class="text-right">{{nr.productName}}</td>
+						<td class="text-right">Anzahl:</td>
+						<td>{{prodQuantity}}</td>
+						<td class="text-right">Einzelpreis</td>
+						<td>{{prodPrice}} €</td>
+						<td>{{prodSum}} €</td>
+					</tr>
+					{{/items}}
+					{{/orders}}
+				</tbody>	
+			</table>
+			{{#if orders}}<p id="infoOrderItems">Auf die Bestellung drücken um mehr Details zu sehen</p>{{else}}
+			<p id="infoOrderItems">Es wurden noch keine Bestellungen getätigt</p>{{/if}}
+		</div>
+
+    </div>
+</div>

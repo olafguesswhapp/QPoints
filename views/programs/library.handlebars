@@ -1,38 +1,43 @@
-<h3>{{customerCompany}} Treuepunkte Programme</h3>
-<a href="/programm/anlegen" class="btn btn-default">Neues Programm anlegen</a></br></br>
+<div class="">
+	<div class="row">
 
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>Nr</td>
-			<td>Name</td>
-			<td>Status</td>
-			<td>Ziel Punkte</td>
-			<td>Gültig ab</td>
-			{{!-- <td>Lesbar bis</td> --}}
-			<td>Einlösbar bis</td>
-			<td>Rollen</td>
-			<td>Botschaft</td>
-		</tr>
-	</thead>
-	<tbody>
-		{{#programs}}
-		<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
-			<td>{{nr}}</td>
-			<td>{{programName}}</td>
-			<td>{{programStatus}}</td>
-			<td>{{goalToHit}}</td>
-			<td>{{startDate}}</td>
-			{{!-- <td>{{deadlineScan}}</td> --}}
-			<td>{{deadlineSubmit}}</td>
-			<td>{{#allocatedReels}}
-				{{#if @index}}, {{/if}}<a href="/rollen/{{nr}}">{{nr}}</a>{{/allocatedReels}}</td>
-			<td>{{#if hasNews}}<a href="/news/anlegen/{{nr}}"><img src="{{static '/images/new-message-icon.png'}}"></a>
-			{{else}}<a href="" title="Um Ihren Kunden Nachrichten zusenden zu können kaufen Sie bitte ein News-Paket. Clicken Sie bitte auf Produkte"><img src="{{static '/images/Nonew-message-icon.png'}}"></a>{{/if}}</td>
-		</tr>
-		{{/programs}}
-	</tbody>
-	
-</table>
+		{{> programNav  }}
 
+		<div role="main"  class="col-sm-9 col-md-10 main">
+			<a href="/programm/anlegen" class="btn btn-default">Neues {{customerCompany}} Programm anlegen</a></br></br>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<td>Nr</td>
+						<td>Name</td>
+						<td>Status</td>
+						<td>Ziel Punkte</td>
+						<td>Gültig ab</td>
+						{{!-- <td>Lesbar bis</td> --}}
+						<td>Einlösbar bis</td>
+						<td>Rollen</td>
+						<td>Botschaft</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{#programs}}
+					<tr class='clickableRow' onclick="window.document.location='/programm/{{nr}}';"> 
+						<td>{{nr}}</td>
+						<td>{{programName}}</td>
+						<td>{{programStatus}}</td>
+						<td>{{goalToHit}}</td>
+						<td>{{startDate}}</td>
+						{{!-- <td>{{deadlineScan}}</td> --}}
+						<td>{{deadlineSubmit}}</td>
+						<td>{{#allocatedReels}}
+							{{#if @index}}, {{/if}}<a href="/rollen/{{nr}}">{{nr}}</a>{{/allocatedReels}}</td>
+						<td>{{#if hasNews}}<a href="/news/anlegen/{{nr}}"><img src="{{static '/images/new-message-icon.png'}}"></a>
+						{{else}}<a href="" title="Um Ihren Kunden Nachrichten zusenden zu können kaufen Sie bitte ein News-Paket. Clicken Sie bitte auf Produkte"><img src="{{static '/images/Nonew-message-icon.png'}}"></a>{{/if}}</td>
+					</tr>
+					{{/programs}}
+				</tbody>
+			</table>
+		</div>
 
+	</div>
+</div>

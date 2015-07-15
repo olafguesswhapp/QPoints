@@ -7,6 +7,7 @@ var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var methodOverride = require('method-override');
 var credentials = require('./credentials.js');
+var qplib = require('./lib/qpointlib.js');
 var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',
     failureRedirect: 'unauthorized',
@@ -68,6 +69,13 @@ var handlebars = require('express3-handlebars')
                 return options.inverse(this);
             }
         },
+        gt: function (value, test, options) {
+            if (value > test) {
+                return options.fn(this);
+            } else {
+                return options.inverse(this);
+            }
+        },
         times: function(n, block) {
             var accum = '';
             for(var i = 0; i < n; ++i){
@@ -114,10 +122,14 @@ auth.init();
 app.use(function(req, res, next) {
     var cart = req.session.cart;
     res.locals.cartItems = cart && cart.items ? cart.items.length : 0;
-    if (!req.user) return next();
-    res.locals.loggedInUser = req.user.firstName;
-    res.locals.loggedInUsername = req.user.username;
-    next();
+    if (!req.user) {
+        res.locals.roleLevel = 0;
+    } else {
+        res.locals.loggedInUser = req.user.firstName;
+        res.locals.loggedInUsername = req.user.username;
+        res.locals.roleLevel = qplib.defineRole(req);
+    }
+    return next();
 });
 
 // add routes

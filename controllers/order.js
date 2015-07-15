@@ -4,19 +4,7 @@ var CUsers = require('../models/cusers.js');
 var Reels = require('../models/reels.js');
 var NewsFeed = require('../models/newsfeed.js');
 var moment = require('moment');
-
-
-function LoggedInUserOnly(req, res, next) {
-	if (!req.user) {
-		req.session.flash = {
-			type: 'Warnung',
-			intro: 'Sie müssen bitte als User eingelogged sein.',
-			message: 'Bitte melden Sie sich mit Ihrem Email und Passwort an.',
-		};
-		req.session.lastPage = req.path;
-		return res.redirect(303, '/login');
-	} else { return next();}
-};
+var qplib = require('../lib/qpointlib.js');
 
 function processReelOrder (req, requiReels, o) {
 	Reels.find({ 'reelStatus': 'erfasst'})
@@ -62,8 +50,8 @@ module.exports = {
 
 	// order routes
 	registerRoutes: function(app){
-		app.get('/bestellungen/bestaetigt', this.confirmed);
-		app.get('/bestellungen', LoggedInUserOnly, this.home);
+		app.get('/bestellungen/bestaetigt', qplib.checkUserRole6above, this.confirmed);
+		app.get('/bestellungen', qplib.checkUserRole6above, this.home);
 	},
 
 	// order confirmed
@@ -152,6 +140,8 @@ module.exports = {
 						.populate('items.prodId', 'nr productName')
 						.exec(function(err, orders){
 				var context = {
+					navAccount: 'class="active"',
+					current: 'order',
 					orders: orders.map(function(order){
 						return {
 							nr: order.nr,

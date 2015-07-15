@@ -27,13 +27,9 @@
 			<!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="collapse navbar-collapse" role="navigation">
 			    <ul class="nav navbar-nav">
-			    	<li {{{navProgram}}}><a href="/programm">Programme</a></li>
-			    	<li><a href="/rollen">Rollen</a></li>
-			    	<li><a href="/news">Botschaften</a></li>
-			    	<li {{{navProduct}}}><a href="/produkte">Produkte</a></li>
-			    	<li><a href="/bestellungen">Bestellungen</a></li>
-			    	<li><a href="/user">User</a></li>
-			    	<li {{{meinepunkte}}}><a href="/meinepunkte">Meine QPoints</a></li>
+			    	{{#gt roleLevel 5}}<li {{{navProgram}}}><a href="/programm">Meine Programme</a></li>{{/gt}}
+			    	{{#gt roleLevel 7}}<li {{{navAccount}}}><a href="/user">Konto</a></li>{{/gt}}
+			    	{{#gt roleLevel 2}}<li {{{meinepunkte}}}><a href="/meinepunkte">Meine Punkte</a></li>{{/gt}}
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
 			    	<li>{{#if loggedInUser}}<a href="/user/{{loggedInUsername}}">{{loggedInUser}}</a></li><!-- login/logout -->

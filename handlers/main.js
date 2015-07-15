@@ -1,4 +1,8 @@
 exports.home = function(req, res) {
+    console.log(res.locals);
+    // var context = {
+    //     roleLevel: res.locals.roleLevel
+    // }; // context
 	res.render('home');
 };
 
