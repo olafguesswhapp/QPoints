@@ -12,10 +12,11 @@ var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',
     failureRedirect: 'unauthorized',
 });
-var sslOptions = {
-    key: fs.readFileSync('./ssl/localhost.key'),
-    cert: fs.readFileSync('./ssl/localhost.key.crt')
-};
+// var sslOptions = {
+//     key: fs.readFileSync('./ssl/localhost.key'),
+//     cert: fs.readFileSync('./ssl/localhost.key.crt')
+// };
+
 //Mongoose Schema and Model
 var TestDB = require('./models/testDB.js');
 
@@ -159,12 +160,12 @@ app.use(function(err, req, res, next){
 	res.render('500');
 });
 
-https.createServer(sslOptions, app).listen(app.get('port'), function(){
-    console.log('Express HTTPS started in ' + app.get('env') + ' mode on port ' + app.get('port') + '.');
-});
+// https.createServer(sslOptions, app).listen(app.get('port'), function(){
+//     console.log('Express HTTPS started in ' + app.get('env') + ' mode on port ' + app.get('port') + '.');
+// });
 
 // IN ORDER TO RUN ON HTTP instead of https
-// app.listen(app.get('port'), function(){
-//   console.log( 'Express started on http://localhost:' + 
-//     app.get('port') + '; press Ctrl-C to terminate.' );
-// });
+app.listen(app.get('port'), function(){
+  console.log( 'Express started on http://localhost:' + 
+    app.get('port') + '; press Ctrl-C to terminate.' );
+});
