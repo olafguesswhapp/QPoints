@@ -34,10 +34,12 @@ switch(app.get('env')){
     case 'development':
         mongoose.connect(credentials.mongo.development.connectionString, opts);
         var sessionStore = new MongoSessionStore({ url: credentials.mongo.development.connectionString });
+        console.log('Using MongoDB development mode');
         break;
     case 'production':
         mongoose.connect(credentials.mongo.production.connectionString, opts);
         var sessionStore = new MongoSessionStore({ url: credentials.mongo.production.connectionString });
+        console.log('Using MongoDB production mode');
         break;
     default:
         throw new Error('Unknown execution environment: ' + app.get('env'));
