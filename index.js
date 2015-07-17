@@ -29,12 +29,15 @@ var opts = {
         socketOptions: {keepAlive: 1}
     }
 };
+var MongoSessionStore = require('session-mongoose')(require('connect'));
 switch(app.get('env')){
     case 'development':
         mongoose.connect(credentials.mongo.development.connectionString, opts);
+        var sessionStore = new MongoSessionStore({ url: credentials.mongo.development.connectionString });
         break;
     case 'production':
         mongoose.connect(credentials.mongo.production.connectionString, opts);
+        var sessionStore = new MongoSessionStore({ url: credentials.mongo.production.connectionString });
         break;
     default:
         throw new Error('Unknown execution environment: ' + app.get('env'));
@@ -90,9 +93,6 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
 app.set('port', process.env.PORT || 3000); // 61099 or other port for uberspace
-
-var MongoSessionStore = require('session-mongoose')(require('connect'));
-var sessionStore = new MongoSessionStore({ url: credentials.mongo.development.connectionString });
 
 app.use(cookieParser(credentials.cookieSecret));
 app.use(expressSession({
