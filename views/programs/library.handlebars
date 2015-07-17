@@ -31,8 +31,8 @@
 						<td>{{deadlineSubmit}}</td>
 						<td>{{#allocatedReels}}
 							{{#if @index}}, {{/if}}<a href="/rollen/{{nr}}">{{nr}}</a>{{/allocatedReels}}</td>
-						<td>{{#if hasNews}}<a href="/news/anlegen/{{nr}}"><img src="{{static '/images/new-message-icon.png'}}"></a>
-						{{else}}<a href="" title="Um Ihren Kunden Nachrichten zusenden zu können kaufen Sie bitte ein News-Paket. Clicken Sie bitte auf Produkte"><img src="{{static '/images/Nonew-message-icon.png'}}"></a>{{/if}}</td>
+						<td>{{#if hasNews}}<a href="/news/anlegen/{{nr}}"><img src="/images/new-message-icon.png"></a>
+						{{else}}<a href="" title="Um Ihren Kunden Nachrichten zusenden zu können kaufen Sie bitte ein News-Paket. Clicken Sie bitte auf Produkte"><img src="/images/Nonew-message-icon.png"></a>{{/if}}</td>
 					</tr>
 					{{/programs}}
 				</tbody>

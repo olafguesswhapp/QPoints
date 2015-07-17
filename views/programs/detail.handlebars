@@ -5,7 +5,7 @@
 
     <div role="main"  class="col-sm-9 col-md-10 main">
       <h4>Programm "{{programName}}"  &nbsp;&nbsp;<a href="/programm/edit/{{nr}}" title="Programm aktualisieren">
-        <img src="{{static '/images/update-icon2.png'}}"></a></h4><br>
+        <img src="/images/update-icon2.png"></a></h4><br>
 
       <div class="formContainer">
           <form class="form-horizontal productsForm" role="form" action="" method="">
@@ -102,7 +102,7 @@
                 <input type="hidden" name="programId" value="{{../../id}}">
                 <input type="hidden" name="programNr" value="{{../../nr}}">
                 <input type="hidden" name="reelNr" value="{{nr}}">
-                <button type="submit" style="border:none; background-color:transparent;"><img src="{{static '/images/delete-icon.png'}}"></button></form>{{/contentCheck}}</td>
+                <button type="submit" style="border:none; background-color:transparent;"><img src="/images/delete-icon.png"></button></form>{{/contentCheck}}</td>
           </tr>  
           {{/allocatedReels}}
         </tbody>

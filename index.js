@@ -1,4 +1,5 @@
 var express = require('express');
+var path = require('path');
 var https = require('https');
 var app = express();
 var bodyParser = require('body-parser');
@@ -29,12 +30,14 @@ var opts = {
     }
 };
 switch(app.get('env')){
-    case 'development': mongoose.connect(credentials.mongo.development.connectionString, opts);
-    break;
-    case 'production': mongoose.connect(credentials.mongo.production.connectionString, opts);
-    break;
+    case 'development':
+        mongoose.connect(credentials.mongo.development.connectionString, opts);
+        break;
+    case 'production':
+        mongoose.connect(credentials.mongo.production.connectionString, opts);
+        break;
     default:
-    throw new Error('Unknown execution environment: ' + app.get('env'));
+        throw new Error('Unknown execution environment: ' + app.get('env'));
 }
 
 // Email versenden
@@ -50,9 +53,9 @@ var handlebars = require('express3-handlebars')
             this._sections[name] = options.fn(this);
             return null;
         },
-        static: function(name) {
-            return require('./lib/static.js').map(name);
-        },
+        // static: function(name) {
+        //     return require('./lib/static.js').map(name);
+        // },
         itemSumOld: function(items){
             return items.price * items.quantity;
         },
@@ -101,7 +104,7 @@ app.use(expressSession({
     saveUninitialized: true,
     resave: true
 }));
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true

@@ -25,7 +25,7 @@
 				<td>{{quantity}}</td>
 				<td>{{price}} €</td>
 				<td>{{itemSum}} €</td>
-				<td><a href="/warenkorb/add?nr={{nr}}" data-nr="{{nr}}"><img src="{{static '/images/plus-icon.png'}}"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/warenkorb/sub?nr={{nr}}" data-nr="{{nr}}"><img src="{{static '/images/minus-icon.png'}}"></a></td>
+				<td><a href="/warenkorb/add?nr={{nr}}" data-nr="{{nr}}"><img src="/images/plus-icon.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/warenkorb/sub?nr={{nr}}" data-nr="{{nr}}"><img src="/images/minus-icon.png"></a></td>
 			</tr>
 		{{/each}}
 		{{#if cart.total}}
