@@ -53,9 +53,6 @@ var handlebars = require('express3-handlebars')
             this._sections[name] = options.fn(this);
             return null;
         },
-        // static: function(name) {
-        //     return require('./lib/static.js').map(name);
-        // },
         itemSumOld: function(items){
             return items.price * items.quantity;
         },
@@ -170,5 +167,5 @@ app.use(function(err, req, res, next){
 // IN ORDER TO RUN ON HTTP instead of https
 app.listen(app.get('port'), function(){
   console.log( 'Express started on http://localhost:' + 
-    app.get('port') + '; press Ctrl-C to terminate.' );
+    app.get('port') + ' in ' + app.get('env') + '-mode ; press Ctrl-C to terminate.' );
 });
