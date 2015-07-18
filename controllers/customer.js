@@ -3,6 +3,18 @@ var CUsers = require('../models/cusers.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
 
+function noCustomerMessage (req, res, next) {
+	res.locals.flash = {
+		type: 'Warnung',
+		intro: 'Sie haben keinen Zugriffsrechte bzw. es gibt nicht den Kunden ',
+		message: ' mit der Kunden-Nr ' + req.params.nr,
+	};
+	var context = {
+		navAccount: 'class="active"',
+		current: 'client',
+	};
+	res.render('customer/detail', context);
+}; // noCustomerMessage
 
 module.exports = {
 
@@ -109,81 +121,97 @@ module.exports = {
 
 	detail: function(req, res, next) {
 		Customers.findOne({ nr : req.params.nr })
+				.where({ user: req.user._id})
 				.populate('user')
 				.exec(function(err, customer) {
-			if(err) return next(err);
-			if(!customer) return next(); 	// pass this on to 404 handler
-			CUsers.find({}, function(err, users){
-				var context = {
-					navAccount: 'class="active"',
-					current: 'client',
-					nr: customer.nr,
-					company: customer.company,
-					firstName: customer.firstName,
-					lastName: customer.lastName,
-					email: customer.email,
-					address1: customer.address1,
-					address2: customer.address2,
-					zip: customer.zip,
-					city: customer.city,
-					state: customer.state,
-					phone: customer.phone,
-					user: customer.user.map(function(user){
-						return { 
-							username: user.username,
-							firstName: user.firstName,
-							lastName: user.lastName,
-							role: user.role,
-						}
-					}),
-				};
-			res.render('customer/detail', context);	
-			});
-		});
+			if(err || !customer) {
+				noCustomerMessage(req, res, next);
+				return;
+			} else {
+				CUsers.find({}, function(err, users){
+					var context = {
+						navAccount: 'class="active"',
+						current: 'client',
+						nr: customer.nr,
+						company: customer.company,
+						firstName: customer.firstName,
+						lastName: customer.lastName,
+						email: customer.email,
+						address1: customer.address1,
+						address2: customer.address2,
+						zip: customer.zip,
+						city: customer.city,
+						state: customer.state,
+						phone: customer.phone,
+						user: customer.user.map(function(user){
+							return { 
+								username: user.username,
+								firstName: user.firstName,
+								lastName: user.lastName,
+								role: user.role,
+							}
+						}), // customer.user.map
+					}; // context
+				res.render('customer/detail', context);	
+				}); // CUsers.find
+			} // else if
+		}); // Customers.findOne
 	}, // detail
 
 	editCustomer: function (req, res, next) {
 		Customers.findOne({ nr : req.params.nr })
+				.where({ user: req.user._id})
 				.exec(function(err, customer) {
-			if(err) return next(err);
-			if(!customer) return next(); 	// pass this on to 404 handler
-			CUsers.find({}, function(err, users){
-				var context = {
-					navAccount: 'class="active"',
-					current: 'client',
-					customerId: customer._id,
-					nr: customer.nr,
-					company: customer.company,
-					firstName: customer.firstName,
-					lastName: customer.lastName,
-					email: customer.email,
-					address1: customer.address1,
-					address2: customer.address2,
-					zip: customer.zip,
-					city: customer.city,
-					state: customer.state,
-					phone: customer.phone,
-				}; // context
-			res.render('customer/edit', context);	
-			});
-		});
+			if(err || !customer) {
+				noCustomerMessage(req, res, next);
+				return;
+			} else {
+				CUsers.find({}, function(err, users){
+					var context = {
+						navAccount: 'class="active"',
+						current: 'client',
+						customerId: customer._id,
+						nr: customer.nr,
+						company: customer.company,
+						firstName: customer.firstName,
+						lastName: customer.lastName,
+						email: customer.email,
+						address1: customer.address1,
+						address2: customer.address2,
+						zip: customer.zip,
+						city: customer.city,
+						state: customer.state,
+						phone: customer.phone,
+					}; // context
+				res.render('customer/edit', context);	
+				});
+			} // else
+		}); // Customers.findOne
 	}, // editCustomer
 
 	processEditCustomer: function(req, res, next) {
-		Customers.findById(req.body.customerId, function(err, customer){
-			customer.company = req.body.company;
-			customer.address1 = req.body.address1;
-			customer.address2 = req.body.address2;
-			customer.city = req.body.city;
-			customer.state = req.body.state;
-			customer.zip = req.body.zip;
-			customer.phone = req.body.phone;
-			customer.user = req.user._id;
-			console.log(customer);
-			customer.save(function(err, updatedCustomer) {
-                if(err) return next(err);
-	            res.redirect(303, '/kunden/' + req.body.nr);
-            }); // customer.save
+		Customers
+				.findById(req.body.customerId)
+				.where({ user: req.user._id})
+				.exec(function(err, customer){
+			if(err || !customer) {
+				noCustomerMessage(req, res, next);
+				return;
+			} else {
+				customer.company = req.body.company;
+				customer.address1 = req.body.address1;
+				customer.address2 = req.body.address2;
+				customer.city = req.body.city;
+				customer.state = req.body.state;
+				customer.zip = req.body.zip;
+				customer.phone = req.body.phone;
+				customer.user = req.user._id;
+				console.log(customer);
+				customer.save(function(err, updatedCustomer) {
+	                if(err) return next(err);
+		            res.redirect(303, '/kunden/' + req.body.nr);
+	            }); // customer.save
+			} // else
 		}); // Customers.findById
 	}, // processEditCustomer
 };
