@@ -1,7 +1,5 @@
 
 var main = require('./handlers/main.js');
-var TestMongoDB = require('./handlers/TestMongoDB.js');
-
 var apiController = require('./controllers/api.js');
 var customerController = require('./controllers/customer.js');
 var userController = require('./controllers/user.js');
@@ -11,7 +9,6 @@ var programController = require('./controllers/programs.js');
 var cartController = require('./controllers/cart.js');
 var orderController = require('./controllers/order.js');
 var myPointsController = require('./controllers/mypoints.js');
-// var transactionController = require('./controllers/transaction.js');
 var resetController = require('./controllers/reset.js');
 var newsFeedController = require('./controllers/newsfeed.js');
 
@@ -28,19 +25,6 @@ module.exports = function(app) {
 
 	// news Feed Controller
 	newsFeedController.registerRoutes(app);
-
-
-	// test MongoDB
-	app.get('/waehlen/:wahl', TestMongoDB.wahl);
-	app.get('/testMongo', TestMongoDB.testMongo);
-	app.get('/api', TestMongoDB.testapi);
-	app.get('/apishow/:nr', TestMongoDB.apiShow);
-	app.post('/apiNewReel', TestMongoDB.apiNewReel);
-	app.delete('/apideleteuser', TestMongoDB.deleteUser);
-	app.get('/apirequest', TestMongoDB.sendHttp);
-	app.post('/apirequest', TestMongoDB.processSendHttp);
-	app.post('/apireceiverequest', TestMongoDB.processApiRequest);
-	app.post('/apirequestprograms', TestMongoDB.processApiReqPrograms);
 
 	// customer routes
 	customerController.registerRoutes(app);
@@ -65,9 +49,6 @@ module.exports = function(app) {
 
 	// mypoints routes
 	myPointsController.registerRoutes(app);
-
-	// transaction routes
-	// transactionController.registerRoutes(app);
 
 	// reset route
 	resetController.registerRoutes(app);

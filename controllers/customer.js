@@ -1,5 +1,4 @@
 var Customers = require('../models/customers.js');
-var customerViewModel = require('../viewModels/customer.js');
 var CUsers = require('../models/cusers.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');

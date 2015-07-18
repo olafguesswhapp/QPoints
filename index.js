@@ -1,3 +1,5 @@
+// DEPENDENCIES
+// ============
 var express = require('express');
 var path = require('path');
 var https = require('https');
@@ -13,21 +15,24 @@ var auth = require('./lib/auth.js')(app, {
     successRedirect: '/login',
     failureRedirect: 'unauthorized',
 });
+var mongoose = require('mongoose');
+var MongoSessionStore = require('session-mongoose')(require('connect'));
+// Email versenden
+// var emailService = require('./lib/email.js')(credentials);
+
+// INTANTIATIONS
+// =============
 // var sslOptions = {
 //     key: fs.readFileSync('./ssl/localhost.key'),
 //     cert: fs.readFileSync('./ssl/localhost.key.crt')
 // };
 
-//Mongoose Schema and Model
-var mongoose = require('mongoose');
-// Connect mongoose with mongoDB
-// do not forget to open a 2nd terminal window and start mongoDB with "mongod" upfront
 var opts = {
     server: {
         socketOptions: {keepAlive: 1}
     }
 };
-var MongoSessionStore = require('session-mongoose')(require('connect'));
+// do not forget to open a 2nd terminal window and start mongoDB with "mongod" upfront
 switch(app.get('env')){
     case 'development':
         var sessionStore = new MongoSessionStore({ url: credentials.mongo.development.connectionString });
@@ -43,9 +48,8 @@ switch(app.get('env')){
         throw new Error('Unknown execution environment: ' + app.get('env'));
 }
 
-// Email versenden
-// var emailService = require('./lib/email.js')(credentials);
-
+// CONFIGURATIONS
+// ==============
 // set up handlebars view engine
 var handlebars = require('express3-handlebars')
 	.create({
@@ -91,9 +95,10 @@ var handlebars = require('express3-handlebars')
 });	
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-
 app.set('port', process.env.PORT || 3000); // 61099 or other port for uberspace
 
+// MIDDLEWARE
+// ==========
 app.use(cookieParser(credentials.cookieSecret));
 app.use(expressSession({
     secret: credentials.sessionSecret,
@@ -106,7 +111,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
 // flash message middleware
 app.use(function(req, res, next){
     // if there's a flash message, transfer
@@ -115,7 +119,6 @@ app.use(function(req, res, next){
     delete req.session.flash;
     next();
 });
-
 //auth.init() links in Passport middleware;
 auth.init();
 
@@ -133,7 +136,8 @@ app.use(function(req, res, next) {
     return next();
 });
 
-// add routes
+// ROUTES
+// ======
 require('./routes.js')(app);
 
 //testen Email versand
@@ -159,6 +163,9 @@ app.use(function(err, req, res, next){
 	res.status(500);
 	res.render('500');
 });
+
+// BOOTUP
+// ======
 
 // https.createServer(sslOptions, app).listen(app.get('port'), function(){
 //     console.log('Express HTTPS started in ' + app.get('env') + ' mode on port ' + app.get('port') + '.');
