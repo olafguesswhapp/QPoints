@@ -95,9 +95,9 @@ var handlebars = require('express3-handlebars')
 });	
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-if (app.get('env') = 'development') {
+if (app.get('env') == 'development') {
     app.set('port', process.env.PORT || 3000);
-} else if (app.get('env') = 'production') {
+} else if (app.get('env') == 'production') {
     app.set('port', process.env.PORT || 61099); // Uberspace
 }
 
