@@ -140,8 +140,6 @@ module.exports = {
 						.populate('items.prodId', 'nr productName')
 						.exec(function(err, orders){
 				var context = {
-					navAccount: 'class="active"',
-					current: 'order',
 					orders: orders.map(function(order){
 						return {
 							nr: order.nr,

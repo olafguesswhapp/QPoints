@@ -9,10 +9,10 @@ function noCustomerMessage (req, res, next) {
 		intro: 'Sie haben keinen Zugriffsrechte bzw. es gibt nicht den Kunden ',
 		message: ' mit der Kunden-Nr ' + req.params.nr,
 	};
-	var context = {
-		navAccount: 'class="active"',
-		current: 'client',
-	};
+	// var context = {
+	// 	navAccount: 'class="active"',
+	// 	current: 'client',
+	// };
 	res.render('customer/detail', context);
 }; // noCustomerMessage
 
@@ -130,8 +130,6 @@ module.exports = {
 			} else {
 				CUsers.find({}, function(err, users){
 					var context = {
-						navAccount: 'class="active"',
-						current: 'client',
 						nr: customer.nr,
 						company: customer.company,
 						firstName: customer.firstName,
@@ -168,8 +166,6 @@ module.exports = {
 			} else {
 				CUsers.find({}, function(err, users){
 					var context = {
-						navAccount: 'class="active"',
-						current: 'client',
 						customerId: customer._id,
 						nr: customer.nr,
 						company: customer.company,

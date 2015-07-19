@@ -196,8 +196,8 @@ module.exports = {
                         .select('_id newsDeliveryLimit')
                         .exec(function(err, newsFeed){
                     context = {
-                        navProgram: 'class="active"',
-                        current: 'myNews',
+                        // navProgram: 'class="active"',
+                        // current: 'myNews',
                         newsFeedId: newsFeed[0]._id,
                         newsDeliveryLimit: newsFeed[0].newsDeliveryLimit,
                         newsBudget: newsFeed[0].newsBudget,
@@ -250,8 +250,8 @@ module.exports = {
                 if (err || !program || program.length<1) {
                     console.log('Der User hat noch keine Programme');
                     context = {
-                        navProgram: 'class="active"',
-                        current: 'myNews',
+                        // navProgram: 'class="active"',
+                        // current: 'myNews',
                         customerCompany: user.customer.company,
                         programs: {
                             programName: 'Sie haben noch kein Treuepunkte-Programm gestartet',
@@ -261,8 +261,8 @@ module.exports = {
                     return;
                 } else { // if error or !program found
                     context = {
-                        navProgram: 'class="active"',
-                        current: 'myNews',
+                        // navProgram: 'class="active"',
+                        // current: 'myNews',
                         customerCompany: user.customer.company,
                         programs: [],
                     };
@@ -309,8 +309,8 @@ module.exports = {
 
             } // no News found
             var context = {
-                navProgram: 'class="active"',
-                current: 'myNews',
+                // navProgram: 'class="active"',
+                // current: 'myNews',
                 newsId: req.params.id,
                 customerCompany: newsfeed.customer.company,
                 programName: newsfeed.assignedProgram.programName,
@@ -339,8 +339,8 @@ module.exports = {
 
             } // no News found
             var context = {
-                navProgram: 'class="active"',
-                current: 'myNews',
+                // navProgram: 'class="active"',
+                // current: 'myNews',
                 newsFeedId: req.params.id,
                 customerCompany: newsfeed.customer.company,
                 programName: newsfeed.assignedProgram.programName,

@@ -61,8 +61,6 @@ module.exports = {
 				.exec(function(err, reels) {
 				if (reels.length > 0) {
 					var context = {
-						navProgram: 'class="active"',
-						current: 'myReels',
 						reels: reels.map(function(reel){
 							return {
 								nr: reel.nr,
@@ -76,8 +74,6 @@ module.exports = {
 					}; // context				
 				} else { // if Reels length 
 					var context = {
-						navProgram: 'class="active"',
-						current: 'myReels',
 						reels: {
 							reelStatus: 'Sie haben noch keine Rollen bestellt.',
 						} 
@@ -97,8 +93,6 @@ module.exports = {
 			if(err) return res.redirect(303, '/error');
 			// if(!reel) return next(); 	// pass this on to 404 handler
 			var context = {
-				navProgram: 'class="active"',
-				current: 'myReels',
 				nr: reel.nr,
 				reelStatus: reel.reelStatus,
 				quantityCodes: reel.quantityCodes,

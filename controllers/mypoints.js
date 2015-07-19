@@ -40,8 +40,6 @@ module.exports = {
 	scan: function(req, res, next){
 		CUsers.findById(req.user._id, function(err, user){
 			var context = {
-				meinepunkte: 'class="active"',
-				current: 'scan',
 				name: user.firstName + ' ' + user.lastName
 			};
 			res.render('transaction/scan', context);
@@ -133,14 +131,10 @@ module.exports = {
 			.exec(function(err, user){
 			if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
 				var context = {
-					meinepunkte: 'class="active"',
-					current: 'mypoints',
 					programs: {},
 				};
 			} else { // user already has collected one or more codes
 				var context ={
-					meinepunkte: 'class="active"',
-					current: 'mypoints',
 					programs: user.particiPrograms.map(function(partiProgram){
 						return {
 							nr: partiProgram.program.nr,
@@ -211,8 +205,6 @@ module.exports = {
 	customerDetail: function(req, res, next){
 		Customers.findOne( {nr: req.params.nr}, function(err, customer){
 			var context = {
-				meinepunkte: 'class="active"',
-				current: 'mypoints',
 				nr: customer.nr,
 				company: customer.company,
 				email: customer.email,
@@ -229,8 +221,6 @@ module.exports = {
 	programDetail: function(req, res, next){
 		Programs.findOne({ nr : req.params.nr }, function(err, program){
 			var context = {
-				meinepunkte: 'class="active"',
-				current: 'mypoints',
 				nr: program.nr,
 				programStatus: program.programStatus,
 				programName: program.programName,
@@ -260,8 +250,6 @@ module.exports = {
 			if (err || !checkUser || checkUser.particiPrograms.length == 0) {
 				console.log('Diesen User nicht für offene News gefunden');
 				context = {
-	                meinepunkte: 'class="active"',
-	                current: 'news',
 	                message: 'Es liegen keine Nachrichten vor',
 	            };
 	            console.log(context);
@@ -284,15 +272,11 @@ module.exports = {
 		            .populate('assignedProgram', 'programName')
 		            .exec(function(err, newsFeed){
 			        var context = {
-			        	meinepunkte: 'class="active"',
-			        	current: 'news',
 			        	news: []
 			        };
 			        var help = {};
 			        if (err || newsFeed.length == 0) {
 			            context = {
-			                meinepunkte: 'class="active"',
-			                current: 'news',
 			                message: 'Es liegen keine Nachrichten vor',
 			            };
 			            console.log(context);
@@ -340,8 +324,6 @@ module.exports = {
 			                            res.render('transaction/news', context);
 			                        } else {
 			                            context = {
-			                            	meinepunkte: 'class="active"',
-			                            	current: 'news',
 			                                success: true,
 			                                message: 'hat geklappt',
 			                                news: context.news

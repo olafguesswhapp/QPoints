@@ -59,8 +59,6 @@ module.exports = {
 		if (req.user.role != 'customer' && req.user.role != 'admin') return next();
 		Customers.findById(req.user.customer, function(err, customer){
 			var context = {
-				navAccount: 'class="active"',
-				current: 'user',
 				actualCustomerId: customer._id,
 				customerCompany: customer.company,
 				actualUserName: req.user.username,
@@ -104,8 +102,6 @@ module.exports = {
 		if (!req.user) return next();
 		CUsers.find({ customer : req.user.customer}, function(err, users) {
 			var context = {
-				navAccount: 'class="active"',
-				current: 'user',
 				users: users.map(function(user){
 					return {
 						firstName: user.firstName,
@@ -193,8 +189,6 @@ module.exports = {
 				return next (err);		
 			} else { // error or no user found
 				context = {
-					navAccount: 'class="active"',
-					current: 'user',
 					username: user.username,
 					customer: user.customer.company,
 					firstName: user.firstName,
@@ -217,8 +211,6 @@ module.exports = {
 				return next (err);		
 			} else { // error or no user found
 				context = {
-					navAccount: 'class="active"',
-					current: 'user',
 					userId: user._id,
 					username: user.username,
 					customer: user.customer.company,

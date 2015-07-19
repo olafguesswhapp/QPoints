@@ -126,6 +126,7 @@ auth.init();
 app.use(function(req, res, next) {
     var cart = req.session.cart;
     res.locals.cartItems = cart && cart.items ? cart.items.length : 0;
+    qplib.defineNav(req, res);
     req.session.lastPage = req.path;
     if (!req.user) {
         res.locals.roleLevel = 0;

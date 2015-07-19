@@ -78,8 +78,6 @@ module.exports = {
 						var newProgramNr = program.nr.match(/\D+/)[0] + (parseInt(program.nr.match(/\d+/))+1);
 					}
 					var context = {
-						navProgram: 'class="active"',
-						current: 'myPrograms',
 						// die letzte Programm-Nr filetieren (string und nr) und um 1 erhöhen [A]
 						neueNr: newProgramNr,
 						// in Start- und Deadline-Datums das heutige Datum setzen
@@ -153,8 +151,6 @@ module.exports = {
 								hasNews=true;
 							}
 							context = {
-								navProgram: 'class="active"',
-								current: 'myPrograms',
 								customerCompany: user.customer.company,
 								programs: programs.map(function(program){
 									return {
@@ -178,8 +174,6 @@ module.exports = {
 						}); // NewsFeed.find
 					} else { // else if no programs
 						context = {
-							navProgram: 'class="active"',
-							current: 'myPrograms',
 							customerCompany: user.customer.company,
 							programs: {
 								programName: 'Sie haben noch kein Programm angelegt',
@@ -201,8 +195,6 @@ module.exports = {
 					.exec(function(err,reels){
 					if(!program) return next(); 	// pass this on to 404 handler
 					var context = {
-						navProgram: 'class="active"',
-						current: 'myPrograms',
 						id: program._id,
 						nr: program.nr,
 						programStatus: program.programStatus,
@@ -255,8 +247,6 @@ module.exports = {
 				console.log(reels);
 				if(!program) return next(); // pass this on to 404 handler
 				var context = {
-					navProgram: 'class="active"',
-					current: 'myPrograms',
 					programId: program._id,
 					programNr: program.nr,
 					programName: program.programName,
