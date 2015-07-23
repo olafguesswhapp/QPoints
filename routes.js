@@ -1,5 +1,5 @@
 
-var main = require('./handlers/main.js');
+var mainController = require('./controllers/main.js');
 var apiController = require('./controllers/api.js');
 var customerController = require('./controllers/customer.js');
 var userController = require('./controllers/user.js');
@@ -14,42 +14,16 @@ var newsFeedController = require('./controllers/newsfeed.js');
 
 module.exports = function(app) {
 
-	// miscellaneous routes
-	app.get('/', main.home);
-	app.get('/newsletter', main.newsletter);
-	app.post('/newsletter', main.newsletterProcessPost);
-	app.get('/newsletter/archive', main.newsletterArchive);
-
-	// api Controller
-	apiController.registerRoutes(app);
-
-	// news Feed Controller
-	newsFeedController.registerRoutes(app);
-
-	// customer routes
-	customerController.registerRoutes(app);
-
-	// user routes
-	userController.registerRoutes(app);
-	
-	// products routes
-	productsController.registerRoutes(app);
-
-	// reel routes
-	reelsController.registerRoutes(app);
-
-	// program routes
-	programController.registerRoutes(app);
-
-	// cart routes
-	cartController.registerRoutes(app);
-
-	// order routes
-	orderController.registerRoutes(app);
-
-	// mypoints routes
-	myPointsController.registerRoutes(app);
-
-	// reset route
-	resetController.registerRoutes(app);
+	mainController.registerRoutes(app); // main Controller
+	apiController.registerRoutes(app); // api Controller
+	newsFeedController.registerRoutes(app); // news Feed Controller
+	customerController.registerRoutes(app); // customer routes
+	userController.registerRoutes(app); // user routes
+	productsController.registerRoutes(app); // products routes
+	reelsController.registerRoutes(app); // reel routes
+	programController.registerRoutes(app); // program routes
+	cartController.registerRoutes(app); // cart routes
+	orderController.registerRoutes(app); // order routes
+	myPointsController.registerRoutes(app); // mypoints routes
+	resetController.registerRoutes(app); // reset route
 };
