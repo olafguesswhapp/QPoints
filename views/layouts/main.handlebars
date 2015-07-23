@@ -31,6 +31,7 @@
 			    	{{#gt roleLevel 5}}<li {{{navProgram}}}><a href="/programm">Meine Programme</a></li>{{/gt}}
 			    	{{#gt roleLevel 7}}<li {{{navAccount}}}><a href="/user">Konto</a></li>{{/gt}}
 			    	{{#gt roleLevel 2}}<li {{{meinepunkte}}}><a href="/meinepunkte">Meine Punkte</a></li>{{/gt}}
+			    	{{#gt roleLevel 9}}<li {{{navAdmin}}}><a href="/admin/kunden">Admin</a></li>{{/gt}}
 			    </ul>
 			    <ul class="nav navbar-nav navbar-right">
 			    	<li>{{#if loggedInUser}}<a href="/user/{{loggedInUsername}}">{{loggedInUser}}</a></li><!-- login/logout -->

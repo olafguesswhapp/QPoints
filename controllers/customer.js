@@ -19,7 +19,6 @@ module.exports = {
 	registerRoutes: function(app) {
 		app.get('/anmelden', this.register);
 		app.post('/anmelden', this.processRegister);
-		app.get('/kunden', qplib.adminOnly, this.clientList);
 		app.get('/kunde', qplib.checkUserRole8above, this.clientPrep);
 		app.get('/kunden/:nr', qplib.checkUserRole8above, this.detail);
 		app.get('/kunden/edit/:nr', qplib.checkUserRole8above, this.editCustomer);
@@ -82,24 +81,6 @@ module.exports = {
 			}
 		});
 
-	},
-
-	clientList: function(req, res, next){
-		Customers.find(function(err, customers) {
-			var context = {
-				customers: customers.map(function(customer){
-					return {
-						nr: customer.nr,
-						company: customer.company,
-						firstName: customer.firstName,
-						lastName: customer.lastName,
-						email: customer.email,
-						city: customer.city,
-					}
-				})
-			};
-			res.render('customer/customers', context);		
-		})
 	},
 
 	clientPrep: function(req, res, next){

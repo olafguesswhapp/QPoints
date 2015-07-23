@@ -11,6 +11,7 @@ var orderController = require('./controllers/order.js');
 var myPointsController = require('./controllers/mypoints.js');
 var resetController = require('./controllers/reset.js');
 var newsFeedController = require('./controllers/newsfeed.js');
+var admin = require('./controllers/admin.js');
 
 module.exports = function(app) {
 
@@ -26,4 +27,5 @@ module.exports = function(app) {
 	orderController.registerRoutes(app); // order routes
 	myPointsController.registerRoutes(app); // mypoints routes
 	resetController.registerRoutes(app); // reset route
+	admin.registerRoutes(app); // admin route
 };
