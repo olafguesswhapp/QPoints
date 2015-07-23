@@ -42,7 +42,7 @@ module.exports = {
 			var context = {
 				name: user.firstName + ' ' + user.lastName
 			};
-			res.render('transaction/scan', context);
+			res.render('myPoints/scan', context);
 		}); // CUsers find
 	},
 
@@ -157,7 +157,7 @@ module.exports = {
 				}); // forEach context.programs
 			} // else check whether user has already collected a code
 			console.log(context);
-			res.render('transaction/mypoints', context);
+			res.render('myPoints/mypoints', context);
 		}); // CUSers FindById
 	}, // myPoints
 
@@ -196,7 +196,7 @@ module.exports = {
 						program.companyNr = cust.nr
 					}); // Customers find
 				if (indexPP == context.programs.length - 1) {
-					res.render('transaction/toRedeem', context);
+					res.render('myPoints/toRedeem', context);
 				}
 			}); // forEach context.programs
 		}); // CUSers FindById
@@ -214,7 +214,7 @@ module.exports = {
 				city: customer.city,
 				phone: customer.phone
 			};
-			res.render('transaction/customer', context);
+			res.render('myPoints/customer', context);
 		}); // CustomersFind
 	}, // customerDetail
 
@@ -229,7 +229,7 @@ module.exports = {
 				deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
 				// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 			}; // context
-			res.render('transaction/program', context);
+			res.render('myPoints/program', context);
 
 		}); // ProgramsFindOne
 	}, // programDetail
@@ -253,7 +253,7 @@ module.exports = {
 	                message: 'Es liegen keine Nachrichten vor',
 	            };
 	            console.log(context);
-	            res.render('transaction/news', context);
+	            res.render('myPoints/news', context);
 			} else {
 				console.log('else');
 				for (var i=0; i<checkUser.particiPrograms.length; i++) {
@@ -280,7 +280,7 @@ module.exports = {
 			                message: 'Es liegen keine Nachrichten vor',
 			            };
 			            console.log(context);
-			            res.render('transaction/news', context);
+			            res.render('myPoints/news', context);
 			        } else {// if
 			            //Check if News was already sent
 			            newsFeed.forEach(function(newsfeed, indexN){
@@ -321,7 +321,7 @@ module.exports = {
 			                                message: 'Es liegen keine Nachrichten vor',
 			                            };
 			                            console.log(context);
-			                            res.render('transaction/news', context);
+			                            res.render('myPoints/news', context);
 			                        } else {
 			                            context = {
 			                                success: true,
@@ -329,7 +329,7 @@ module.exports = {
 			                                news: context.news
 			                            };
 			                            console.log(context);
-			                            res.render('transaction/news', context);
+			                            res.render('myPoints/news', context);
 			                        } // context is not empty
 			                    } // if
 			                }); // NewsHistory.findById
