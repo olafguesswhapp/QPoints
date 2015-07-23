@@ -31,9 +31,9 @@ function checkUser(req, res, next) {
         } else {
             res.locals.apiuser = user._id;
             return next();
-        }
+        } // else
     }); // CUsers findOne
-};
+}; // checkUser
 
 function buildResponseArray (user, req, res){
         console.log(user);
@@ -46,27 +46,28 @@ function buildResponseArray (user, req, res){
     }; // function buildResponseArray2
 
 function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, gender, req, res){
-    Programs.findById(programId)
+    Programs
+            .findById(programId)
             .populate('customer')
             .exec(function(err, usersProgram){
         context = {
-        programNr: usersProgram.nr,
-        programName: usersProgram.programName,
-        programCompany: usersProgram.customer.company,
-        companyCity: usersProgram.customer.city,
-        address1: usersProgram.customer.address1,
-        address2: usersProgram.customer.address2,
-        zip: usersProgram.customer.zip,
-        city: usersProgram.customer.city,
-        phone: usersProgram.customer.phone,
-        programGoal: usersProgram.goalToHit, 
-        myCount: programCount,
-        ProgramsFinished: programHit,
-        programStatus: usersProgram.programStatus,
-        programStartDate: usersProgram.startDate,
-        programEndDate: usersProgram.deadlineSubmit,
-        programKey: usersProgram.programKey,
-        };
+            programNr: usersProgram.nr,
+            programName: usersProgram.programName,
+            programCompany: usersProgram.customer.company,
+            companyCity: usersProgram.customer.city,
+            address1: usersProgram.customer.address1,
+            address2: usersProgram.customer.address2,
+            zip: usersProgram.customer.zip,
+            city: usersProgram.customer.city,
+            phone: usersProgram.customer.phone,
+            programGoal: usersProgram.goalToHit, 
+            myCount: programCount,
+            ProgramsFinished: programHit,
+            programStatus: usersProgram.programStatus,
+            programStartDate: usersProgram.startDate,
+            programEndDate: usersProgram.deadlineSubmit,
+            programKey: usersProgram.programKey,
+        }; // context
         programData.push(context);
         if (index == nrOfParticiPrograms -1 ){
             context = {
@@ -83,14 +84,13 @@ function collectProgramData (programId, programCount, programHit, nrOfParticiPro
 }; // collectProgramData
 
 module.exports = {
-
 	registerRoutes: function(app) {
 		app.post('/apicodecheck', checkUser, this.processApiCodeScan);
         app.post('/apicoderedeem', checkUser, this.processApiCodeRedeem);
         app.post('/apicreateaccount', this.processApiCreateAccount);
         app.post('/apicheckuser', this.processApiCheckUserAccount);
         app.post('/apiupdateuser', checkUser, this.processApiUpdateUser);
-	},
+	}, // module.exports
 
     processApiUpdateUser: function(req, res, next) {
         CUsers.findOne({'username' : req.body.userEmail}, function (err, userToFind){
@@ -156,11 +156,11 @@ module.exports = {
         console.log('API check Account startet hier');
         console.log(req.body);
         // User identifizieren
-        CUsers.findOne({'username' : req.body.userEmail})
-                .populate('particiPrograms')
-                .select('password particiPrograms gender')
-                //.lean()
-                .exec(function(err, checkUser){
+        CUsers
+            .findOne({'username' : req.body.userEmail})
+            .populate('particiPrograms')
+            .select('password particiPrograms gender')
+            .exec(function(err, checkUser){
             if(err) {
                 context = {
                     success: false,
@@ -211,10 +211,10 @@ module.exports = {
                         } else {
                             buildResponseArray(checkUser, req, res);
                             return;
-                        }
-                    }
+                        } // else
+                    } // else
                 }); // checkUser.comparePassword
-            }
+            } // else
         }); // CUsers findOne
     }, // processApiCheckUserAccount
 
@@ -245,31 +245,32 @@ module.exports = {
                         statusCode = 200;
                         publish(context, statusCode, req, res)
                         console.log('erfolgreich angelegt');
-                    }
-                });
+                    } // else
+                }); // user.save
             } else {// if user nocht found in CUsers
                 context = {
                     success: false,
                     message: 'Der Username "' + user.username + '" wird bereits verwendet.',
-                };
+                }; // context
                 statusCode = 400;
                 publish(context, statusCode, req, res);
-            }
+            } // else
         }); // CUsers.findOne
-    },
+    }, // processApiCreateAccount
 
 	processApiCodeScan: function(req, res, next) {
 		APIUser = res.locals.apiuser;
         var statusCode = 0;
-		Reels.findOne({'codes.rCode' : req.body.qpInput})
-                    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalToHit programStatus programKey')
-                    .populate('customer')
-                    .exec(function(err, reel){
+		Reels
+            .findOne({'codes.rCode' : req.body.qpInput})
+            .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalToHit programStatus programKey')
+            .populate('customer')
+            .exec(function(err, reel){
             if(err) {
                 context = {
                 success: false,
                 message: "Leider ist ein Fehler aufgetreten.",
-            };
+            }; // context
             statusCode = 400;
             publish(context, statusCode, req, res);
             } // if err
@@ -411,7 +412,7 @@ function checkCodesInReels (programId, req, res){
                     } else {
                         var objArray = { rCode: reelcode.rCode};
                         codesArray[reelId].push(objArray);
-                    }
+                    } // else
                     counter--;
                 } //  if cStatus = 1
             }); // reels.forEach
@@ -430,7 +431,7 @@ function checkCodesInReels (programId, req, res){
             } else {
                 console.log('super!');
                 updateUserStats(programId, codesArray, req, res);
-            }
+            } // else
         } // wir sind am Ende
     }); // Reels.find
 }; // checkCodesInReels
@@ -454,7 +455,7 @@ function updateUserStats(programId, codesArray, req, res){
         if (correctUser) {
             if (didRun==false){updateProgramStats(codesArray, req, res);}
             didRun=true;
-        }
+        } // if
         return;
     }); // CUsers findById
 }; // updateUserStats
