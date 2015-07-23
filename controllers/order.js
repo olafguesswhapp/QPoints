@@ -61,7 +61,7 @@ module.exports = {
 		console.log('Kommt von ' + req.header('Referer'));
 		if (req.header('Referer').indexOf('/warenkorb/checkout')<0) {
 			req.session.flash = {
-				type: 'Warnung',
+				type: 'danger',
 				intro: 'Sie kommen nicht vom Warenkorb Checkout.',
 				message: 'Zu Ihrer Sicherheit wird diese Bestellung abgebrochen',
 			};

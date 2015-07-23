@@ -72,7 +72,7 @@ function addToCart(nr, req, res, next){
 		}
 		cart.total= cartTotal.toFixed(2);
 		req.session.flash = {
-			type: 'Danke',
+			type: 'success',
 			intro: 'Wir habe ein "' + product.productName + '" dem Warenkorb hinzugefügt.',
 			message: 'Vielen Dank',
 		};
@@ -100,9 +100,9 @@ function substractFromCart(nr, req, res, next){
 		}
 		cart.total= cartTotal.toFixed(2);
 		req.session.flash = {
-			type: 'Danke',
-			intro: 'Wir habe den Warenkorb um ein "' + product.productName + '" reduziert.',
-			message: 'Vielen Dank',
+			type: 'info',
+			intro: 'Information:',
+			message: 'Wir habe den Warenkorb um ein "' + product.productName + '" reduziert.',
 		};
 		res.redirect('back');
 	}); // Products find

@@ -5,14 +5,12 @@ var qplib = require('../lib/qpointlib.js');
 
 function noCustomerMessage (req, res, next) {
 	res.locals.flash = {
-		type: 'Warnung',
+		type: 'danger',
 		intro: 'Sie haben keinen Zugriffsrechte bzw. es gibt nicht den Kunden ',
 		message: ' mit der Kunden-Nr ' + req.params.nr,
 	};
-	// var context = {
-	// 	navAccount: 'class="active"',
-	// 	current: 'client',
-	// };
+	var context = {
+	};
 	res.render('customer/detail', context);
 }; // noCustomerMessage
 
@@ -52,7 +50,7 @@ module.exports = {
 		u.save(function(err, newUser){
 			if(err) {
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'danger',
 					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
 					message: err.errors.username.message,
 				};

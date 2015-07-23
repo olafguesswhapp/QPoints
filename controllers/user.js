@@ -82,7 +82,7 @@ module.exports = {
 		u.save(function(err, newUser){
 			if(err) {
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'warning',
 					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
 					message: err.errors.username.message,
 				};
@@ -139,14 +139,14 @@ module.exports = {
 			if (!user && info.message == 'Invalid password'){
 				console.log('falsche Passwort');
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'warning',
 					intro: 'Hinweis: ',
 					message: 'Das Passwort für Username ' + req.body.username + ' stimmt nicht - Bitte versuchen Sie es erneut.',
 					};
 				return res.redirect('/login');
 			} else if (!user) {
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'warning',
 					intro: 'Hinweis: ',
 					message: 'Der Username ' + req.body.username + ' wurde bisher nicht angelegt. Bitte diesen als Kunde neu anmelden oder als User eines Kunden anlegen lassen.',
 					};
@@ -155,7 +155,7 @@ module.exports = {
 			req.logIn(user, function(err) {
 				if (err) { return next(err); }
 				req.session.flash = {
-					type: 'Erfolg',
+					type: 'success',
 					intro: 'Willkommen!',
 					message: 'Du bist richtig eingelogged.',
 					};	
@@ -260,7 +260,7 @@ module.exports = {
 				.exec(function(err, user){
 				if(!user || err) {
 					req.session.flash = {
-	                    type: 'Warnung',
+	                    type: 'warning',
 	                    intro: 'Der eingegebene User konnte nicht gefunden werden.',
 	                    message: 'Bitte wiederholen Sie Ihre Eingabe mit einem anderen User.'
                 	};
@@ -269,7 +269,7 @@ module.exports = {
 				} else { // if err
 					if (user.role != 'consumer') {
 						req.session.flash = {
-		                    type: 'Warnung',
+		                    type: 'warning',
 		                    intro: 'Der eingegebene User ist bereits zugeordnet.',
 		                    message: 'Bitte ordnen Sie einen anderen User zu oder trennen Sie diesen User von einem anderen Kunden.'
 	                	};

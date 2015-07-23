@@ -44,7 +44,7 @@ module.exports = {
 		});
 		c.save(function(err) {
 			if(err) req.session.flash = {
-					type: 'Warnung',
+					type: 'danger',
 					intro: 'Die Rolle kann nicht angelegt werden.',
 					message: err.message,
 				};;

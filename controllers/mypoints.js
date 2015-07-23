@@ -52,7 +52,7 @@ module.exports = {
 					.exec(function(err, reel){
 			if(err) {
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'danger',
 					intro: 'Leider ist ein Fehler aufgetreten.',
 					message: err,
 				};
@@ -60,9 +60,9 @@ module.exports = {
 			} // if err
 			if (!reel) {
 				req.session.flash = {
-					type: 'Warnung',
-					intro: 'Dieser QPoint ist nicht vorhanden',
-					message: req.qpInput,
+					type: 'danger',
+					intro: 'Diesen QPoint gibt es nicht.',
+					message: 'Bitte sprechen Sie den Ladeninhaber an.',
 				};
 				res.redirect(303, '/meinepunkte/scan');
 			} else {// if !reel
@@ -74,7 +74,7 @@ module.exports = {
 								if(code.cStatus=='0'){
 									var qpMessage = 'QPoint ' + code.rCode  + ' Rolle ' + reel.nr;	
 									req.session.flash = {
-										type: 'Erfolg',
+										type: 'success',
 										intro: 'Der QPoint gehört zum Program ' + reel.assignedProgram.programName,
 										message: qpMessage,
 									};
@@ -95,7 +95,7 @@ module.exports = {
 									var qpMessage = 'QPoint ' + code.rCode + ' Status ' 
 										+ code.cStatus + ' Rolle ' + reel.nr;	
 									req.session.flash = {
-										type: 'Warnung',
+										type: 'danger',
 										intro: 'Der QPoint wurde bereits verwendet',
 										message: qpMessage,
 									};
@@ -105,7 +105,7 @@ module.exports = {
 						}); // reel.codes forEach	
 				} else { // if Dates
 					req.session.flash = {
-						type: 'Warnung',
+						type: 'warning',
 						intro: 'Das Programm ist bereits abgelaufen',
 						message: 'Die Rolle ist damit nicht mehr gültig',
 					};
@@ -113,7 +113,7 @@ module.exports = {
 				} // else if Dates
 				} else {// if reel = aktiviert
 				req.session.flash = {
-					type: 'Warnung',
+					type: 'warning',
 					intro: 'Der QPoint wurde noch nicht einem Programm zugeordnet',
 					message: 'Bitte wenden Sie sich an den Ladeninhaber',
 				};
