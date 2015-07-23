@@ -32,7 +32,7 @@ function checkUser(req, res, next) {
         } else {
             res.locals.apiuser = user._id;
             return next();
-        }
+        } // else
     }); // CUsers findOne
 }; // checkUser
 
@@ -49,10 +49,11 @@ module.exports = {
 	},
 
 	processNewsFeedRequest : function(req, res, next){
-		CUsers.findById(res.locals.apiuser)
-				.populate('particiPrograms.program', 'programStatus')
-                .select('password particiPrograms.program particiPrograms.programStatus')
-                .exec(function(err, checkUser){
+		CUsers
+            .findById(res.locals.apiuser)
+			.populate('particiPrograms.program', 'programStatus')
+            .select('password particiPrograms.program particiPrograms.programStatus')
+            .exec(function(err, checkUser){
         	if (!checkUser) {
                 context = {
                     success: false,
@@ -185,19 +186,20 @@ module.exports = {
 	}, // processNewsFeedRequest
 
     createNewsFeed : function (req, res, next) {
-        CUsers.findById(req.user._id)
-                .populate('customer', '_id company')
-                .select('_id customer customer.company')
-                .exec(function(err, user) {
-            Programs.findOne({'nr' : req.params.nr})
+        CUsers
+            .findById(req.user._id)
+            .populate('customer', '_id company')
+            .select('_id customer customer.company')
+            .exec(function(err, user) {
+            Programs
+                    .findOne({'nr' : req.params.nr})
                     .select('_id programName deadlineSubmit')
                     .exec(function(err, program){
-                NewsFeed.find({'newsStatus' : 'zugeordnet', 'customer' : user.customer._id})
+                NewsFeed
+                        .find({'newsStatus' : 'zugeordnet', 'customer' : user.customer._id})
                         .select('_id newsDeliveryLimit')
                         .exec(function(err, newsFeed){
                     context = {
-                        // navProgram: 'class="active"',
-                        // current: 'myNews',
                         newsFeedId: newsFeed[0]._id,
                         newsDeliveryLimit: newsFeed[0].newsDeliveryLimit,
                         newsBudget: newsFeed[0].newsBudget,
@@ -228,11 +230,10 @@ module.exports = {
             newsfeed.newsDeliveryLimit = req.body.newsDeliveryLimit;
             newsfeed.createdBy = req.body.userId;
             newsfeed.newsStatus = 'erstellt';
-
             newsfeed.save(function(err, newNewsFeed) {
                 if(err) return next(err);
                 res.redirect(303, '/programm');
-            });
+            }); // newsfeed.save
         }); // NewsFeed.FindById
     }, // processCreateNewsFeed
 
@@ -250,8 +251,6 @@ module.exports = {
                 if (err || !program || program.length<1) {
                     console.log('Der User hat noch keine Programme');
                     context = {
-                        // navProgram: 'class="active"',
-                        // current: 'myNews',
                         customerCompany: user.customer.company,
                         programs: {
                             programName: 'Sie haben noch kein Treuepunkte-Programm gestartet',
@@ -261,8 +260,6 @@ module.exports = {
                     return;
                 } else { // if error or !program found
                     context = {
-                        // navProgram: 'class="active"',
-                        // current: 'myNews',
                         customerCompany: user.customer.company,
                         programs: [],
                     };
@@ -300,17 +297,21 @@ module.exports = {
     }, // newsLibrary
 
     newsDetail: function (req, res, next) {
-        NewsFeed.findById(req.params.id)
+        NewsFeed
+                .findById(req.params.id)
                 .populate('assignedProgram', 'programName programStatus')
                 .populate('customer', 'company')
                 .populate('createdBy', 'firstName')
                 .exec(function(err, newsfeed){
             if (err || newsfeed.length == 0) {
-
+                req.session.flash = {
+                    type: 'warning',
+                    intro: 'Hinweis',
+                    message: 'Diese Botschaft können wir derzeit nicht finden',
+                };
+                res.redirect(303, '/news');
             } // no News found
             var context = {
-                // navProgram: 'class="active"',
-                // current: 'myNews',
                 newsId: req.params.id,
                 customerCompany: newsfeed.customer.company,
                 programName: newsfeed.assignedProgram.programName,
@@ -330,17 +331,21 @@ module.exports = {
     }, // newsDetail
 
     newsEdit: function (req, res, next) {
-        NewsFeed.findById(req.params.id)
+        NewsFeed
+                .findById(req.params.id)
                 .populate('assignedProgram', 'programName programStatus')
                 .populate('customer', 'company')
                 .populate('createdBy', 'firstName')
                 .exec(function(err, newsfeed){
             if (err || newsfeed.length == 0) {
-
+                req.session.flash = {
+                    type: 'warning',
+                    intro: 'Hinweis',
+                    message: 'Diese Botschaft können wir derzeit nicht finden',
+                };
+                res.redirect(303, '/news');
             } // no News found
             var context = {
-                // navProgram: 'class="active"',
-                // current: 'myNews',
                 newsFeedId: req.params.id,
                 customerCompany: newsfeed.customer.company,
                 programName: newsfeed.assignedProgram.programName,
@@ -369,7 +374,7 @@ module.exports = {
             newsfeed.save(function(err, newNewsFeed) {
                 if(err) return next(err);
                 res.redirect(303, '/news');
-            });
+            }); // newsfeed.save
         }); // NewsFeed.FindById
     }, // processNewsEdit
 };
