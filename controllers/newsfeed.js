@@ -116,7 +116,7 @@ module.exports = {
                                 .exec(function(err, newsFeed){
                             var newsData = [];
                             var help = {};
-                            if (err || newsFeed.length == 0) {
+                            if (err || newsFeed.length === 0) {
                                 context = {
                                     success: false,
                                     message: 'Es liegen keine Nachrichten vor',
@@ -131,7 +131,7 @@ module.exports = {
                                                 .where({'receivedBy' : res.locals.apiuser })
                                                 .select('_id')
                                                 .exec(function(err, newshistory){
-                                        if (newshistory.length == 0) {// has not been send
+                                        if (newshistory.length === 0) {// has not been send
                                             // collect News Data to send to User
                                             help = {
                                                 newsTitle: newsfeed.newsTitle,
@@ -158,7 +158,7 @@ module.exports = {
                                         if (indexN == newsFeed.length - 1) {
                                             console.log('letzte prüfung');
                                             console.log(newsData);
-                                            if (newsData.length == 0) {
+                                            if (newsData.length === 0) {
                                                 context = {
                                                     success: false,
                                                     message: 'Es liegen keine Nachrichten vor',
