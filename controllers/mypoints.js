@@ -6,24 +6,23 @@ var NewsFeed = require('../models/newsfeed.js');
 var NewsHistory = require('../models/newshistory.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
-var asyncforEach = require('async-foreach').forEach;
 
 // Check whether Program still does have reel with free codes
 checkProgramsReels = function(programId, cb){
 	var progReelStatus = true;
 	Programs.findById(programId)
 			.populate('allocatedReels', 'nr reelStatus')
-			.exec(function(err, program){	    
+			.exec(function(err, program) {	    
 	    program.allocatedReels.forEach(function(reels){
-	        if (reels.reelStatus=='erfüllt') {progReelStatus=false;}
+	      if (reels.reelStatus=='erfüllt') {progReelStatus=false;}
 	    }); // forEach AllocatedReels
 	    if (progReelStatus == false) {
-					program.programStatus = 'inaktiv';
-					program.save(function(err){
-						if (err) { return next(err); }
-					});
+				program.programStatus = 'inaktiv';
+				program.save(function(err){
+					if (err) { return next(err); }
+				}); // program.save
 	    } // end if progReelStatus=false
-    }); // Users find
+    }); // Programs find
 }; // function checkProgramsReels
 
 module.exports = {
@@ -32,7 +31,6 @@ module.exports = {
 		app.get('/meinepunkte/scan', qplib.checkUserRole3above, this.scan);
 		app.post('/meinepunkte/scan', qplib.checkUserRole3above, this.processScan);
 		app.get('/meinepunkte', qplib.checkUserRole3above, this.myPoints);
-		app.get('/meinepunkte2', qplib.checkUserRole3above, this.myPoints2);
 		app.get('/meinepunkte/news', qplib.checkUserRole3above, this.news);
 		app.get('/einzuloesen', qplib.checkUserRole3above, this.toRedeem);
 		app.get('/firma/:nr', qplib.checkUserRole3above, this.customerDetail);
@@ -67,8 +65,7 @@ module.exports = {
 					message: 'Bitte sprechen Sie den Ladeninhaber an.',
 				};
 				res.redirect(303, '/meinepunkte/scan');
-			} else {// if !reel
-				// gefunden
+			} else {// if reel was found
 				if (reel.reelStatus == "aktiviert"){
 					if(new Date()<= reel.assignedProgram.deadlineSubmit){
 						reel.codes.forEach(function(code){
@@ -125,56 +122,7 @@ module.exports = {
 		}); // Reels find
 	}, // processCodeRequest
 
-	myPoints2: function(req, res, next){
-		console.time('myPoints2');
-		var currentUserPrograms = CUsers
-			.findById(req.user._id)
-			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
-			.select('particiPrograms')
-			.exec();
-		currentUserPrograms.then(function(user){
-			var context = {};
-			if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
-				context = { programs: {} };
-			} else { // user already has collected one or more codes
-				context = {
-					programs: user.particiPrograms.map(function(partiProgram){
-						return {
-							nr: partiProgram.program.nr,
-							programName: partiProgram.program.programName,
-							programStatus: partiProgram.program.programStatus,
-							programCustomer: partiProgram.program.customer,
-							goalToHit: partiProgram.program.goalToHit,
-							countPoints: partiProgram.countPoints,
-							countToRedeem: partiProgram.countToRedeem,
-						}; // return
-					}), // map programs
-				}; // define context
-			} // else check whether user has already collected a code
-			return context;
-		}).then(function(context){
-			asyncforEach(context.programs,
-				function(program, index, context){
-					var done = this.async();
-					Customers.findById(program.programCustomer)
-							.select('nr company')
-							.exec(function(err, cust){
-						program.company = cust.company;
-						program.companyNr = cust.nr;
-						done();
-					}); // Customers find
-				}, // function per item
-				function (notaborrted, contextFinal){
-					console.timeEnd('myPoints2');
-					res.render('myPoints/mypoints', context);
-					return;	
-				} // function done
-			)} // asyncforEach
-		); // alldone callback
-	}, // myPoints2
-
 	myPoints: function(req, res, next){
-		console.time('myPoints');
 		CUsers
 			.findById(req.user._id)
 			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
@@ -206,7 +154,6 @@ module.exports = {
 						}); // Customers find
 				}); // forEach context.programs
 			} // else check whether user has already collected a code
-			console.timeEnd('myPoints');
 			res.render('myPoints/mypoints', context);
 		}); // CUSers FindById
 	}, // myPoints
@@ -234,9 +181,8 @@ module.exports = {
 					};
 					context.programs[indexP] = help;
 					indexP++;
-				}
+				} // if
 			}); // user.particiPrograms.forEach
-
 			context.programs.forEach(function(program, indexPP){
 				Customers
 					.findById(program.programCustomer)
@@ -247,7 +193,7 @@ module.exports = {
 					}); // Customers find
 				if (indexPP == context.programs.length - 1) {
 					res.render('myPoints/toRedeem', context);
-				}
+				} // if
 			}); // forEach context.programs
 		}); // CUSers FindById
 	}, // toRedeem
@@ -277,7 +223,6 @@ module.exports = {
 				goalToHit: program.goalToHit,
 				startDate: moment(program.startDate).format("DD.MM.YY HH:mm"),
 				deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY HH:mm"),
-				// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 			}; // context
 			res.render('myPoints/program', context);
 		}); // ProgramsFindOne
@@ -294,24 +239,17 @@ module.exports = {
 				})
 			.select('particiPrograms.program')
 			.exec(function(err, checkUser){
-			console.log('checkUser1');
-			console.log(checkUser);
 			if (err || !checkUser || checkUser.particiPrograms.length == 0) {
-				console.log('Diesen User nicht für offene News gefunden');
 				context = {
 	                message: 'Es liegen keine Nachrichten vor',
 	            };
-	            console.log(context);
 	            res.render('myPoints/news', context);
 			} else {
-				console.log('else');
 				for (var i=0; i<checkUser.particiPrograms.length; i++) {
 					if (checkUser.particiPrograms[i].program) {
 						programData.push(checkUser.particiPrograms[i].program._id);
 					} // if
 				} // for i
-				console.log('programData');
-				console.log(programData);
 				NewsFeed
 					.find({'assignedProgram': { $in: programData}})
 		            .where('newsStatus').equals('erstellt')
@@ -328,12 +266,10 @@ module.exports = {
 			            context = {
 			                message: 'Es liegen keine Nachrichten vor',
 			            };
-			            console.log(context);
 			            res.render('myPoints/news', context);
 			        } else {// if
 			            //Check if News was already sent
 			            newsFeed.forEach(function(newsfeed, indexN){
-			                console.log(newsfeed._id);
 			                NewsHistory.find({'newsFeed' : newsfeed._id})
 			                            .where({'receivedBy' : res.locals.apiuser })
 			                            .select('_id')
@@ -363,13 +299,11 @@ module.exports = {
 			                    } // if
 			                    // if last forEach.loop than finish API with response
 			                    if (indexN == newsFeed.length - 1) {
-			                        console.log(context);
 			                        if (context.length == 0) {
 			                            context = {
 			                                success: false,
 			                                message: 'Es liegen keine Nachrichten vor',
 			                            };
-			                            console.log(context);
 			                            res.render('myPoints/news', context);
 			                        } else {
 			                            context = {
@@ -377,7 +311,6 @@ module.exports = {
 			                                message: 'hat geklappt',
 			                                news: context.news
 			                            };
-			                            console.log(context);
 			                            res.render('myPoints/news', context);
 			                        } // context is not empty
 			                    } // if
@@ -385,7 +318,6 @@ module.exports = {
 			            }); // newsFeed.forEach
 			        } // else
 			    }); // NewsFeed.Find
-
 			} // else checkUser has content
 		}); // CUsers.findById
 		// Find News relating to the Programs
