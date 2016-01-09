@@ -290,19 +290,18 @@ module.exports = {
 			program.startDate = req.body.startDate;
 			program.deadlineSubmit = req.body.deadlineSubmit;
 			program.save(function(err, updatedProgram) {
-                if(err) return next(err);
-                if (req.body.newReelId.length > 0) {
-            	allocateReeltoProgram(req, res, next);
-            } else {
-            	res.redirect(303, '/programm');
-            }
-            }); // program.save
+        if(err) return next(err);
+        if (req.body.newReelId.length > 0) {
+      		allocateReeltoProgram(req, res, next);
+      	} else {
+      		res.redirect(303, '/programm');
+      	}
+      }); // program.save
 		}); // Programs.findById
 	}, // processProgramEdit
 
 	processDetachReel: function(req, res, next){
 		console.log('jetzt Rolle abtrennen');
-		console.log(req.body);
 		detachReelfromProgram(req, res, next);
 		res.redirect(303, '/programm/' + req.body.programNr );
 	}, // processDetachreel
