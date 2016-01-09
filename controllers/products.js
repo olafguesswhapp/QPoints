@@ -11,22 +11,19 @@ module.exports = {
 	},
 
 	create: function(req, res, next) {
-		var context;
 		Products.findOne({})
 				.sort({'nr': -1})
 				.select('nr')
 				.exec(function(err, product){
-			if (!product) {
+			var context =  !product ?
 				context = {
 					navProduct: 'class="active"',
 					productNr : 'PR1001'
-				};
-			} else {
+				} :
 				context = {
 					navProduct: 'class="active"',
 					productNr : product.nr.match(/\D+/)[0] + (parseInt(product.nr.match(/\d+/))+1)
 				};
-			}
 			res.render('products/create', context);
 		}); // Products.findOne
 	},
@@ -49,7 +46,6 @@ module.exports = {
 		Products.findOne({ nr : req.params.nr }, function(err, product) {
 			if(err) return res.redirect(303, '/error');
 			if(!product) return next(); 	// pass this on to 404 handler
-			console.log(product);
 			var context = {
 				navProduct: 'class="active"',
 				nr: product.nr,
