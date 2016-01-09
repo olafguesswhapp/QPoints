@@ -9,9 +9,7 @@ function noCustomerMessage (req, res, next) {
 		intro: 'Sie haben keinen Zugriffsrechte bzw. es gibt nicht den Kunden ',
 		message: ' mit der Kunden-Nr ' + req.params.nr,
 	};
-	var context = {
-	};
-	res.render('customer/detail', context);
+	res.render('customer/detail');
 }; // noCustomerMessage
 
 module.exports = {
@@ -27,17 +25,13 @@ module.exports = {
 
 	register: function(req, res, next) {
 		Customers.findOne({}, {}, {sort: {'nr' : -1}}, function(err, customer){
-			if (!customer) {
-				var context = {neueNr : 'K10001'};
-			} else {
-				var context = {neueNr : customer.nr.match(/\D+/)[0] + (parseInt(customer.nr.match(/\d+/))+1),};
-			}
+			var context = !customer ? {neueNr : 'K10001'} : 
+				{neueNr : customer.nr.match(/\D+/)[0] + (parseInt(customer.nr.match(/\d+/))+1),};
 			res.render('customer/register', context);
 		});	
 	},
 
-	processRegister: function(req, res, next) {
-		// TODO: back-end validation (safety)
+	processRegister: function(req, res, next) { // TODO: back-end validation (safety)
 		var u = new CUsers({
 			username: req.body.email,
 			password: req.body.password,
@@ -68,7 +62,7 @@ module.exports = {
 					zip: req.body.zip,
 					phone: req.body.phone,
 					user: newUser._id,
-				});
+				}); // var c =
 				c.save(function(err, newCustomer){
 					if(err) {
 						return next(err);
@@ -76,11 +70,10 @@ module.exports = {
 					newUser.customer = newCustomer._id;
 					newUser.save();
 					res.redirect(303, '/kunden');					
-					}
-				});
-			}
-		});
-
+					} // else
+				}); // c.save
+			} // else
+		}); // u.save
 	},
 
 	clientPrep: function(req, res, next){
@@ -126,7 +119,7 @@ module.exports = {
 								firstName: user.firstName,
 								lastName: user.lastName,
 								role: user.role,
-							}
+							} // return
 						}), // customer.user.map
 					}; // context
 				res.render('customer/detail', context);	
@@ -159,7 +152,7 @@ module.exports = {
 						phone: customer.phone,
 					}; // context
 				res.render('customer/edit', context);	
-				});
+				}); // CUSers.find
 			} // else
 		}); // Customers.findOne
 	}, // editCustomer
@@ -181,12 +174,12 @@ module.exports = {
 				customer.zip = req.body.zip;
 				customer.phone = req.body.phone;
 				customer.user = req.user._id;
-				console.log(customer);
 				customer.save(function(err, updatedCustomer) {
-	                if(err) return next(err);
-		            res.redirect(303, '/kunden/' + req.body.nr);
-	            }); // customer.save
+	        if(err) return next(err);
+		      res.redirect(303, '/kunden/' + req.body.nr);
+	      }); // customer.save
 			} // else
 		}); // Customers.findById
-	}, // processEditCustomer
+	} // processEditCustomer
+
 };
