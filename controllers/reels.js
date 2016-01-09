@@ -90,6 +90,8 @@ module.exports = {
 			.populate('assignedProgram', 'nr programName')
 			.populate('codes.consumer', 'firstName lastName')
 			.exec( function(err, reel) {
+				console.log(reel._id);
+				console.log(reel.nr);
 			if(err) return res.redirect(303, '/error');
 			// if(!reel) return next(); 	// pass this on to 404 handler
 			var context = {

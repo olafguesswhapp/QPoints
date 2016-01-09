@@ -69,7 +69,7 @@ module.exports = {
 					} else {
 					newUser.customer = newCustomer._id;
 					newUser.save();
-					res.redirect(303, '/kunden');					
+					res.redirect(303, '/programm');					
 					} // else
 				}); // c.save
 			} // else

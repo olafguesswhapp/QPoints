@@ -6,40 +6,29 @@ var NewsFeed = require('../models/newsfeed.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
 
-function allocateReeltoProgram(req, res, next){
-	Reels
-		.findById(req.body.newReelId)
-		.populate('assignedPrograms')
-		.exec(function(err, reel){
-		reel.assignedProgram = req.body.programId;
-		reel.reelStatus = 'aktiviert';
-		reel.save();
-	});
-	Programs.findOne({ _id : req.body.programId }, function(err, program){
-		program.allocatedReels.push(req.body.newReelId);
-		program.programStatus = 'aktiviert';
-		program.save();
-		});
-	console.log(req.body);
-	res.redirect(303, '/programm/' + req.body.programNr);
+function allocateReeltoProgram(newReelId, programId){
+	Reels.update({ _id: newReelId },
+		{ $set: { assignedProgram : programId, reelStatus : 'aktiviert' }},
+		{ multi: false }, function(err, reel) {});
+	Programs.update({ _id : programId },
+		{ $set: { programStatus : 'aktiviert' },
+			$push: { allocatedReels : newReelId} },
+		{ multi: false }, function(err, program){});
 }; // allocateReeltoProgram
 
-function detachReelfromProgram(req, res, next){
-	Reels
-		.findOne({ 'nr' : req.body.reelNr })
-		.populate('assignedPrograms')
-		.exec(function(err, reel){
-		reel.reelStatus = 'zugeordnet';
-		reel.save();
-	});
+function detachReelfromProgram(reelNr, programId){ // 
+	Reels.update({ 'nr' : reelNr },
+		{ $set: { reelStatus :'zugeordnet' },
+			$unset: { assignedProgram : "" }},
+			{ multi: false }, function(err, reel){});
 	Programs
-		.findById(req.body.programId)
+		.findById(programId)
 		.populate('allocatedReels', 'nr') 
 		.select('allocatedReels')
 		.exec(function(err, program) {
 		var executed = false;
 		program.allocatedReels.forEach(function(reel, indexR){
-			if (reel.nr == req.body.reelNr){
+			if (reel.nr == reelNr){
 				console.log(indexR + ' at ' +  reel);
 				program.allocatedReels.splice(indexR, 1);
 				executed = true;
@@ -48,8 +37,8 @@ function detachReelfromProgram(req, res, next){
 			program.save();
 			} // if
 		}); // program.allocatedReels.forEach
-	});	
-}; // allocateReeltoProgram
+	}); // Programs.findById	
+}; // detachReelfromProgram
 
 module.exports = {
 
@@ -60,32 +49,22 @@ module.exports = {
 		app.get('/programm/:nr', qplib.checkUserRole6above, this.programDetail);
 		app.post('/programm/:nr', qplib.checkUserRole6above, this.programDetailProcess);
 		app.get('/programm/edit/:nr', qplib.checkUserRole6above, this.programEdit);
-        app.post('/programm/edit/:nr', qplib.checkUserRole6above, this.processProgramEdit);
-        app.post('/rolletrennen', qplib.checkUserRole6above, this.processDetachReel);
+    app.post('/programm/edit/:nr', qplib.checkUserRole6above, this.processProgramEdit);
+    app.post('/rolletrennen', qplib.checkUserRole6above, this.processDetachReel);
 	},
 
 	// Ein neues Programm anlegen
 	programRegister: function(req,res, next) {
-		// das Programm mit der bisher höchsten Programm-Nr selektieren [A]
 		Programs.findOne({}, {}, {sort: {'nr' : -1}}, function(err, program){
 			CUsers.findById(req.user._id).populate('customer', '_id company').exec(function(err, user){
-				//Quelle alle noch nicht zugeordneten Rollen [B]
 				Reels.find({ 'reelStatus': 'zugeordnet', 'customer': user.customer._id }).populate('assignedPrograms').exec(function(err,reels){
-					// Daten für die Template Erstellung
-					if (!program) {
-						var newProgramNr = 'P100001';
-					} else {
-						var newProgramNr = program.nr.match(/\D+/)[0] + (parseInt(program.nr.match(/\d+/))+1);
-					}
+					var newProgramNr = !program ? 'P100001' :
+						program.nr.match(/\D+/)[0] + (parseInt(program.nr.match(/\d+/))+1);
 					var context = {
-						// die letzte Programm-Nr filetieren (string und nr) und um 1 erhöhen [A]
 						neueNr: newProgramNr,
-						// in Start- und Deadline-Datums das heutige Datum setzen
 						dateDefault: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-						// Kunde welchem das Programm zugeordnet ist
 						customerId: user.customer._id,
 						customerCompany : user.customer.company,
-						// Liste der noch nicht zugeordneten Rollen erstellen [B]
 						reels: reels.map(function(reel){
 							return {
 								reelId: reel._id,
@@ -98,9 +77,7 @@ module.exports = {
 		}); // Programms Find
 	},
 
-	// Programm Anlage umsetzen
-	programRegistertProcess: function(req,res, next){
-		// TODO: back-end validation (safety)
+	programRegistertProcess: function(req,res, next){ // TODO: back-end validation (safety)
 		var c = new Programs({
 			nr: req.body.nr,
 			programStatus: 'erstellt',
@@ -123,11 +100,9 @@ module.exports = {
 		c.save(function(err, program) {
 			if(err) return next(err);
 			if (req.body.allocatedReels!='') {
-				Reels.findOne({ _id: req.body.allocatedReels}, function(err, reel){
-					reel.reelStatus = 'aktiviert';
-					reel.assignedProgram = program._id;
-					reel.save();
-					});
+				Reels.update({ _id: req.body.allocatedReels},
+					{ $set: { reelStatus : 'aktiviert', assignedProgram : program._id }},
+					{ multi: false }, function(err, reel) {});
 				};
 			res.redirect(303, '/programm');
 		});
@@ -141,15 +116,13 @@ module.exports = {
 			Programs.find({customer: user.customer._id})
 				.populate('allocatedReels', 'nr')
 				.exec(function(err, programs) {
+					console.log(programs.length);
 					var context;
-					if (programs) {
+					if (programs.length != 0) {
 						NewsFeed.find({'newsStatus' : 'zugeordnet', 'customer' : user.customer._id})
 								.select('newsStatus customer')
 								.exec(function(err, newsFeed){
-							var hasNews = false;
-							if (newsFeed.length >0) {
-								hasNews=true;
-							}
+							var hasNews = newsFeed.length >0 ? true : false
 							context = {
 								customerCompany: user.customer.company,
 								programs: programs.map(function(program){
@@ -160,7 +133,6 @@ module.exports = {
 										goalToHit: program.goalToHit,
 										startDate: moment(program.startDate).format("DD.MM.YY"),
 										deadlineSubmit: moment(program.deadlineSubmit).format("DD.MM.YY"),
-										// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 										allocatedReels: program.allocatedReels.map(function(reel){
 											return {nr: reel.nr}
 										}), // allocatedReels.map
@@ -169,7 +141,6 @@ module.exports = {
 									} // return for programs map
 								}) // programs map
 							}; // context
-							console.log(context);
 							res.render('programs/library', context);
 						}); // NewsFeed.find
 					} else { // else if no programs
@@ -179,10 +150,11 @@ module.exports = {
 								programName: 'Sie haben noch kein Programm angelegt',
 							} // programs
 						}; // context
+						res.render('programs/library', context);
 					} // else - no program
 			}); // Programs.find
 		}); // CUSers.findById
-	}, // Librars
+	}, // Library
 
 	// Programm Detail-Ansicht
 	programDetail: function(req,res, next){
@@ -191,7 +163,7 @@ module.exports = {
 					.populate('allocatedReels')
 					.populate('createdBy', 'firstName lastName username')
 					.exec(function(err, program) {
-				Reels.find({ 'reelStatus': 'zugeordnet' , 'customer' : user.customer})
+				Reels.find({ 'reelStatus': 'zugeordnet', 'customer' : user.customer})
 					.exec(function(err,reels){
 					if(!program) return next(); 	// pass this on to 404 handler
 					var context = {
@@ -230,7 +202,8 @@ module.exports = {
 
 	// Programm eine neue Rolle zuordnen
 	programDetailProcess: function(req,res, next){
-		allocateReeltoProgram(req, res, next);
+		allocateReeltoProgram(req.body.newReelId, req.body.programId);
+		res.redirect(303, '/programm/' + req.body.programNr);
 	},
 
 	programEdit: function(req, res, next) {
@@ -292,7 +265,8 @@ module.exports = {
 			program.save(function(err, updatedProgram) {
         if(err) return next(err);
         if (req.body.newReelId.length > 0) {
-      		allocateReeltoProgram(req, res, next);
+      		allocateReeltoProgram(req.body.newReelId, req.body.programId);
+      		res.redirect(303, '/programm/' + req.body.programNr);
       	} else {
       		res.redirect(303, '/programm');
       	}
@@ -302,9 +276,8 @@ module.exports = {
 
 	processDetachReel: function(req, res, next){
 		console.log('jetzt Rolle abtrennen');
-		detachReelfromProgram(req, res, next);
+		detachReelfromProgram(req.body.reelNr,req.body.programId);
 		res.redirect(303, '/programm/' + req.body.programNr );
 	}, // processDetachreel
 
 };
-
