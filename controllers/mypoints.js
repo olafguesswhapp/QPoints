@@ -6,6 +6,7 @@ var NewsFeed = require('../models/newsfeed.js');
 var NewsHistory = require('../models/newshistory.js');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
+var asyncforEach = require('async-foreach').forEach;
 
 // Check whether Program still does have reel with free codes
 checkProgramsReels = function(programId, cb){
@@ -31,6 +32,7 @@ module.exports = {
 		app.get('/meinepunkte/scan', qplib.checkUserRole3above, this.scan);
 		app.post('/meinepunkte/scan', qplib.checkUserRole3above, this.processScan);
 		app.get('/meinepunkte', qplib.checkUserRole3above, this.myPoints);
+		app.get('/meinepunkte2', qplib.checkUserRole3above, this.myPoints2);
 		app.get('/meinepunkte/news', qplib.checkUserRole3above, this.news);
 		app.get('/einzuloesen', qplib.checkUserRole3above, this.toRedeem);
 		app.get('/firma/:nr', qplib.checkUserRole3above, this.customerDetail);
@@ -123,8 +125,56 @@ module.exports = {
 		}); // Reels find
 	}, // processCodeRequest
 
+	myPoints2: function(req, res, next){
+		console.time('myPoints2');
+		var currentUserPrograms = CUsers
+			.findById(req.user._id)
+			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
+			.select('particiPrograms')
+			.exec();
+		currentUserPrograms.then(function(user){
+			var context = {};
+			if (typeof user.particiPrograms === 'undefined'){ // if user has not yet collected any code
+				context = { programs: {} };
+			} else { // user already has collected one or more codes
+				context = {
+					programs: user.particiPrograms.map(function(partiProgram){
+						return {
+							nr: partiProgram.program.nr,
+							programName: partiProgram.program.programName,
+							programStatus: partiProgram.program.programStatus,
+							programCustomer: partiProgram.program.customer,
+							goalToHit: partiProgram.program.goalToHit,
+							countPoints: partiProgram.countPoints,
+							countToRedeem: partiProgram.countToRedeem,
+						}; // return
+					}), // map programs
+				}; // define context
+			} // else check whether user has already collected a code
+			return context;
+		}).then(function(context){
+			asyncforEach(context.programs,
+				function(program, index, context){
+					var done = this.async();
+					Customers.findById(program.programCustomer)
+							.select('nr company')
+							.exec(function(err, cust){
+						program.company = cust.company;
+						program.companyNr = cust.nr;
+						done();
+					}); // Customers find
+				}, // function per item
+				function (notaborrted, contextFinal){
+					console.timeEnd('myPoints2');
+					res.render('myPoints/mypoints', context);
+					return;	
+				} // function done
+			)} // asyncforEach
+		); // alldone callback
+	}, // myPoints2
+
 	myPoints: function(req, res, next){
-		console.log(res.locals);
+		console.time('myPoints');
 		CUsers
 			.findById(req.user._id)
 			.populate('particiPrograms.program', 'nr programName programStatus goalToHit customer')
@@ -156,7 +206,7 @@ module.exports = {
 						}); // Customers find
 				}); // forEach context.programs
 			} // else check whether user has already collected a code
-			console.log(context);
+			console.timeEnd('myPoints');
 			res.render('myPoints/mypoints', context);
 		}); // CUSers FindById
 	}, // myPoints
@@ -230,7 +280,6 @@ module.exports = {
 				// deadlineScan: moment(program.deadlineScan).format("DD.MM.YY HH:mm"),
 			}; // context
 			res.render('myPoints/program', context);
-
 		}); // ProgramsFindOne
 	}, // programDetail
 

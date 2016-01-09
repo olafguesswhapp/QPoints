@@ -17,6 +17,7 @@ ssl/
 # Backupfiles
 *~
 .DS_Store
+.com.apple.timemachine.supported
 
 # Logs
 logs

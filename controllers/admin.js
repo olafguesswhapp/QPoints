@@ -37,11 +37,6 @@ module.exports = {
 			.exec(function(err, users) {
 			var context = {
 				users: users.map(function(user){
-					if (user.customer) {
-						help = user.customer.company;
-					} else {
-						help = '';
-					} // else
 					return {
 						firstName: user.firstName,
 						lastName: user.lastName,
@@ -49,11 +44,10 @@ module.exports = {
 						gender: user.gender,
 						role: user.role,
 						created: moment(user.created).format("DD.MM.YY"),
-						company: help,
+						company: user.customer ? user.customer.company : '',
 					} // return
 				}) // users map
 			}; // context
-			console.log(context);
 			res.render('admin/user', context);
 		}); // CUsers.find
 	}, // userLibrary
@@ -83,9 +77,8 @@ module.exports = {
 						} // return for programs map
 					}) // programs map
 				}; // context
-				console.log(context);
 				res.render('admin/programs', context);
 		}); // Programs.find
 	}, // programLibrary
 
-}; // module.exports
+}; // module.exports	
