@@ -93,12 +93,17 @@ module.exports = {
 
 	detail: function(req, res, next) {
 		Customers.findOne({ nr : req.params.nr })
-				.where({ user: req.user._id})
-				.populate('user')
+				// .where({ user: req.user._id})
+				.populate('user', '_id username')
 				.exec(function(err, customer) {
+			console.log('_id found in Obj? ' + customer.user.filter(function(userObj){return JSON.stringify(userObj._id) == JSON.stringify(req.user._id);}).length);
 			if(err || !customer) {
+				console.log(err);
 				noCustomerMessage(req, res, next);
 				return;
+			} else if (res.locals.roleLevel < 10 && customer.user.filter(function(userObj){return JSON.stringify(userObj._id) == JSON.stringify(req.user._id);}).length == 0) {
+				console.log('User not allowed - ' + req.user._id + ' ' + res.locals.roleLevel+ ' ' + customer.user._id);
+				noCustomerMessage(req, res, next);
 			} else {
 				CUsers.find({}, function(err, users){
 					var context = {
