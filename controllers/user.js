@@ -3,22 +3,24 @@ var Customers = require('../models/customers.js');
 var passport = require('passport');
 var moment = require('moment');
 var qplib = require('../lib/qpointlib.js');
-// var passport = require('passport');
 
-function detachUserfromCustomer(req, res, next){
+function detachUserfromCustomer(username, customerNr){
 	CUsers
-		.findOne({ 'username' : req.body.username })
+		.findOne({ 'username' : username })
 		.select('_id customer role')
 		.exec(function(err, user){
 		if (!user || err) {
-			// HIER FLASH MESSAGE EINSETZEN
-			return next;
+			req.session.flash = {
+				type: 'warning',
+				intro: 'Der Username "' + username + '" ist nicht registriert.',
+				message: err.errors.username.message,
+			};
 		} else {
 			user.role = 'consumer';
 			user.customer = undefined;
 			user.save();
 			Customers
-				.findOne({ 'nr' : req.body.customerNr})
+				.findOne({ 'nr' : customerNr})
 				.select('user')
 				.exec(function(err, customer) {
 				var executed = false;
@@ -33,8 +35,8 @@ function detachUserfromCustomer(req, res, next){
 					} // if
 				}); // customer.user.forEach
 			});	// Customers.findOne
-		}
-	});
+		} // else
+	}); // CUsers.findOne
 }; // detachUserToProgram
 
 module.exports = {
@@ -55,17 +57,21 @@ module.exports = {
 
 	// Neuen User anlegen - Voraussetzung = als Kunde angemeldet
 	userRegister: function(req, res, next){
-		if (!req.user) return next();
-		if (req.user.role != 'customer' && req.user.role != 'admin') return next();
-		Customers.findById(req.user.customer, function(err, customer){
-			var context = {
-				actualCustomerId: customer._id,
-				customerCompany: customer.company,
-				actualUserName: req.user.username,
-				customerName: customer.firstName + " " + customer.lastName,
-			};
-		res.render('user/register', context);
-		});		
+		if (!req.user) {
+			res.redirect(303, '/');
+		} else if (req.user.role != 'customer' && req.user.role != 'admin') {
+			res.redirect(303, '/');
+		} else {
+			Customers.findById(req.user.customer, function(err, customer){
+				var context = {
+					actualCustomerId: customer._id,
+					customerCompany: customer.company,
+					actualUserName: req.user.username,
+					customerName: customer.firstName + " " + customer.lastName,
+				}; // var context
+			res.render('user/register', context);
+			}); // Custormers.findById
+		} // else		
 	},
 
 	processUserRegister: function(req, res, next){
@@ -86,7 +92,7 @@ module.exports = {
 					intro: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
 					message: err.errors.username.message,
 				};
-				res.redirect(303, 'user/anlegen');
+				res.redirect(303, '/user/anlegen');
 			} else {
 				Customers.findById(req.body.customer, function(err, customer){
 					customer.user.push(newUser._id);
@@ -98,7 +104,6 @@ module.exports = {
 	},
 
 	userLibrary: function(req, res, next){
-		console.log(res.locals);
 		if (!req.user) return next();
 		CUsers.find({ customer : req.user.customer}, function(err, users) {
 			var context = {
@@ -167,7 +172,7 @@ module.exports = {
 					}
 				}
 				var lastPage = req.session.lastPage;
-				req.session.lastPage='';
+				req.session.lastPage='/';
 				return res.redirect(lastPage);
 			});
 		})(req, res, next);
@@ -186,7 +191,12 @@ module.exports = {
 			.exec(function(err, user) {
 			if (err || !user) {
 				console.log('Could not find a user with that username - meaning user email');
-				return next (err);		
+				req.session.flash = {
+					type: 'warning',
+					intro: 'Der Username "' + req.params.username + '" ist nicht angelegt.',
+					message: err,
+				};
+				res.redirect(303, '/user');
 			} else { // error or no user found
 				context = {
 					username: user.username,
@@ -208,7 +218,12 @@ module.exports = {
 			.exec(function(err, user) {
 			if (err || !user) {
 				console.log('Could not find a user with that username - meaning user email');
-				return next (err);		
+				req.session.flash = {
+					type: 'warning',
+					intro: 'Der Username "' + req.params.username + '" ist nicht angelegt.',
+					message: err,
+				};
+				res.redirect(303, '/user');
 			} else { // error or no user found
 				context = {
 					userId: user._id,
@@ -228,15 +243,20 @@ module.exports = {
 		CUsers.findById(req.body.userId, function(err, user) {
 			if (err || !user) {
 				console.log('Irgendwas stimmt hier bei processUserEdit nicht');
+				req.session.flash = {
+					type: 'warning',
+					intro: 'Der Username "' + req.params.username + '" ist nicht angelegt.',
+					message: err,
+				};
 				return res.redirect('/user');
 			} else {
 				user.firstName = req.body.firstName;
 				user.lastName = req.body.lastName;
 				user.gender = req.body.gender
 				user.save(function(err, updatedUser) {
-	                if(err) return next(err);
-		            res.redirect(303, '/user/' + req.body.username);
-	            }); // customer.save
+          if(err) return next(err);
+          res.redirect(303, '/user/' + req.body.username);
+        }); // customer.save
 			} // else			
 		}); // CUsers.findById
 	}, // processUserEdit
@@ -244,7 +264,7 @@ module.exports = {
 	processDetachUser: function(req, res, next){
 		console.log('jetzt User von Kunde trennen');
 		console.log(req.body);
-		detachUserfromCustomer(req, res, next);
+		detachUserfromCustomer(req.body.username, req.body.customerNr);
 		res.redirect(303, '/user' );
 	}, // processDetachUser
 

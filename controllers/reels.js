@@ -14,13 +14,8 @@ module.exports = {
 	// Einzelne Reel erfassen
 	reelEdit: function(req,res){
 		Reels.findOne({}, {}, {sort: {'nr' : -1}}, function(err, reel){
-			if (!reel) {
-				var context = {neueNr : 'R1000001'};
-			} else {
-				var context = {
-					neueNr : reel.nr.match(/\D+/)[0] + (parseInt(reel.nr.match(/\d+/))+1),
-				};
-			}
+			var context = !reel ? {neueNr : 'R1000001'} :
+				{ neueNr : reel.nr.match(/\D+/)[0] + (parseInt(reel.nr.match(/\d+/))+1) };
 			res.render('reels/edit', context);
 		});
 	}, 
