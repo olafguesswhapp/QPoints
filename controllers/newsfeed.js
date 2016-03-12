@@ -39,7 +39,7 @@ function checkUser(req, res, next) {
 module.exports = {
 
 	registerRoutes: function(app) {
-		app.post('/apinewsfeed', checkUser, this.processNewsFeedRequest);
+		app.post('/api/v1/newsfeed', checkUser, this.processNewsFeedRequest);
         app.get('/news/anlegen/:nr', qplib.checkUserRole6above, this.createNewsFeed);
         app.post('/news/anlegen/:nr', qplib.checkUserRole6above, this.processCreateNewsFeed);
         app.get('/news', qplib.checkUserRole6above, this.newsLibrary);

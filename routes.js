@@ -15,6 +15,7 @@ var admin = require('./controllers/admin.js');
 
 module.exports = function(app) {
 
+	app.use('/api/v2', require('./controllers/api2'));
 	mainController.registerRoutes(app); // main Controller
 	apiController.registerRoutes(app); // api Controller
 	newsFeedController.registerRoutes(app); // news Feed Controller

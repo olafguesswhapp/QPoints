@@ -12,7 +12,7 @@ var methodOverride = require('method-override');
 var credentials = require('./credentials.js');
 var qplib = require('./lib/qpointlib.js');
 var auth = require('./lib/auth.js')(app, {
-    successRedirect: '/login',
+    successRedirect: '/',
     failureRedirect: 'unauthorized',
 });
 var mongoose = require('mongoose');
@@ -101,6 +101,18 @@ if (app.get('env') == 'development') {
     app.set('port', process.env.PORT || 61099); // Uberspace
 }
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+};
+
 // MIDDLEWARE
 // ==========
 app.use(cookieParser(credentials.cookieSecret));
@@ -115,6 +127,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(allowCrossDomain);
 // flash message middleware
 app.use(function(req, res, next){
     // if there's a flash message, transfer

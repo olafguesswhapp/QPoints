@@ -7,7 +7,14 @@ var moment = require('moment');
 
 function publish(context, statusCode, req, res){
     console.log(context);
-    res.status(statusCode).json(context);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, ORIGIN');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if ('OPTIONS' == req.method) {
+      res.send(200);
+    } else {
+      res.status(statusCode).json(context);
+    }
 }; // pubilsh
 
 function checkUser(req, res, next) {
@@ -85,11 +92,11 @@ function collectProgramData (programId, programCount, programHit, nrOfParticiPro
 
 module.exports = {
 	registerRoutes: function(app) {
-		app.post('/apicodecheck', checkUser, this.processApiCodeScan);
-        app.post('/apicoderedeem', checkUser, this.processApiCodeRedeem);
-        app.post('/apicreateaccount', this.processApiCreateAccount);
-        app.post('/apicheckuser', this.processApiCheckUserAccount);
-        app.post('/apiupdateuser', checkUser, this.processApiUpdateUser);
+		app.post('/api/v1/codecheck', checkUser, this.processApiCodeScan);
+        app.post('/api/v1/coderedeem', checkUser, this.processApiCodeRedeem);
+        app.post('/api/v1/createaccount', this.processApiCreateAccount);
+        app.post('/api/v1/checkuser', this.processApiCheckUserAccount);
+        app.post('/api/v1/updateuser', checkUser, this.processApiUpdateUser);
 	}, // module.exports
 
     processApiUpdateUser: function(req, res, next) {
@@ -296,9 +303,9 @@ module.exports = {
                                         reel.reelStatus='erfüllt';
                                         qplib.checkProgramsReels(reel.assignedProgram._id);
                                     } // if activatedCodes = quantityCodes
-                                    reel.save(function(err) {
-                                        if (err) { return next(err); }
-                                    });
+                                    // reel.save(function(err) {
+                                    //     if (err) { return next(err); }
+                                    // });
                                     qplib.updateUserStats(APIUser, reel.assignedProgram._id, reel.assignedProgram.goalToHit);
                                     context = {
                                         success: true,
@@ -446,7 +453,7 @@ function updateUserStats(programId, codesArray, req, res){
                 console.log('gefunden');
                 correctUser = true;
                 program.countToRedeem--; // countToRedeem Stats decrease (since codes are beeing redeemed)
-                program.countCashed++;
+                // program.countCashed++;
             } // found redeemed Program
         }); // particiPrograms.forEach
         cUser.save(function(err){
