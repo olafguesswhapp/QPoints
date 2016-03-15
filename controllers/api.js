@@ -42,60 +42,11 @@ function checkUser(req, res, next) {
     }); // CUsers findOne
 }; // checkUser
 
-function buildResponseArray (user, req, res){
-        console.log(user);
-        var programData=[];
-        var context = {};
-        user.particiPrograms.forEach(function(particiProgram, index){
-            collectProgramData (particiProgram.program, particiProgram.countPoints, particiProgram.countToRedeem, user.particiPrograms.length, index, programData, user.gender, req, res);
-        });// user.particiPrograms.forEach
-        return programData;
-    }; // function buildResponseArray2
-
-function collectProgramData (programId, programCount, programHit, nrOfParticiPrograms, index, programData, gender, req, res){
-    Programs
-            .findById(programId)
-            .populate('customer')
-            .exec(function(err, usersProgram){
-        context = {
-            programNr: usersProgram.nr,
-            programName: usersProgram.programName,
-            programCompany: usersProgram.customer.company,
-            companyCity: usersProgram.customer.city,
-            address1: usersProgram.customer.address1,
-            address2: usersProgram.customer.address2,
-            zip: usersProgram.customer.zip,
-            city: usersProgram.customer.city,
-            phone: usersProgram.customer.phone,
-            programGoal: usersProgram.goalToHit, 
-            myCount: programCount,
-            ProgramsFinished: programHit,
-            programStatus: usersProgram.programStatus,
-            programStartDate: usersProgram.startDate,
-            programEndDate: usersProgram.deadlineSubmit,
-            programKey: usersProgram.programKey,
-        }; // context
-        programData.push(context);
-        if (index == nrOfParticiPrograms -1 ){
-            context = {
-                success: true,
-                message : "User-Email und Passwort sind verifiziert. Willkommen",
-                gender: gender,
-                programData: programData,
-            }; // context
-            statusCode = 200;
-            publish(context, statusCode, req, res)
-            console.log('erfolgreich angemeldet');
-        }// if last forEach
-    }); // Programs.FindById
-}; // collectProgramData
-
 module.exports = {
 	registerRoutes: function(app) {
 		app.post('/api/v1/codecheck', checkUser, this.processApiCodeScan);
         app.post('/api/v1/coderedeem', checkUser, this.processApiCodeRedeem);
         app.post('/api/v1/createaccount', this.processApiCreateAccount);
-        app.post('/api/v1/checkuser', this.processApiCheckUserAccount);
         app.post('/api/v1/updateuser', checkUser, this.processApiUpdateUser);
 	}, // module.exports
 
@@ -158,72 +109,6 @@ module.exports = {
             } // if user was found
         }); // CUsers.fineOne
     }, // processApiUpdateUser
-
-    processApiCheckUserAccount: function(req, res, next) {
-        console.log('API check Account startet hier');
-        console.log(req.body);
-        // User identifizieren
-        CUsers
-            .findOne({'username' : req.body.userEmail})
-            .populate('particiPrograms')
-            .select('password particiPrograms gender')
-            .exec(function(err, checkUser){
-            if(err) {
-                context = {
-                    success: false,
-                    message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
-                };
-                statusCode = 400;
-                publish(context, statusCode, req, res);
-            } else if (!checkUser) {
-                context = {
-                    success: false,
-                    message: "Wir konnten Sie als User nicht finden. Bitte verwenden Sie Ihre Email als User oder melden Sie sich neu an",
-                };
-                statusCode = 400;
-                publish(context, statusCode, req, res);
-            } else {
-                checkUser.comparePassword(req.body.password, function(err, isMatch){
-                    if (err) {
-                        console.log(err);
-                        context = {
-                            success: false,
-                            message : "Bitte melden Sie sich als User bei QPoints an - via App oder www.qpoints.net"
-                        };
-                        statusCode = 400;
-                        publish(context, statusCode, req, res);
-                        return;
-                    } else if (!isMatch) {
-                        context = {
-                            success: false,
-                            message : "Das übermittelte Passwort stimmt nicht"
-                        };
-                        statusCode = 400;
-                        publish(context, statusCode, req, res);
-                        return;
-                    } else {
-                        if (checkUser.particiPrograms.length == 0) {
-                            context = {
-                                success: true,
-                                message : "User-Email und Passwort sind verifiziert. Willkommen",
-                                gender: checkUser.gender,
-                            }; // context
-                            if (!context.gender) {
-                                context.gender = 0;
-                            }
-                            statusCode = 200;
-                            publish(context, statusCode, req, res)
-                            console.log('erfolgreich angemeldet - noch keine Programm-Daten vorhanden');
-                            return;
-                        } else {
-                            buildResponseArray(checkUser, req, res);
-                            return;
-                        } // else
-                    } // else
-                }); // checkUser.comparePassword
-            } // else
-        }); // CUsers findOne
-    }, // processApiCheckUserAccount
 
     processApiCreateAccount: function(req, res, next) {
         CUsers.findOne({'username' : req.body.userEmail}, function(err, user){

@@ -20,18 +20,21 @@ function apiGetUserData(req, res, next) {
 		.populate('particiPrograms.program', '-_id nr programName customer goalToHit programStatus startDate deadlineSubmit programKey')
 		.exec(function(err, user){
     if(err || !user) {
-    	return res.status(401).end();
+    	return res.status(401).json({message: 'Invalid Authorization'}).end();
     } else if (user.particiPrograms.length === 0){
     	res.json({
     		success: true,
     		message : "User-Email und Passwort sind verifiziert. Willkommen",
     		gender: user.gender
     	});
+    	return;
     }
     var userData = user.particiPrograms;
     return userData;
    }).then(function(userData){
-   		updateCustomerData(userData, res);
+   		if (userData.particiPrograms.length !== 0) {
+   			updateCustomerData(userData, res);
+   		} else { return; }
 	   });
 };
 
@@ -80,8 +83,7 @@ function apiLogin(req, res, next) {
     var error = err || info;
     if (error) {
       return res.status(401).json(error);
-    }
-    if (!user) {
+    } else if (!user) {
       return res.status(404).json({message: 'Something went wrong, please try again.'});
     }
     var token = auth.signToken(user._id, user.role);
