@@ -12,9 +12,38 @@ var router = express.Router();
 
 router.post('/login', apiLogin);
 router.get('/user',  auth.isAuthenticated(), apiGetUserData);
+router.post('/user',  auth.isAuthenticated(), apiUpdateUserProfile);
 router.post('/code',  auth.isAuthenticated(), apiCheckCode);
 
 module.exports = router;
+
+function apiUpdateUserProfile(req, res, next) {
+	CUsers.findById( req.user._id, function (err, userToFind){
+		if(err || !userToFind) {
+      return res.status(404).json({
+      	success: false,
+      	message : "Bitte melden Sie sich als User bei QPoints an"
+      });
+    } else {
+    	userToFind.password = req.body.passwordNew;
+    	userToFind.gender = req.body.gender;
+    	userToFind.save(function(err, newUser){
+    		if (err) {
+    			console.log(err);
+    			return res.status(500).json({
+		      	success: false,
+		      	message : "Der User konnte nicht gespeichert werden"
+		      });
+    		} else {
+    			return res.json({
+		      	success: true,
+		      	message : "Danke, das User Profil wurde upgedated"
+		      });
+    		}
+    	});
+    }
+	});
+};
 
 function apiCheckCode(req, res, next) {
 	Reels
