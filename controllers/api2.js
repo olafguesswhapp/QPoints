@@ -5,13 +5,87 @@ var passport = require('passport');
 var auth = require('../lib/auth.services');
 var CUsers = require('../models/cusers.js');
 var Customers = require('../models/customers.js');
+var Reels = require('../models/reels.js');
+var qplib = require('../lib/qpointlib.js');
 
 var router = express.Router();
 
 router.post('/login', apiLogin);
-router.get('/user',  auth.isAuthenticated(), apiGetUserData); //
+router.get('/user',  auth.isAuthenticated(), apiGetUserData);
+router.post('/code',  auth.isAuthenticated(), apiCheckCode);
 
 module.exports = router;
+
+function apiCheckCode(req, res, next) {
+	Reels
+    .findOne({'codes.rCode' : req.body.scannedCode})
+    .populate('assignedProgram', '_id nr programName startDate deadlineSubmit goalToHit programStatus programKey')
+    .populate('customer')
+    .exec(function(err, reel) {
+    	if (err || !reel) {
+    		return res.status(404).json({ success: false, message: 'Dieser QPoint ist nicht vorhanden.' });
+    	} else if (reel.reelStatus !== "aktiviert") {
+    		return res.status(404).json({
+    			success: false,
+    			message: 'Der QPoint wurde noch nicht einem Programm zugeordnet, Bitte wenden Sie sich an den Ladeninhaber.'
+    		});
+    	} else if ( reel.assignedProgram.deadlineSubmit <= new Date() ) {
+    		return res.status(404).json({
+    			success: false,
+    			message: 'Das Programm ist bereits abgelaufen. Der QPoint ist damit nicht mehr gültig.'
+    		});
+    	}
+    	var indexFoundCode;
+    	var foundCode = reel.codes.filter(function(code, index){
+    		if (code.rCode === req.body.scannedCode) {
+    			indexFoundCode = index;
+    			return true;
+    		}
+    	})[0];
+    	if (foundCode.cStatus !== 0) {
+    		return res.status(403).json({
+    			success: false,
+    			message: `Der QPoint ${req.body.scannedCode} der Rolle ${reel.nr} wurde bereits verwendet.`
+    		});
+    	} else if (foundCode.cStatus === 0) {
+    		reel.codes[indexFoundCode].cStatus = 1;
+        reel.codes[indexFoundCode].consumer = req.user._id;
+        reel.codes[indexFoundCode].updated = new Date();
+        reel.activatedCodes++;
+        if (reel.activatedCodes==reel.quantityCodes){
+            reel.reelStatus='erfüllt';
+            qplib.checkProgramsReels(reel.assignedProgram._id);
+        } // if activatedCodes = quantityCodes
+        // comment out for testing purposes *********************************
+        reel.save(function(err) {
+          if (err) { return next(err); }
+        });
+        // comment out for testing purposes *********************************
+        qplib.updateUserStats(req.user._id, reel.assignedProgram._id, reel.assignedProgram.goalToHit);
+    		res.json({
+	    		success: true,
+	    		message : `Wohl verdient. Der QPoint gehört zum Program ${reel.assignedProgram.programName} (Rolle ${reel.nr})"`,
+	    		name: reel.assignedProgram.programName,
+          nr: reel.assignedProgram.nr,
+          goalToHit: reel.assignedProgram.goalToHit,
+          programStatus: reel.assignedProgram.programStatus,
+          startDate: reel.assignedProgram.startDate,
+          endDate: reel.assignedProgram.deadlineSubmit,
+          company: reel.customer.company,
+          address1: reel.customer.address1,
+          address2: reel.customer.address2,
+          city: reel.customer.city,
+          zip: reel.customer.zip,
+          country: reel.customer.country,
+          phone: reel.customer.phone,
+          key: reel.assignedProgram.programKey, // Beispiel Code = 2T@
+	    	});
+	    	return;
+    	}
+    	console.log('something went wrong');
+    	console.log(foundCode);
+    }); // Reels.findOne
+};
 
 function apiGetUserData(req, res, next) {
 	CUsers
