@@ -18,16 +18,16 @@ router.post('/code',  auth.isAuthenticated(), apiCheckCode);
 module.exports = router;
 
 function apiUpdateUserProfile(req, res, next) {
-	CUsers.findById( req.user._id, function (err, userToFind){
-		if(err || !userToFind) {
+	CUsers.findById( req.user._id, function (err, userToUpdate){
+		if(err || !userToUpdate) {
       return res.status(404).json({
       	success: false,
       	message : "Bitte melden Sie sich als User bei QPoints an"
       });
     } else {
-    	userToFind.password = req.body.passwordNew;
-    	userToFind.gender = req.body.gender;
-    	userToFind.save(function(err, newUser){
+    	if (req.body.passwordNew){userToUpdate.password = req.body.passwordNew}
+    	userToUpdate.gender = req.body.gender;
+    	userToUpdate.save(function(err, newUser){
     		if (err) {
     			console.log(err);
     			return res.status(500).json({
