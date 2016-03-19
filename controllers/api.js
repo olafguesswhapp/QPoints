@@ -45,48 +45,7 @@ function checkUser(req, res, next) {
 module.exports = {
 	registerRoutes: function(app) {
         app.post('/api/v1/coderedeem', checkUser, this.processApiCodeRedeem);
-        app.post('/api/v1/createaccount', this.processApiCreateAccount);
 	}, // module.exports
-
-    processApiCreateAccount: function(req, res, next) {
-        CUsers.findOne({'username' : req.body.userEmail}, function(err, user){
-            if (!user) {
-                console.log("User wurde bisher nicht verwendet");
-                var user = new CUsers ({
-                    username: req.body.userEmail,
-                    password: req.body.password,
-                    created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-                    role: 'consumer',
-                }); // 
-                user.save(function(err, newUser){
-                    console.log(newUser);
-                    if(err) {
-                        context = {
-                            success: false,
-                            message: 'Der Username "' + err.errors.username.value + '" muss einmalig sein.',
-                        };
-                        statusCode = 400;
-                        publish(context, statusCode, req, res);
-                    } else {
-                        context = {
-                            success: true,
-                            message : "Willkommen bei QPoints - vielen Dank für das Einrichten eines neuen Kontos",
-                        }; // context
-                        statusCode = 200;
-                        publish(context, statusCode, req, res)
-                        console.log('erfolgreich angelegt');
-                    } // else
-                }); // user.save
-            } else {// if user nocht found in CUsers
-                context = {
-                    success: false,
-                    message: 'Der Username "' + user.username + '" wird bereits verwendet.',
-                }; // context
-                statusCode = 400;
-                publish(context, statusCode, req, res);
-            } // else
-        }); // CUsers.findOne
-    }, // processApiCreateAccount
 
     processApiCodeRedeem: function (req, res, next){
         // APIUser = res.locals.apiuser; var indexEditedCodes = req.body.programGoal; var reelIdArray = [];

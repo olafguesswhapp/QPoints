@@ -3,6 +3,7 @@
 var express = require('express');
 var passport = require('passport');
 var auth = require('../lib/auth.services');
+var moment = require('moment');
 var CUsers = require('../models/cusers.js');
 var Customers = require('../models/customers.js');
 var Reels = require('../models/reels.js');
@@ -13,9 +14,46 @@ var router = express.Router();
 router.post('/login', apiLogin);
 router.get('/user',  auth.isAuthenticated(), apiGetUserData);
 router.post('/user',  auth.isAuthenticated(), apiUpdateUserProfile);
+router.put('/user', apiCreateUserAccount);
 router.post('/code',  auth.isAuthenticated(), apiCheckCode);
 
 module.exports = router;
+
+function apiCreateUserAccount(req, res, next) {
+	CUsers.findOne({'username' : req.body.userEmail}, function(err, user) {
+		if (user) {
+			return res.status(403).json({
+      	success: false,
+      	message : `Ein User mit der Email ${req.body.userEmail} wurde bereits angemeldet.`
+      });
+		} else if (err) {
+			return res.status(500).json({
+      	success: false,
+      	message : "Bitte entschuldigen Sie, es ist ein Fehler aufgetreten"
+      });
+		}
+		var user = new CUsers ({
+	    username: req.body.userEmail,
+	    password: req.body.password,
+	    created: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+	    role: 'consumer',
+		});
+		user.save(function(err, newUser){
+			if (err) {
+				console.log(err);
+				return res.status(403).json({
+	      	success: false,
+	      	message : `Ein User mit der Email ${req.body.userEmail} kann nicht angemeldet werden.`
+	      });
+			} else {
+				return res.json({
+	      	success: true,
+	      	message : "Danke, der neue User wurde angemeldet."
+	      });
+			}
+		});
+	});
+};
 
 function apiUpdateUserProfile(req, res, next) {
 	CUsers.findById( req.user._id, function (err, userToUpdate){
