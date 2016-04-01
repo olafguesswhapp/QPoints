@@ -1,6 +1,5 @@
 
 var mainController = require('./controllers/main.js');
-var apiController = require('./controllers/api.js');
 var customerController = require('./controllers/customer.js');
 var userController = require('./controllers/user.js');
 var productsController = require('./controllers/products.js');
@@ -17,7 +16,6 @@ module.exports = function(app) {
 
 	app.use('/api/v2', require('./controllers/api2'));
 	mainController.registerRoutes(app); // main Controller
-	apiController.registerRoutes(app); // api Controller
 	newsFeedController.registerRoutes(app); // news Feed Controller
 	customerController.registerRoutes(app); // customer routes
 	userController.registerRoutes(app); // user routes

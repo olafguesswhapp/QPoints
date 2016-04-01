@@ -6,6 +6,7 @@ var auth = require('../lib/auth.services');
 var moment = require('moment');
 var CUsers = require('../models/cusers.js');
 var Customers = require('../models/customers.js');
+var Programs = require('../models/programs.js');
 var Reels = require('../models/reels.js');
 var qplib = require('../lib/qpointlib.js');
 
@@ -16,8 +17,144 @@ router.get('/user',  auth.isAuthenticated(), apiGetUserData);
 router.post('/user',  auth.isAuthenticated(), apiUpdateUserProfile);
 router.put('/user', apiCreateUserAccount);
 router.post('/code',  auth.isAuthenticated(), apiCheckCode);
+router.post('/redeem',  auth.isAuthenticated(), apiRedeem);
 
 module.exports = router;
+
+function apiRedeem(req, res, next) {
+	var counter =  req.body.programGoal;
+	var codesArray = [];
+	var currentStatus = false;
+	Programs.findOne({'nr' : req.body.programNr}, function(err, redeemProgram){
+		if (err || !redeemProgram || !redeemProgram.allocatedReels) {
+			return res.status(404).json({
+      	success: false,
+      	message : `Dieses Sammelpunkte-Programm hat derzeit keine einzulösende Treuepunkte.`
+      });
+		} else if (req.body.programGoal != redeemProgram.goalToHit) {
+			return res.status(403).json({
+      	success: false,
+      	message : `Bitte sprechen Sie den Ladeninhaber an wieviele Zielpunkte zu sammeln sind.`,
+      	programName: redeemProgram.programName,
+        requestProgramGoal: req.body.programGoal,
+        programProgramGoal: redeemProgram.goalToHit,
+      });
+		} else {
+			Reels
+        .find({'assignedProgram' : redeemProgram._id })
+        .select('_id codes.rCode codes.cStatus codes.consumer')
+        .exec(function(err, reels) {
+        	reels.forEach(function(reel, index) {
+        		let codesOfReel = reel.codes
+        			.map(function(reelCode, indexR){
+        				var reelCodeItem = {
+        					rCode: reelCode.rCode,
+        					cStatus: reelCode.cStatus,
+        					consumer: reelCode.consumer,
+        					indexR: indexR
+        				};
+        				return reelCodeItem;
+        			})
+        			.filter(function(reelCode){
+        				if (	reelCode.cStatus==1 && counter > 0 &&
+        							JSON.stringify(reelCode.consumer) === JSON.stringify(req.user._id)) {
+  								counter --;
+  								return true;
+      					}
+        		});
+        		if (codesOfReel.length > 0) {
+        			var help = {
+	        			reel: reel._id,
+	        			counter: counter,
+	        			codes: codesOfReel,
+	        		};
+	        		codesArray.push(help);
+        		}
+        	});
+      }).then(() => {
+      	if (counter > 0) {
+      		return res.status(403).json({
+		      	success: false,
+		      	message : `Sie haben noch nicht genügen Treuepunkte gesammelt - es fehlen ${counter} Punkte. Bitte sprechen Sie den Ladeninhaber an.`,
+		      	programName: redeemProgram.programName,
+		        requestProgramGoal: req.body.programGoal,
+		        programProgramGoal: redeemProgram.goalToHit,
+		      });
+      	} else {
+      		updateUser(req.user._id, redeemProgram._id).then((updateUserStatus) => {
+      			currentStatus = updateUserStatus;
+	      		// Adjust Count on Program
+	      		redeemProgram.hitGoalsCount--;
+		        redeemProgram.redeemCount++;
+		        // comment out for testing purposes *********************************
+		        redeemProgram.save(function(err){
+		           if (err) {
+		           	currentStatus = false;
+		           	return next(err);
+		           }
+		        }).then(() => {
+		        	res.json(codesArray)
+			      	if (currentStatus){
+			      		updateEachCode(codesArray);
+			      	}
+		        }); // .then save updated User Stats
+      		});
+      	} // else
+      });	// Reels.find.then
+		} // if
+	}); // Programs.findOne
+};
+
+function updateUser(userId, redeemProgramId){
+	return new Promise(function(resolve, reject){
+		var currentStatus = false;
+		CUsers.findById(userId, 'particiPrograms', function(err, redeemUser){
+			redeemUser.particiPrograms.forEach(function(program){
+				if (JSON.stringify(program.program) == JSON.stringify(redeemProgramId)) {
+					program.countToRedeem--;
+					// comment out for testing purposes *********************************
+					redeemUser.save(function(err){
+						if (err) {
+							console.log('fehler beim redeemUser.save');
+							reject(err);
+						} else {
+							currentStatus = true;
+						}
+	       	 }).then(() => {
+						if (currentStatus){
+							resolve(true);
+						} else {
+							reject(err);
+						}
+					}); // save updated User Stats
+				}
+			});
+		}); // CUsers.findById
+	});
+};
+
+function updateEachCode(codesArray){
+	for (var i = 0; i<Object.keys(codesArray).length; i++){
+	  var reelId = codesArray[i].reel;
+	  var reelCodes = codesArray[i].codes;
+	  Reels.findById(reelId)
+	  		.select('_id codes.rCode codes.cStatus codes.consumer codes.updated')
+  			.exec(function(err, reelToBeAdjusted){
+			reelCodes.forEach(function(codesToAdjust){
+				reelToBeAdjusted.codes[codesToAdjust.indexR].cStatus = 2;
+				reelToBeAdjusted.codes[codesToAdjust.indexR].consumer = codesToAdjust.consumer;
+				reelToBeAdjusted.codes[codesToAdjust.indexR].updated = new Date();
+			});
+			// comment out for testing purposes *********************************
+			reelToBeAdjusted.save(function(err){
+        if (err) {
+        	console.log('save reelToBeAdjusted fehler');
+        	return next(err);
+        }
+       }); // save updated Code Stats
+		}); // Reels.findById
+	} // for var i
+};
 
 function apiCreateUserAccount(req, res, next) {
 	CUsers.findOne({'username' : req.body.userEmail}, function(err, user) {
