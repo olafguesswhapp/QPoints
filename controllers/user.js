@@ -189,6 +189,7 @@ module.exports = {
 			.findOne({ 'username' : req.params.username})
 			.populate('customer', 'company') 
 			.exec(function(err, user) {
+
 			if (err || !user) {
 				console.log('Could not find a user with that username - meaning user email');
 				req.session.flash = {
@@ -198,9 +199,10 @@ module.exports = {
 				};
 				res.redirect(303, '/user');
 			} else { // error or no user found
+				var company = user.customer ? user.customer.company : 'eigenständig';
 				context = {
 					username: user.username,
-					customer: user.customer.company,
+					customer: company,
 					firstName: user.firstName,
 					lastName: user.lastName,
 					role: user.role,

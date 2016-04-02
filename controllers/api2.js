@@ -93,9 +93,11 @@ function apiRedeem(req, res, next) {
 		           	return next(err);
 		           }
 		        }).then(() => {
-		        	res.json(codesArray)
+		        	let context = {};
 			      	if (currentStatus){
 			      		updateEachCode(codesArray);
+                context.success = true;
+                res.json(context)
 			      	}
 		        }); // .then save updated User Stats
       		});
