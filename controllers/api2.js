@@ -9,6 +9,8 @@ var Customers = require('../models/customers.js');
 var Programs = require('../models/programs.js');
 var Reels = require('../models/reels.js');
 var qplib = require('../lib/qpointlib.js');
+var NewsFeed = require('../models/newsfeed.js');
+var NewsHistory = require('../models/newshistory.js');
 
 var router = express.Router();
 
@@ -18,8 +20,101 @@ router.post('/user',  auth.isAuthenticated(), apiUpdateUserProfile);
 router.put('/user', apiCreateUserAccount);
 router.post('/code',  auth.isAuthenticated(), apiCheckCode);
 router.post('/redeem',  auth.isAuthenticated(), apiRedeem);
+router.get('/news',  auth.isAuthenticated(), apiGetNews);
 
 module.exports = router;
+
+function apiGetNews(req, res, next) {
+  CUsers
+    .findById(req.user._id)
+    .populate('particiPrograms.program', 'programStatus')
+    .select('password particiPrograms.program particiPrograms.programStatus')
+    .exec(function(err, checkUser) {
+    if (!checkUser) {
+      return res.status(401).json({
+        success: false,
+        message : `Wir konnten Sie als User nicht finden. Bitte melden Sie sich richtig an`
+      });
+    } else {
+      var programData = [];
+      console.log(checkUser.particiPrograms);
+      for (var i=0; i<checkUser.particiPrograms.length; i++) {
+        if (checkUser.particiPrograms[i].program.programStatus=='aktiviert') {
+          programData.push(checkUser.particiPrograms[i].program._id);
+        } // if
+      } // for i
+      NewsFeed.find({'assignedProgram': { $in: programData}})
+              .where('newsStatus').equals('erstellt')
+              .$where('this.newsDeliveryLimit > this.newsDeliveryCount')
+              .where('newsDeadline').gt(new Date()) // Change to "new Date (2016,1,1)" to test
+              .populate('customer', 'company')
+              .populate('assignedProgram', 'programName')
+              .exec(function(err, newsFeed){
+        if (err || newsFeed.length === 0){
+         return res.status(404).json({
+            success: false,
+            message : `Es liegen keine Nachrichten vor` 
+          }); 
+        } else {
+          var newsData = [];
+          var help = {};
+          newsFeed.forEach(function(newsfeed, indexN){
+            console.log(newsfeed._id);
+            NewsHistory.find({'newsFeed' : newsfeed._id})
+                      .where({'receivedBy' : req.user._id })
+                      .select('_id')
+                      .exec(function(err, newshistory){
+              console.log('this is newshistory of ');
+              console.log(newshistory);
+              if (newshistory.length === 0) {// has not been send
+                // collect News Data to send to User
+                help = {
+                  newsTitle: newsfeed.newsTitle,
+                  newsMessage: newsfeed.newsMessage,
+                  programName: newsfeed.assignedProgram.programName,
+                  company: newsfeed.customer.company,
+                  newsDate: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+                  readStatus: false
+                };
+                newsData.push(help);
+                // register news Push to newsHistory data feed
+                var newHistory = new NewsHistory ({
+                  newsFeed: newsfeed._id,
+                  receivedBy: req.user._id,
+                  customer: newsfeed.customer._id,
+                  assignedProgram: newsfeed.assignedProgram._id,
+                  sendDate: new Date(),
+                });
+                newHistory.save(function(err, newhistory) {
+                  if(err) return next(err);
+                });
+                qplib.updateNewsFeedStats(newsfeed._id);
+              } // if
+              // if last forEach.loop than finish API with response
+              if (indexN == newsFeed.length - 1) {
+                console.log('letzte prüfung');
+                console.log(newsData);
+                if (newsData.length === 0) {
+                  return res.status(404).json({
+                    success: false,
+                    message : `Es liegen keine Nachrichten vor` 
+                  }); 
+                } else {
+                  var context = {
+                    success: true,
+                    message: 'hat geklappt',
+                    newsFeed: newsData,
+                  };
+                  res.json(context);
+                } // newsData is not empty
+              } // if
+          }); // NewsHistory.findById
+        }); // newsFeed.forEach
+        }
+      }); //NewsFeed.find
+    }
+  }); //CUSers.findById
+};
 
 function apiRedeem(req, res, next) {
 	var counter =  req.body.programGoal;

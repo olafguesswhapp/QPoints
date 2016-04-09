@@ -139,6 +139,7 @@ module.exports = {
                                                 programName: newsfeed.assignedProgram.programName,
                                                 company: newsfeed.customer.company,
                                                 newsDate: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+                                                readStatus: false
                                             };
                                             newsData.push(help);
                                             // register news Push to newsHistory data feed
