@@ -299,6 +299,8 @@ function apiUpdateUserProfile(req, res, next) {
     } else {
     	if (req.body.passwordNew){userToUpdate.password = req.body.passwordNew}
     	userToUpdate.gender = req.body.gender;
+      userToUpdate.firstName = req.body.name.replace(/\s.*$/, "").trim();
+      userToUpdate.lastName = req.body.name.replace(/^[a-zA-Z]*/, "").trim();
     	userToUpdate.save(function(err, newUser){
     		if (err) {
     			console.log(err);
@@ -307,6 +309,8 @@ function apiUpdateUserProfile(req, res, next) {
 		      	message : "Der User konnte nicht gespeichert werden"
 		      });
     		} else {
+          console.log('nach update der User:');
+          console.log(userToUpdate);
     			return res.json({
 		      	success: true,
 		      	message : "Danke, das User Profil wurde upgedated"
@@ -466,7 +470,8 @@ function apiLogin(req, res, next) {
     	success: true,
     	token: token,
     	role: user.role,
-    	gender: user.gender
+    	gender: user.gender,
+      name: user.firstName + ' ' + user.lastName
     });
   })(req, res, next)
 };
